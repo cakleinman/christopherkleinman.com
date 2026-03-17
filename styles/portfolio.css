@@ -618,6 +618,7 @@ a {
 .tag-fintech { color: #a78bfa; background: rgba(167,139,250,0.08); border: 1px solid rgba(167,139,250,0.2); }
 .tag-consumer{ color: #f9a8d4; background: rgba(249,168,212,0.08); border: 1px solid rgba(249,168,212,0.2); }
 .tag-gov     { color: #fb923c; background: rgba(251,146,60,0.08);  border: 1px solid rgba(251,146,60,0.2); }
+.tag-game    { color: #34d399; background: rgba(52,211,153,0.08);  border: 1px solid rgba(52,211,153,0.2); }
 
 /* ============================================================
    STATUS BADGES
@@ -925,6 +926,33 @@ a {
   .footer-copy {
     flex-wrap: wrap;
     gap: 6px;
+  }
+}
+
+/* Small phones */
+@media (max-width: 380px) {
+  .section {
+    padding: 32px 12px;
+  }
+
+  .hero {
+    padding: 40px 12px 36px;
+  }
+
+  .nav-bar {
+    padding: 0 12px;
+  }
+
+  .card-inner {
+    padding: 18px 16px 16px;
+  }
+
+  .other-item {
+    padding: 14px 16px;
+  }
+
+  .footer-inner {
+    padding: 0;
   }
 }
 

@@ -142,9 +142,9 @@ body {
   left: 0;
   right: 0;
   height: 32px;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
   background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, transparent 100%);
   font-size: 11px;
   letter-spacing: 2px;
@@ -154,6 +154,10 @@ body {
   padding: 0 60px;
   opacity: 0.85;
 }
+
+.hud-bottom-bar span:first-child { text-align: left; }
+.hud-bottom-bar span:nth-child(2) { text-align: center; }
+.hud-bottom-bar span:last-child { text-align: right; }
 
 /* ============================================
    NAV DOTS
@@ -1469,8 +1473,8 @@ body {
   .hero-unit { font-size: 10px; letter-spacing: 2px; }
   .cleared-text { font-size: 18px; letter-spacing: 6px; }
   .closing-name { font-size: 16px; letter-spacing: 3px; }
-  .hud-top-bar { font-size: 7px; gap: 8px; padding: 0 12px; }
-  .hud-bottom-bar { font-size: 7px; padding: 0 12px; }
+  .hud-top-bar { font-size: 9px; gap: 8px; padding: 0 12px; }
+  .hud-bottom-bar { font-size: 9px; padding: 0 12px; }
   .carousel-slide { padding: 16px 12px; }
   .endorser-quote { font-size: 11px; padding-left: 12px; }
   .endorser-name { font-size: 14px; }
