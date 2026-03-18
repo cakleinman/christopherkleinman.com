@@ -50,6 +50,14 @@
   .gameover{padding:2rem 1rem;animation:pop 0.4s ease;}
   .gameover h2{font-size:24px;font-weight:800;color:var(--purple800);margin-bottom:0.75rem;}
   .gameover p{font-size:15px;color:var(--text2);margin-bottom:0.3rem;}
+  .guide-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.2s;}
+  .guide-overlay.open{opacity:1;pointer-events:auto;}
+  .guide-card{background:#fff;border-radius:var(--radius);padding:20px 24px;max-width:340px;width:90%;position:relative;box-shadow:0 8px 30px rgba(0,0,0,0.15);}
+  .guide-card h3{font-size:16px;font-weight:800;color:var(--purple800);margin-bottom:12px;}
+  .guide-close{position:absolute;top:10px;right:14px;background:none;border:none;font-size:20px;color:var(--text3);cursor:pointer;font-family:var(--font);}
+  .guide-row{display:flex;align-items:baseline;gap:8px;margin-bottom:6px;font-size:13px;}
+  .guide-pts{font-weight:800;color:var(--purple600);min-width:38px;text-align:right;}
+  .guide-letters{color:var(--text);letter-spacing:1px;}
 </style>
 </head>
 <body>
@@ -58,6 +66,7 @@
 <div style="display:flex;justify-content:space-between;align-items:baseline;margin:0.25rem 0 0.4rem;">
   <div style="font-size:22px;font-weight:800;color:var(--purple800);">Scrab</div>
   <div style="display:flex;gap:12px;align-items:baseline;">
+    <button onclick="showGuide()" style="font-family:var(--font);font-size:11px;font-weight:700;padding:3px 10px;border-radius:8px;border:1.5px solid var(--purple600);background:none;color:var(--purple600);cursor:pointer;">?</button>
     <button id="mode-btn" onclick="toggleMode()" style="font-family:var(--font);font-size:11px;font-weight:700;padding:3px 10px;border-radius:8px;border:1.5px solid var(--purple600);background:none;color:var(--purple600);cursor:pointer;">Daily</button>
     <div style="font-size:14px;font-weight:700;font-family:var(--font);color:var(--text2);" id="score-display">0 pts</div>
   </div>
@@ -604,6 +613,23 @@ function updModeBtn(){
 }
 
 updHP();updStreak();updLv();updModeBtn();
+</script>
+<div class="guide-overlay" id="guide-overlay" onclick="hideGuide()">
+  <div class="guide-card" onclick="event.stopPropagation()">
+    <button class="guide-close" onclick="hideGuide()">&times;</button>
+    <h3>Letter Points</h3>
+    <div class="guide-row"><span class="guide-pts">1 pt</span><span class="guide-letters">A E I L N O R S T U</span></div>
+    <div class="guide-row"><span class="guide-pts">2 pt</span><span class="guide-letters">D G</span></div>
+    <div class="guide-row"><span class="guide-pts">3 pt</span><span class="guide-letters">B C M P</span></div>
+    <div class="guide-row"><span class="guide-pts">4 pt</span><span class="guide-letters">F H V W Y</span></div>
+    <div class="guide-row"><span class="guide-pts">5 pt</span><span class="guide-letters">K</span></div>
+    <div class="guide-row"><span class="guide-pts">8 pt</span><span class="guide-letters">J X</span></div>
+    <div class="guide-row"><span class="guide-pts">10 pt</span><span class="guide-letters">Q Z</span></div>
+  </div>
+</div>
+<script>
+function showGuide(){document.getElementById('guide-overlay').classList.add('open');}
+function hideGuide(){document.getElementById('guide-overlay').classList.remove('open');}
 </script>
 </body>
 </html>
