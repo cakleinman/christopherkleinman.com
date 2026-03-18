@@ -422,6 +422,7 @@ function doSubmit(){
 
   function finish(){
     updHP();updStreak();
+    document.getElementById('clear-btn').style.display='none';
     if(hp<=0&&freeSpins<=0){setTimeout(gameOver,800);return;}
     state='ready';
     var b=document.getElementById('btn');
