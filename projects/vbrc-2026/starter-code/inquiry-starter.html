@@ -1111,6 +1111,19 @@ html, body {
     to   { opacity: 1; transform: translateY(0) scale(1); }
   }
   .inbox-actions { margin-left: auto; }
+
+  /* Pulse the Send Inquiry button after demo auto-fill, so the presenter
+     (and audience) know what to click next. Removed once the form is
+     submitted or reset. */
+  @keyframes cta-pulse {
+    0%, 100% { box-shadow: 0 0 0 0    rgba(74, 124, 78, 0.65); }
+    50%      { box-shadow: 0 0 0 10px rgba(74, 124, 78, 0.0);  }
+  }
+  #submitBtn.is-pulsing {
+    animation: cta-pulse 1.4s ease-out infinite;
+    position: relative;
+    z-index: 5;
+  }
 </style>
 </head>
 <body>
@@ -1497,7 +1510,23 @@ html, body {
     selectRadio('prior',   LINDA.prior);
     // Don't auto-submit — leave the filled form on screen so the audience
     // can read what got filled in. Presenter clicks Send Inquiry manually.
+    // Pulse the submit button so it's obvious what to click next.
+    const submitBtn = document.getElementById('submitBtn');
+    if (submitBtn) submitBtn.classList.add('is-pulsing');
   });
+
+  // Stop pulsing once the user interacts with the submit button or moves on.
+  (function wireSubmitPulseStop(){
+    const submitBtn = document.getElementById('submitBtn');
+    if (!submitBtn) return;
+    const stop = () => submitBtn.classList.remove('is-pulsing');
+    submitBtn.addEventListener('click', stop);
+    submitBtn.addEventListener('mouseenter', stop);
+    submitBtn.addEventListener('focus', stop);
+    // Also stop pulsing if the user resets — Reset button already exists.
+    const resetBtn2 = document.getElementById('resetBtn');
+    if (resetBtn2) resetBtn2.addEventListener('click', stop);
+  })();
 
   function collectData() {
     const get = id => (document.getElementById(id).value || '').trim();
