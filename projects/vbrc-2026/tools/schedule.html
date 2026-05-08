@@ -1810,7 +1810,13 @@
     // Reset demo walkthrough so it can re-run cleanly
     demoStep = 0;
     demoPhase = 'pending';
+    demoLindaPending = false;
     clearDemoPreview();
+    // Close the new-job modal if reset is hit mid-flow
+    const njm = document.getElementById('newJobModal');
+    if (njm) njm.classList.remove('is-open');
+    const submit = document.getElementById('newJobSubmit');
+    if (submit) submit.classList.remove('is-pulsing');
     const btn = document.getElementById('demoNewJobBtn');
     if (btn) {
       btn.disabled = false;
@@ -1870,22 +1876,29 @@
   }
 
   const DEMO_STEPS = [
-    // Step 0 — Linda's job appears in the Inbox.
-    // No preview phase: there's nothing to highlight before the card exists.
+    // Step 0 — Linda's job arrives via the actual + New Job modal workflow.
+    // We open the same modal a real user would use, prefill Linda's data,
+    // and pulse "Add to Inbox" so the audience sees the workflow instead
+    // of the card just popping in. The demo doesn't advance until they
+    // click Add to Inbox (or Cancel, which restores the demo to step 0).
     {
       label: "demo: + Linda's job",
       skipPreview: true,
+      awaitsExternal: true,
       execute: () => {
-        if (!state.unassigned.some(u => u.customer === 'Linda Park')) {
-          state.unassigned.push({
-            id: 'un-demo-linda',
-            customer: 'Linda Park',
-            svc: 'lawn',
-            det: '412 Birch Lane · 3.5 hrs · new homeowner',
-          });
+        if (state.unassigned.some(u => u.customer === 'Linda Park')) {
+          toast('Linda already in the Inbox · skipping', 'warn');
+          return { skipAdvanceWait: true }; // signal: don't go into waiting state
         }
-        toast('+ Linda Park · she landed in the Inbox');
-        return [{ type: 'unassigned', id: 'un-demo-linda' }];
+        $newJobCustomer.value = 'Linda Park';
+        $newJobSvc.value      = 'lawn';
+        $newJobTime.value     = '3.5 hrs · Wed AM';
+        $newJobDet.value      = '412 Birch Lane, Provo UT · new homeowner';
+        $newJobModal.classList.add('is-open');
+        const submit = document.getElementById('newJobSubmit');
+        if (submit) submit.classList.add('is-pulsing');
+        demoLindaPending = true;
+        return [];
       },
     },
 
@@ -1978,8 +1991,9 @@
     },
   ];
 
-  let demoStep  = 0;
-  let demoPhase = 'pending'; // 'pending' = next click previews; 'previewed' = next click executes
+  let demoStep         = 0;
+  let demoPhase        = 'pending'; // 'pending' = next click previews; 'previewed' = next click executes
+  let demoLindaPending = false;     // step 0 is waiting for user to click "Add to Inbox" in the + New Job modal
 
   // Set initial label on boot so it matches the first step
   (function initDemoBtn(){
@@ -2007,10 +2021,21 @@
 
     // Phase 2: execute the change, then flash what changed.
     clearDemoPreview();
-    const changedKeys = step.execute() || [];
+    const result = step.execute();
+    const changedKeys = Array.isArray(result) ? result : [];
+    const skipAdvanceWait = result && result.skipAdvanceWait;
     saveState();
     render();
     flashChange(changedKeys);
+
+    // If the step opens an interactive workflow (e.g., the + New Job modal),
+    // we don't advance until the user completes it. Disable the demo button
+    // and show a hint label. The modal's Save handler will advance us.
+    if (step.awaitsExternal && !skipAdvanceWait) {
+      btn.disabled = true;
+      btn.textContent = 'demo: click Add to Inbox above';
+      return;
+    }
 
     demoStep++;
     demoPhase = 'pending';
@@ -2039,26 +2064,63 @@
   }
   function closeNewJobModal(){ $newJobModal.classList.remove('is-open'); }
 
+  // If the user dismisses the modal mid-demo, restore the demo button so they
+  // can retry step 0 instead of being stuck in "click Add to Inbox above".
+  function handleDemoModalDismiss(){
+    if (!demoLindaPending) return;
+    demoLindaPending = false;
+    const submit = document.getElementById('newJobSubmit');
+    if (submit) submit.classList.remove('is-pulsing');
+    const dbtn = document.getElementById('demoNewJobBtn');
+    if (dbtn) {
+      dbtn.disabled = false;
+      dbtn.textContent = DEMO_STEPS[0].label;
+    }
+  }
+
   document.getElementById('newJobBtn').addEventListener('click', openNewJobModal);
-  document.getElementById('newJobClose').addEventListener('click', closeNewJobModal);
-  document.getElementById('newJobCancel').addEventListener('click', closeNewJobModal);
-  $newJobModal.addEventListener('click', (e) => { if (e.target === $newJobModal) closeNewJobModal(); });
+  document.getElementById('newJobClose').addEventListener('click', () => {
+    closeNewJobModal();
+    handleDemoModalDismiss();
+  });
+  document.getElementById('newJobCancel').addEventListener('click', () => {
+    closeNewJobModal();
+    handleDemoModalDismiss();
+  });
+  $newJobModal.addEventListener('click', (e) => {
+    if (e.target === $newJobModal) {
+      closeNewJobModal();
+      handleDemoModalDismiss();
+    }
+  });
 
   document.getElementById('newJobSubmit').addEventListener('click', () => {
     const customer = $newJobCustomer.value.trim();
     if (!customer) { $newJobCustomer.focus(); return; }
     const det = [$newJobTime.value.trim(), $newJobDet.value.trim()].filter(Boolean).join(' · ') || customer;
-    state.unassigned.push({
-      id: 'un-' + Math.random().toString(36).slice(2, 9),
-      customer,
-      svc: $newJobSvc.value,
-      det,
-    });
+    // Use a stable demo ID when this submission came from the demo flow,
+    // so subsequent demo steps (e.g., "drop onto the grid") can find Linda.
+    const id = demoLindaPending ? 'un-demo-linda' : 'un-' + Math.random().toString(36).slice(2, 9);
+    state.unassigned.push({ id, customer, svc: $newJobSvc.value, det });
     saveState();
     renderUnassigned();
     renderKPIs();
     closeNewJobModal();
     toast(`+ ${customer} · added to Inbox`);
+
+    // If this was the demo flow, advance the walkthrough to the next step.
+    if (demoLindaPending) {
+      demoLindaPending = false;
+      document.getElementById('newJobSubmit').classList.remove('is-pulsing');
+      flashChange([{ type: 'unassigned', id: 'un-demo-linda' }]);
+      demoStep  = 1;
+      demoPhase = 'pending';
+      const dbtn = document.getElementById('demoNewJobBtn');
+      if (dbtn) {
+        dbtn.disabled = false;
+        dbtn.textContent = DEMO_STEPS[1].label;
+      }
+    }
   });
 
   // ===== New-request modal =====

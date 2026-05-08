@@ -702,7 +702,7 @@
       </div>
       <div class="modal-actions">
         <button type="button" class="rg-btn rg-btn--ghost" id="btn-add-cancel">Cancel</button>
-        <button type="submit" class="rg-btn rg-btn--primary">Save customer</button>
+        <button type="submit" class="rg-btn rg-btn--primary" id="btn-add-save">Save customer</button>
       </div>
     </form>
   </div>
@@ -1383,11 +1383,29 @@
   }
   function closeAdd() { modal.classList.remove("is-open"); }
 
+  // If the user dismisses the modal mid-demo, restore the demo button so
+  // they can retry step 1 instead of being stuck in "click Save above".
+  function handleAddModalDismiss(){
+    if (typeof demoAddPending === 'undefined' || !demoAddPending) return;
+    demoAddPending = false;
+    const saveBtn = document.getElementById('btn-add-save');
+    if (saveBtn) saveBtn.classList.remove('is-pulsing');
+    const dbtn = document.getElementById('btn-demo-linda');
+    if (dbtn) {
+      dbtn.disabled = false;
+      dbtn.textContent = "demo: walk through Linda's intake";
+    }
+    // Roll back the step counter so step 1 can re-run
+    demoLindaStep = 0;
+  }
+
   $("#btn-add").addEventListener("click", openAdd);
-  $("#btn-add-cancel").addEventListener("click", closeAdd);
-  modal.addEventListener("click", (e) => { if (e.target === modal) closeAdd(); });
+  $("#btn-add-cancel").addEventListener("click", () => { closeAdd(); handleAddModalDismiss(); });
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) { closeAdd(); handleAddModalDismiss(); }
+  });
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && modal.classList.contains("is-open")) closeAdd();
+    if (e.key === "Escape" && modal.classList.contains("is-open")) { closeAdd(); handleAddModalDismiss(); }
   });
 
   addForm.addEventListener("submit", (e) => {
@@ -1395,6 +1413,10 @@
     const fd = new FormData(addForm);
     const name = (fd.get("name") || "").toString().trim();
     if (!name) return;
+    // For the demo flow, also seed Linda's pre-loaded note so step 2 (log call)
+    // and step 3 (set follow-up) read like a real intake. Otherwise (manual
+    // add by the user) leave notes/follow-up empty, the existing behavior.
+    const isDemoSubmit = typeof demoAddPending !== 'undefined' && demoAddPending;
     const newC = {
       id: uid("c"),
       name,
@@ -1404,7 +1426,7 @@
       service_type: (fd.get("service_type") || "").toString().trim(),
       last_service: null,
       lifetime_value: 0,
-      notes: "",
+      notes: isDemoSubmit ? LINDA_PROFILE.notes : "",
       followup: null,
       calls: []
     };
@@ -1415,6 +1437,23 @@
     renderKPIs();
     renderList();
     renderDetail();
+
+    // If this submission came from the demo flow, capture Linda's id and
+    // advance the demo to step 2 (log a call).
+    if (isDemoSubmit) {
+      demoAddPending = false;
+      const saveBtn = document.getElementById('btn-add-save');
+      if (saveBtn) saveBtn.classList.remove('is-pulsing');
+      demoLindaId = newC.id;
+      // demoLindaStep stays at 1 — the next click of the demo button will
+      // increment it to 2 and run the "Log a call" branch.
+      const dbtn = document.getElementById('btn-demo-linda');
+      if (dbtn) {
+        dbtn.disabled = false;
+        dbtn.textContent = "demo: log a call";
+      }
+      showToast(`<b>+ Linda Park</b> <span class="tdim">added from inquiry</span>`);
+    }
   });
 
   // ---------- Reset to demo data --------------------------------------
@@ -1427,6 +1466,11 @@
     renderAll();
     // Reset demo intake counter so the walk-through can re-run cleanly
     demoLindaStep = 0;
+    if (typeof demoAddPending !== 'undefined') demoAddPending = false;
+    // Close + clear the add modal if it was open mid-demo
+    if (modal) modal.classList.remove('is-open');
+    const saveBtn = document.getElementById('btn-add-save');
+    if (saveBtn) saveBtn.classList.remove('is-pulsing');
     const btn = $("#btn-demo-linda");
     if (btn) {
       btn.disabled = false;
@@ -1467,19 +1511,34 @@
       setTimeout(() => { t.hidden = true; }, 240);
     }, 4000);
   }
+  // True while step 1 has opened the + Add customer modal and is waiting
+  // for the user to click "Save customer" to commit.
+  let demoAddPending = false;
+
   $("#btn-demo-linda").addEventListener("click", () => {
     demoLindaStep++;
     if (demoLindaStep === 1) {
-      // Add Linda + select + populate note
-      const newLinda = { ...LINDA_PROFILE, id: uid("c"), calls: [] };
-      state.contacts.unshift(newLinda);
-      demoLindaId = newLinda.id;
-      state.selectedId = newLinda.id;
-      save();
-      renderKPIs();
-      renderList();
-      renderDetail();
-      showToast(`<b>+ Linda Park</b> <span class="tdim">added from inquiry</span>`);
+      // Step 1 — open the + Add customer modal pre-filled with Linda's data
+      // and pulse "Save customer" so the audience sees the actual workflow.
+      // The demo doesn't advance until the user clicks Save customer.
+      const dbtn = document.getElementById('btn-demo-linda');
+      addForm.reset();
+      addForm.elements['name'].value         = LINDA_PROFILE.name;
+      addForm.elements['email'].value        = LINDA_PROFILE.email;
+      addForm.elements['phone'].value        = LINDA_PROFILE.phone;
+      addForm.elements['address'].value      = LINDA_PROFILE.address;
+      addForm.elements['service_type'].value = LINDA_PROFILE.service_type;
+      modal.classList.add('is-open');
+      const saveBtn = document.getElementById('btn-add-save');
+      if (saveBtn) saveBtn.classList.add('is-pulsing');
+      demoAddPending = true;
+      // Park the demo button while we wait for Save customer
+      if (dbtn) {
+        dbtn.disabled = true;
+        dbtn.textContent = "demo: click Save customer above";
+      }
+      // Don't toast here — the form-submit handler will toast when Linda lands.
+      return;
     } else if (demoLindaStep === 2) {
       // Log a call with the actual current timestamp
       const linda = state.contacts.find(c => c.id === demoLindaId);
@@ -1497,6 +1556,8 @@
       renderDetail();
       const t = new Date().toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
       showToast(`<b>Call logged</b> <span class="tdim">${t} · 12 min</span>`);
+      const btn = $("#btn-demo-linda");
+      if (btn) btn.textContent = "demo: set follow-up";
     } else if (demoLindaStep === 3) {
       // Set follow-up one week out
       const linda = state.contacts.find(c => c.id === demoLindaId);
@@ -1511,6 +1572,11 @@
       renderList();
       renderDetail();
       showToast(`<b>Follow-up set</b> <span class="tdim">+7 days</span>`);
+      const btn = $("#btn-demo-linda");
+      if (btn) {
+        btn.textContent = "demo: intake complete";
+        btn.disabled = true;
+      }
     } else {
       const btn = $("#btn-demo-linda");
       btn.disabled = true;

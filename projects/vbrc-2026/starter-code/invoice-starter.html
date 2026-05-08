@@ -515,6 +515,21 @@ html, body {
 .rg-toast--warn b { color: var(--rg-warning, #b8742d); }
 .rg-toast .tdim { color: var(--rg-ink-dim); font-weight: 400; margin-left: 4px; }
 
+/* ============================================================
+   CTA pulse — soft expanding green halo, used to highlight the
+   "do this next" button after a demo step pre-fills a form. Add
+   `.is-pulsing` to any button (modal Save, form Submit, etc.).
+   ============================================================ */
+@keyframes rg-cta-pulse {
+  0%, 100% { box-shadow: 0 0 0 0    rgba(74, 124, 78, 0.65); }
+  50%      { box-shadow: 0 0 0 10px rgba(74, 124, 78, 0.0);  }
+}
+.is-pulsing {
+  animation: rg-cta-pulse 1.4s ease-out infinite;
+  position: relative;
+  z-index: 5;
+}
+
 </style>
 <style>
   /* ============================================================
