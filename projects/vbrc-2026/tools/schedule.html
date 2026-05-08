@@ -703,6 +703,39 @@
     color: var(--rg-ink-faint);
     margin: 6px 4px;
   }
+
+  /* ---------- Demo highlights ---------- */
+  /* Preview: about to change. Dashed gold outline + slow pulse. Used during
+     the first click of a two-click demo step so the audience can see WHAT is
+     about to move/change before the second click commits it. */
+  @keyframes demo-preview-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255, 180, 30, 0.40); }
+    50%      { box-shadow: 0 0 0 5px rgba(255, 180, 30, 0.60); }
+  }
+  .cell.is-preview,
+  .un-card.is-preview,
+  .req-card.is-preview {
+    outline: 2px dashed #d4a72c;
+    outline-offset: -2px;
+    border-radius: 6px;
+    animation: demo-preview-pulse 1.3s ease-in-out infinite;
+    position: relative;
+    z-index: 6;
+  }
+  /* Just-changed: cell that JUST got a new value. Strong green halo expanding
+     and fading over 1.8s. Auto-removed after the animation finishes. */
+  @keyframes demo-change-flash {
+    0%   { box-shadow: 0 0 0 0    rgba(74, 124, 78, 0.70); transform: scale(1); }
+    25%  { box-shadow: 0 0 0 12px rgba(74, 124, 78, 0.55); transform: scale(1.02); }
+    100% { box-shadow: 0 0 0 22px rgba(74, 124, 78, 0);    transform: scale(1); }
+  }
+  .cell.is-changed,
+  .un-card.is-changed,
+  .req-card.is-changed {
+    animation: demo-change-flash 1.7s ease-out;
+    position: relative;
+    z-index: 6;
+  }
 </style>
 </head>
 <body>
@@ -1365,6 +1398,7 @@
       state.unassigned.forEach(job => {
         const card = document.createElement('div');
         card.className = 'un-card';
+        card.dataset.id  = job.id;
         card.dataset.svc = job.svc;
         card.draggable = true;
         card.innerHTML = `
@@ -1775,6 +1809,8 @@
     resetState();
     // Reset demo walkthrough so it can re-run cleanly
     demoStep = 0;
+    demoPhase = 'pending';
+    clearDemoPreview();
     const btn = document.getElementById('demoNewJobBtn');
     if (btn) {
       btn.disabled = false;
@@ -1782,15 +1818,64 @@
     }
   });
 
-  // ===== Demo walkthrough — auto-proceed through Cody's whole week =====
-  // Each click advances one step. Steps narrate via toast + visual change so
-  // the audience sees the story unfold without the presenter having to drag
-  // anything. (They still CAN drag — this just makes a hands-off run easy.)
+  // ============================================
+  // Demo walkthrough — preview-then-commit pattern
+  // ============================================
+  // Each step has TWO phases (except the first, which has nothing to preview):
+  //   1. PREVIEW — first click highlights the cells/cards that will change
+  //      with a pulsing gold dashed outline. Toast says what's about to happen.
+  //   2. EXECUTE — second click applies the change, clears the preview, and
+  //      flashes the changed elements with a green halo so the audience sees
+  //      exactly what just moved.
+  //
+  // This gives the presenter natural narration time on stage: click, narrate
+  // ("watch — Linda's job will move from the Inbox onto Diego's Wednesday"),
+  // click again to make it happen.
+  // ============================================
+
+  function clearDemoPreview(){
+    document.querySelectorAll('.is-preview').forEach(el => el.classList.remove('is-preview'));
+  }
+
+  function markPreview(target){
+    let el = null;
+    if (target.type === 'cell')       el = document.querySelector(`.cell[data-key="${target.key}"]`);
+    else if (target.type === 'unassigned') el = document.querySelector(`#unassignedList .un-card[data-id="${target.id}"]`);
+    else if (target.type === 'request')    el = document.querySelector(`#requestList .req-card[data-id="${target.id}"]`);
+    if (el) el.classList.add('is-preview');
+  }
+
+  function flashChange(targets){
+    // Run after render() finishes so the new DOM has the elements we want to flash.
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      targets.forEach(t => {
+        let el = null;
+        if (t.type === 'cell')           el = document.querySelector(`.cell[data-key="${t.key}"]`);
+        else if (t.type === 'unassigned' && t.id) el = document.querySelector(`#unassignedList .un-card[data-id="${t.id}"]`);
+        else if (t.type === 'unassigned' && t.match) {
+          const cards = document.querySelectorAll('#unassignedList .un-card');
+          for (const c of cards) {
+            if (c.querySelector('.cust')?.textContent.includes(t.match)) { el = c; break; }
+          }
+        }
+        if (!el) return;
+        // Restart the animation by toggling the class
+        el.classList.remove('is-changed');
+        // Force reflow so the animation re-triggers
+        void el.offsetWidth;
+        el.classList.add('is-changed');
+        setTimeout(() => el.classList.remove('is-changed'), 1900);
+      });
+    }));
+  }
+
   const DEMO_STEPS = [
+    // Step 0 — Linda's job appears in the Inbox.
+    // No preview phase: there's nothing to highlight before the card exists.
     {
       label: "demo: + Linda's job",
-      run: () => {
-        // Add Linda's first lawn job to the Inbox
+      skipPreview: true,
+      execute: () => {
         if (!state.unassigned.some(u => u.customer === 'Linda Park')) {
           state.unassigned.push({
             id: 'un-demo-linda',
@@ -1800,27 +1885,42 @@
           });
         }
         toast('+ Linda Park · she landed in the Inbox');
+        return [{ type: 'unassigned', id: 'un-demo-linda' }];
       },
     },
+
+    // Step 1 — Drop Linda onto Diego's Wednesday.
     {
       label: "demo: drop onto the grid",
-      run: () => {
-        // Move Linda from Inbox to Diego's Wednesday slot
+      previewLabel: "demo: confirm drop →",
+      preview: () => {
+        markPreview({ type: 'unassigned', id: 'un-demo-linda' });
+        markPreview({ type: 'cell', key: 'crew-diego|2' });
+        toast('Preview · Linda → Diego, Wed 8 AM', 'info');
+      },
+      execute: () => {
         const idx = state.unassigned.findIndex(u => u.customer === 'Linda Park');
         if (idx >= 0) state.unassigned.splice(idx, 1);
         state.assignments['crew-diego|2'] = a('Linda Park', 'lawn', '8a–11:30a', { crew: 'DL' });
         toast('Linda → Diego · Wed 8 AM');
+        return [{ type: 'cell', key: 'crew-diego|2' }];
       },
     },
+
+    // Step 2 — Approve Sam's pending time-off (triggers Mule ripple).
     {
       label: "demo: approve time-off",
-      run: () => {
-        // Approve Sam's pending time-off — triggers the Mule ripple
+      previewLabel: "demo: confirm approval →",
+      preview: () => {
         const samReq = state.requests.find(r => r.kind === 'timeoff' && r.who === 'Sam T.');
-        if (!samReq) {
-          toast('Sam already approved · skipping', 'warn');
-          return;
-        }
+        if (samReq) markPreview({ type: 'request', id: samReq.id });
+        markPreview({ type: 'cell', key: 'crew-sam|1' });
+        markPreview({ type: 'cell', key: 'truck-mule|1' });
+        toast('Preview · Sam off Tue → Mule unavailable Tue → 1 job to Inbox', 'info');
+      },
+      execute: () => {
+        const samReq = state.requests.find(r => r.kind === 'timeoff' && r.who === 'Sam T.');
+        if (!samReq) { toast('Sam already approved · skipping', 'warn'); return []; }
         const ripple = applyTimeoffApproval(samReq);
         state.requestHistory.unshift({
           id: 'h-' + Math.random().toString(36).slice(2, 9),
@@ -1834,34 +1934,53 @@
         state.requests = state.requests.filter(r => r.id !== samReq.id);
         const extras = [];
         if (ripple.mule)      extras.push('Mule unavailable');
-        if (ripple.displaced) extras.push(`${ripple.displaced} jobs → Inbox`);
+        if (ripple.displaced) extras.push(`${ripple.displaced} job${ripple.displaced === 1 ? '' : 's'} → Inbox`);
         toast(`Approved · Sam T.${extras.length ? ' · ' + extras.join(' · ') : ''}`);
+        return [
+          { type: 'cell', key: 'crew-sam|1' },
+          { type: 'cell', key: 'truck-mule|1' },
+          { type: 'unassigned', match: 'Marcus Reilly' },
+        ];
       },
     },
+
+    // Step 3 — Rebalance: place displaced Inbox jobs onto open slots.
     {
       label: "demo: rebalance",
-      run: () => {
-        // Auto-place displaced Inbox items onto the remaining open crew slots
+      previewLabel: "demo: confirm rebalance →",
+      preview: () => {
+        // Highlight up to 2 inbox cards + the 2 open crew slots they'll land on
+        state.unassigned.slice(0, 2).forEach(j => markPreview({ type: 'unassigned', id: j.id }));
+        markPreview({ type: 'cell', key: 'crew-casey|4' });
+        markPreview({ type: 'cell', key: 'crew-mateo|3' });
+        toast('Preview · rebalance Inbox onto Casey Fri + Mateo Thu', 'info');
+      },
+      execute: () => {
         const targets = [
-          { key: 'crew-casey|4', crew: 'CJ', time: '9a–12p' }, // Casey's open Fri
-          { key: 'crew-mateo|3', crew: 'MR', time: '7a–5p'  }, // Mateo's open Thu
+          { key: 'crew-casey|4', crew: 'CJ', time: '9a–12p' },
+          { key: 'crew-mateo|3', crew: 'MR', time: '7a–5p'  },
         ];
+        const placedKeys = [];
         let placed = 0;
         for (const t of targets) {
           if (state.unassigned.length === 0) break;
-          if (state.assignments[t.key]) continue; // skip if slot is somehow taken
+          if (state.assignments[t.key]) continue;
           const job = state.unassigned.shift();
           state.assignments[t.key] = a(job.customer, job.svc, t.time, { crew: t.crew });
+          placedKeys.push({ type: 'cell', key: t.key });
           placed++;
         }
         toast(placed
           ? `Rebalanced · ${placed} job${placed === 1 ? '' : 's'} placed`
           : 'Inbox already clear', placed ? 'success' : 'warn');
+        return placedKeys;
       },
     },
   ];
 
-  let demoStep = 0;
+  let demoStep  = 0;
+  let demoPhase = 'pending'; // 'pending' = next click previews; 'previewed' = next click executes
+
   // Set initial label on boot so it matches the first step
   (function initDemoBtn(){
     const btn = document.getElementById('demoNewJobBtn');
@@ -1877,10 +1996,24 @@
       return;
     }
     const step = DEMO_STEPS[demoStep];
-    step.run();
+
+    // Phase 1: preview (skipped if step opted out — first step does this).
+    if (!step.skipPreview && demoPhase === 'pending' && step.preview) {
+      step.preview();
+      demoPhase = 'previewed';
+      btn.textContent = step.previewLabel || 'demo: confirm →';
+      return;
+    }
+
+    // Phase 2: execute the change, then flash what changed.
+    clearDemoPreview();
+    const changedKeys = step.execute() || [];
     saveState();
     render();
+    flashChange(changedKeys);
+
     demoStep++;
+    demoPhase = 'pending';
     if (demoStep < DEMO_STEPS.length) {
       btn.textContent = DEMO_STEPS[demoStep].label;
     } else {
