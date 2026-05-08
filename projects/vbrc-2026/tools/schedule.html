@@ -752,9 +752,9 @@
         <span class="rg-kpi__delta" id="kpiUtilSub">4 crew · 20 shifts</span>
       </div>
       <div class="rg-kpi">
-        <span class="rg-kpi__label">Idle equipment</span>
-        <span class="rg-kpi__value" id="kpiIdle">1 truck</span>
-        <span class="rg-kpi__delta" id="kpiIdleSub">0 trailers</span>
+        <span class="rg-kpi__label">Open capacity</span>
+        <span class="rg-kpi__value" id="kpiIdle">0 truck-days</span>
+        <span class="rg-kpi__delta" id="kpiIdleSub">0 trailer-days</span>
       </div>
       <div class="rg-kpi">
         <span class="rg-kpi__label">Pending requests</span>
@@ -1572,28 +1572,20 @@
       }
     });
 
-    // idle: count resources fully empty all week
-    ['trucks','trailers'].forEach(g => {
-      RESOURCES.filter(r => r.group === g).forEach(res => {
-        let any = false;
-        for (let d = 0; d < 5; d++) {
-          if (state.assignments[res.id + '|' + d]) { any = true; break; }
-        }
-        if (!any) {
-          if (g === 'trucks') truckIdle++;
-          else trailerIdle++;
-        }
-      });
-    });
-
-    // count partial idle (any cell empty)
-    let truckPartial = 0;
-    RESOURCES.filter(r => r.group === 'trucks').forEach(res => {
-      let empty = 0;
+    // Open capacity: count truly-empty resource-days across the week.
+    // An empty cell means the truck/trailer is available for new work that
+    // day. Cells with any value (job, link, time-off, unavailable) count
+    // as occupied. This is a more honest metric than "fully idle all week"
+    // — it tells Cody how much room is left to take on new jobs.
+    let truckDaysOpen = 0, trailerDaysOpen = 0;
+    RESOURCES.forEach(res => {
+      if (res.group !== 'trucks' && res.group !== 'trailers') return;
       for (let d = 0; d < 5; d++) {
-        if (!state.assignments[res.id + '|' + d]) empty++;
+        if (!state.assignments[res.id + '|' + d]) {
+          if (res.group === 'trucks')   truckDaysOpen++;
+          else if (res.group === 'trailers') trailerDaysOpen++;
+        }
       }
-      if (empty >= 3) truckPartial++;
     });
 
     $kJobs.textContent = jobsCount;
@@ -1601,9 +1593,8 @@
     $kUtil.textContent = util + '%';
     $kUtilSub.textContent = `4 crew · ${crewBusy}/${crewSlots} shifts`;
 
-    const idleTrucks = truckIdle || truckPartial; // show 1 truck if Mule has lots of empty
-    $kIdle.textContent = idleTrucks + (idleTrucks === 1 ? ' truck' : ' trucks');
-    $kIdleSub.textContent = trailerIdle + (trailerIdle === 1 ? ' trailer idle' : ' trailers idle');
+    $kIdle.textContent    = `${truckDaysOpen} truck-day${truckDaysOpen === 1 ? '' : 's'}`;
+    $kIdleSub.textContent = `${trailerDaysOpen} trailer-day${trailerDaysOpen === 1 ? '' : 's'}`;
 
     $kPending.textContent = state.requests.length;
   }
