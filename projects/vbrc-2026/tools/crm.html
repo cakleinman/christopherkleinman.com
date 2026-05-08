@@ -1573,6 +1573,15 @@
       renderDetail();
       showToast(`<b>Follow-up set</b> <span class="tdim">+7 days</span>`);
       const btn = $("#btn-demo-linda");
+      if (btn) btn.textContent = "demo: see all calls this week";
+    } else if (demoLindaStep === 4) {
+      // Step 4 — flip the left list to "Calls This Week" view so the audience
+      // sees Linda's just-logged call sitting at the top of every recent call
+      // across every contact. Showcases the KPI-as-pivot feature that the
+      // rest of the demo never touches.
+      setView("calls");
+      showToast(`<b>Calls this week</b> <span class="tdim">Linda's just-logged call sits on top</span>`, 'info');
+      const btn = $("#btn-demo-linda");
       if (btn) {
         btn.textContent = "demo: intake complete";
         btn.disabled = true;

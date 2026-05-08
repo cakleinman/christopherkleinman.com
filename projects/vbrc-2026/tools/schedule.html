@@ -1989,6 +1989,20 @@
         return placedKeys;
       },
     },
+
+    // Step 4 — Open the History modal so the audience sees Sam's approval
+    // entry logged with a real timestamp. Closes the loop on the time-off
+    // flow. No preview phase — the modal opening IS the reveal.
+    {
+      label: "demo: see request history",
+      skipPreview: true,
+      execute: () => {
+        // openHistoryModal is defined later in this IIFE — check it exists
+        if (typeof openHistoryModal === 'function') openHistoryModal();
+        toast('Sam\'s approval logged · history is auditable', 'info');
+        return [];
+      },
+    },
   ];
 
   let demoStep         = 0;

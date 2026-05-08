@@ -429,6 +429,7 @@
   const fileSources = [];             // ordered list of file names ingested
   let toastTimer = null;
   let demoIdx = 0;                    // which weekly demo batch is next
+  let demoSortDone = false;           // tracks the final "sort by total" step
 
   // ───────────── Empty <-> Active ─────────────
   const showActive = () => {
@@ -454,6 +455,7 @@
     hideToast();
     // Reset the progressive demo button
     demoIdx = 0;
+    demoSortDone = false;
     if (addDemoBtn) {
       addDemoBtn.disabled = false;
       addDemoBtn.textContent = 'demo: another week';
@@ -936,8 +938,23 @@
 
   // "demo: another week" — progressive: each click loads the next weekly export.
   // Every batch overlaps with the prior one (so dedupe story keeps landing) plus
-  // adds 3–4 truly new jobs. After 5 batches, button disables until Reset.
+  // adds 3–4 truly new jobs. After 5 batches, the button shifts into a "sort
+  // by biggest invoices" final step (which clicks the Total column header
+  // programmatically) before disabling.
   addDemoBtn.addEventListener('click', async () => {
+    // Final step (after all 5 weekly batches): sort the All Jobs table by
+    // total descending so the audience sees the biggest invoices float to
+    // the top. Showcases the table's interactive sortability.
+    if (demoIdx >= DEMO_BATCHES.length && !demoSortDone) {
+      sortKey = 'total';
+      sortDir = 'desc';
+      renderTable();
+      demoSortDone = true;
+      showToast(`<b>Sorted · biggest invoices first</b> <span class="tdim">click any column header to re-sort</span>`, 'info');
+      addDemoBtn.textContent = 'demo: complete · reset to re-run';
+      addDemoBtn.disabled = true;
+      return;
+    }
     if (demoIdx >= DEMO_BATCHES.length) {
       showToast(`<b>Out of demo data</b> <span class="tdim">click Reset to start over</span>`, 'info');
       return;
@@ -958,8 +975,8 @@
     if (left > 0) {
       addDemoBtn.textContent = `demo: another week (${left} left)`;
     } else {
-      addDemoBtn.textContent = 'demo: out of weeks';
-      addDemoBtn.disabled = true;
+      // After the last weekly batch, queue the sort-by-total step.
+      addDemoBtn.textContent = 'demo: sort by biggest invoices';
     }
   });
 

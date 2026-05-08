@@ -1572,6 +1572,30 @@ html, body {
       },
     },
     {
+      label: "demo: apply 10% discount",
+      run: () => {
+        // Edit the lawn-care line in place: 10% off the rate.
+        // Demonstrates that fields are live-editable and the entire invoice
+        // recomputes — subtotal, tax, total — without needing a "save" or
+        // page reload.
+        const lawnIdx = state.items.findIndex(it => /lawn care/i.test(it.desc));
+        if (lawnIdx < 0) {
+          flashToast('Lawn care line not found · skip', 'warn');
+          return;
+        }
+        const item = state.items[lawnIdx];
+        const newRate = +(Number(item.rate) * 0.9).toFixed(2);
+        item.desc = item.desc.replace(/\s*\(.*\)$/, '') + ' (10% loyalty)';
+        item.rate = newRate;
+        renderLines();
+        renderPreview();
+        flashLineRow(lawnIdx);
+        const sub = state.items.reduce((s, it) => s + (Number(it.qty)||0) * (Number(it.rate)||0), 0);
+        const tot = sub * (1 + (Number(state.tax)||0) / 100);
+        flashToast(`10% discount applied · total now ${fmtMoney(tot)}`);
+      },
+    },
+    {
       label: "demo: ↓ download PDF",
       run: () => {
         const pdfBtn = $('btn-pdf');

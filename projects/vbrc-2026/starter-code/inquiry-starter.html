@@ -1482,21 +1482,49 @@ html, body {
     while (inboxList.children.length > 6) inboxList.removeChild(inboxList.lastChild);
   }
 
-  // ---- Demo button: auto-fill Linda's profile + submit
-  const LINDA = {
-    name:    'Linda Park',
-    email:   'linda.park@example.com',
-    phone:   '(801) 555-0142',
-    address: '412 Birch Lane, Provo, UT 84601',
-    service: 'Lawn care',
-    lot:     'Medium (¼ – ½ acre)',
-    urgency: 'This week if possible',
-    prior:   'No',
-    notes:   'Just moved in. Looking for weekly lawn service plus a one-time consult on the backyard — thinking a small patio. Photos can come later.'
-  };
-  const demoBtn = document.getElementById('demoFillSubmitBtn');
-  demoBtn.addEventListener('click', () => {
-    // If we're on the confirmation screen, flip back to the form first
+  // ---- Demo personas: Linda first (the customer-journey thread), then a
+  // second and third fictional inquiry so the audience watches the inbox
+  // grow from 0 → 3. Each click advances to the next persona, refilling
+  // the form and pulsing Send Inquiry so the presenter clicks through.
+  const DEMO_PERSONAS = [
+    {
+      name:    'Linda Park',
+      email:   'linda.park@example.com',
+      phone:   '(801) 555-0142',
+      address: '412 Birch Lane, Provo, UT 84601',
+      service: 'Lawn care',
+      lot:     'Medium (¼ – ½ acre)',
+      urgency: 'This week if possible',
+      prior:   'No',
+      notes:   'Just moved in. Looking for weekly lawn service plus a one-time consult on the backyard — thinking a small patio. Photos can come later.',
+    },
+    {
+      name:    'Diego Hernandez',
+      email:   'diego.h@example.com',
+      phone:   '(801) 555-0287',
+      address: '88 Oak Ridge Dr, Orem, UT 84097',
+      service: 'Hardscaping',
+      lot:     'Large (½ – 1 acre)',
+      urgency: 'Within the month',
+      prior:   'Yes',
+      notes:   'Need a paver walkway from driveway to backyard, plus a small retaining wall. About 60 ft total. Have some sketches I can email.',
+    },
+    {
+      name:    'Marisol Aguirre',
+      email:   'marisol.a@example.com',
+      phone:   '(385) 555-0118',
+      address: '2204 Highland Ave, Lehi, UT 84043',
+      service: 'Irrigation',
+      lot:     'Small (under ¼ acre)',
+      urgency: 'Spring/Summer 2026',
+      prior:   'We did our own — want a pro now',
+      notes:   'Sprinklers I installed last year keep tripping the controller. Half the lawn isn\'t getting water. Need someone to diagnose.',
+    },
+  ];
+  let demoPersonaIdx = 0;
+
+  function fillForm(p) {
+    // Flip back to the form view if we're on the confirmation screen
     const formState    = document.getElementById('formState');
     const confirmState = document.getElementById('confirmState');
     if (formState.classList.contains('rg-hidden')) {
@@ -1504,15 +1532,13 @@ html, body {
       confirmState.classList.add('rg-hidden');
       confirmState.innerHTML = '';
     }
-    // Fill text inputs
     const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
-    setVal('f-name',    LINDA.name);
-    setVal('f-email',   LINDA.email);
-    setVal('f-phone',   LINDA.phone);
-    setVal('f-address', LINDA.address);
-    setVal('f-lot',     LINDA.lot);
-    setVal('f-notes',   LINDA.notes);
-    // Pick the matching radios
+    setVal('f-name',    p.name);
+    setVal('f-email',   p.email);
+    setVal('f-phone',   p.phone);
+    setVal('f-address', p.address);
+    setVal('f-lot',     p.lot);
+    setVal('f-notes',   p.notes);
     const selectRadio = (name, value) => {
       const r = form.querySelector(`input[name="${name}"][value="${value}"]`);
       if (r) {
@@ -1520,15 +1546,60 @@ html, body {
         r.dispatchEvent(new Event('change', { bubbles: true }));
       }
     };
-    selectRadio('service', LINDA.service);
-    selectRadio('urgency', LINDA.urgency);
-    selectRadio('prior',   LINDA.prior);
-    // Don't auto-submit — leave the filled form on screen so the audience
-    // can read what got filled in. Presenter clicks Send Inquiry manually.
-    // Pulse the submit button so it's obvious what to click next.
+    selectRadio('service', p.service);
+    selectRadio('urgency', p.urgency);
+    selectRadio('prior',   p.prior);
+  }
+
+  function updateDemoBtnLabel() {
+    const btn = document.getElementById('demoFillSubmitBtn');
+    if (!btn) return;
+    if (demoPersonaIdx >= DEMO_PERSONAS.length) {
+      btn.textContent = `demo: complete · ${DEMO_PERSONAS.length} in your inbox`;
+      btn.disabled = true;
+    } else if (demoPersonaIdx === 0) {
+      btn.textContent = "demo: auto-fill (Linda)";
+    } else {
+      btn.textContent = `demo: + another inquiry (${DEMO_PERSONAS[demoPersonaIdx].name.split(' ')[0]})`;
+    }
+  }
+
+  // Initialize button label on boot
+  updateDemoBtnLabel();
+
+  const demoBtn = document.getElementById('demoFillSubmitBtn');
+  demoBtn.addEventListener('click', () => {
+    if (demoPersonaIdx >= DEMO_PERSONAS.length) return;
+    fillForm(DEMO_PERSONAS[demoPersonaIdx]);
+    // Pulse Send Inquiry so the audience knows what to click next.
     const submitBtn = document.getElementById('submitBtn');
     if (submitBtn) submitBtn.classList.add('is-pulsing');
   });
+
+  // After the user submits, advance the persona index and update the demo
+  // button label so a second/third click queues the next persona.
+  form.addEventListener('submit', () => {
+    // Validation runs in the existing handler — only count successful submits
+    // (inbox count is the source of truth)
+    setTimeout(() => {
+      const nowReceived = inboxSubmissions; // updated by addToInbox in the existing submit handler
+      if (nowReceived > demoPersonaIdx) {
+        demoPersonaIdx = nowReceived;
+        updateDemoBtnLabel();
+      }
+    }, 100);
+  });
+
+  // Also reset persona cycle when Reset is hit
+  const resetBtnRef = document.getElementById('resetBtn');
+  if (resetBtnRef) {
+    resetBtnRef.addEventListener('click', () => {
+      demoPersonaIdx = 0;
+      const btn = document.getElementById('demoFillSubmitBtn');
+      if (btn) btn.disabled = false;
+      updateDemoBtnLabel();
+    });
+  }
 
   // Stop pulsing once the user interacts with the submit button or moves on.
   (function wireSubmitPulseStop(){
