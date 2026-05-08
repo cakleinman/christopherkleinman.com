@@ -868,12 +868,30 @@
     row.addEventListener('change', () => row.classList.remove('is-invalid'));
   });
 
-  // Reset
+  // Reset — full clean slate so the demo can re-run between rehearsals.
+  // Clears form, inbox, demo persona cycle, and any pulse on the submit button.
   resetBtn.addEventListener('click', () => {
     form.reset();
     svcGrid.querySelectorAll('.svc').forEach(c => c.classList.remove('is-selected'));
     form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
     topAlert.classList.remove('is-on');
+    // Wipe the inbox panel (created later in this IIFE — refs are captured below)
+    const inboxListEl = document.getElementById('inboxList');
+    const inboxCountEl = document.getElementById('inboxCount');
+    if (inboxListEl) inboxListEl.innerHTML = '';
+    // Reset the inbox submission counter — the addToInbox closure reads it
+    if (typeof window.__resetInboxCount === 'function') window.__resetInboxCount();
+    if (inboxCountEl) inboxCountEl.textContent = '0 received';
+    // Stop pulsing the submit button + flip back to the form view
+    const submitBtnEl = document.getElementById('submitBtn');
+    if (submitBtnEl) submitBtnEl.classList.remove('is-pulsing');
+    const formStateEl = document.getElementById('formState');
+    const confirmStateEl = document.getElementById('confirmState');
+    if (formStateEl) formStateEl.classList.remove('rg-hidden');
+    if (confirmStateEl) {
+      confirmStateEl.classList.add('rg-hidden');
+      confirmStateEl.innerHTML = '';
+    }
   });
 
   // ---- Validation
@@ -939,6 +957,9 @@
   const inboxList  = document.getElementById('inboxList');
   const inboxCount = document.getElementById('inboxCount');
   let inboxSubmissions = 0;
+  // Expose a reset hook so the Reset button (which fires earlier in the
+  // IIFE) can zero this counter without needing direct closure access.
+  window.__resetInboxCount = () => { inboxSubmissions = 0; };
   function addToInbox(d) {
     inboxSubmissions++;
     inboxCount.textContent = `${inboxSubmissions} received`;
@@ -1356,7 +1377,7 @@
     <div class="card">
       <div class="eye">Inquiry Received</div>
       <h1>Thank you, ${escapeHTML(firstName)}.</h1>
-      <p class="sub">We've got your inquiry. Mateo will reach out within one business day. Keep this summary for your records.</p>
+      <p class="sub">We've got your inquiry. Cody will reach out within one business day. Keep this summary for your records.</p>
       <div class="ref">REF ${escapeHTML(ref)}</div>
 
       <table>
@@ -1372,7 +1393,7 @@
       </table>
 
       <div class="veteran">
-        <strong>★ Veteran-owned.</strong> If anyone in the household has served, mention it when Mateo follows up — we apply a 10% veteran discount, no questions asked.
+        <strong>★ Veteran-owned.</strong> If anyone in the household has served, mention it when Cody follows up — we apply a 10% veteran discount, no questions asked.
       </div>
     </div>
 

@@ -1812,9 +1812,11 @@
     demoPhase = 'pending';
     demoLindaPending = false;
     clearDemoPreview();
-    // Close the new-job modal if reset is hit mid-flow
-    const njm = document.getElementById('newJobModal');
-    if (njm) njm.classList.remove('is-open');
+    // Close any open modal so reset doesn't leave a stuck overlay
+    ['newJobModal', 'newReqModal', 'historyModal', 'modal'].forEach(id => {
+      const m = document.getElementById(id);
+      if (m) m.classList.remove('is-open');
+    });
     const submit = document.getElementById('newJobSubmit');
     if (submit) submit.classList.remove('is-pulsing');
     const btn = document.getElementById('demoNewJobBtn');
