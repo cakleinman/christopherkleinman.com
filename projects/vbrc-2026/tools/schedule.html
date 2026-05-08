@@ -1,0 +1,2043 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Rivera Grounds Co · Field Schedule</title>
+<link rel="stylesheet" href="_shared.css" />
+<style>
+  /* ============================================================
+     Schedule tool — local styles
+     ============================================================ */
+
+  html, body { overflow: hidden; }
+  body {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  /* ---------- Title strip extras ---------- */
+  .rg-title-strip {
+    padding: 12px 24px;
+    flex-wrap: nowrap;
+  }
+  .rg-title-strip h1 { font-size: 18px; }
+  .rg-title-strip .rg-sub { font-size: 12px; }
+
+  .ttl-block {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    margin-right: 8px;
+  }
+
+  .week-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 6px;
+    background: #fff;
+    border: 1px solid var(--rg-line);
+    border-radius: var(--rg-radius);
+    box-shadow: var(--rg-shadow-sm);
+  }
+  .week-switch button {
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    color: var(--rg-ink-dim);
+    font-size: 13px;
+    line-height: 1;
+    font-family: inherit;
+    transition: background 120ms, color 120ms;
+  }
+  .week-switch button:hover { background: var(--rg-green-pale); color: var(--rg-green-dk); }
+  .week-switch .week-label {
+    padding: 0 6px;
+    font-family: var(--rg-font-display);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--rg-green-dk);
+    min-width: 132px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+  .week-switch .today-btn {
+    color: var(--rg-green-dk);
+    font-weight: 600;
+    border-left: 1px solid var(--rg-line);
+    border-radius: 0 6px 6px 0;
+    padding-left: 10px;
+  }
+
+  .ttl-actions {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* ---------- KPI strip ---------- */
+  .kpi-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    padding: 10px 24px;
+    background: rgba(255,255,255,0.4);
+    border-bottom: 1px solid var(--rg-line);
+  }
+  .rg-kpi { padding: 9px 14px; gap: 2px; }
+  .rg-kpi__value { font-size: 22px; }
+  .rg-kpi__label { font-size: 10px; letter-spacing: 0.12em; }
+  .rg-kpi__delta { font-size: 10px; }
+
+  /* ---------- Body layout ---------- */
+  .body-wrap {
+    flex: 1 1 auto;
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 12px;
+    padding: 10px 24px 0;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  /* ---------- Schedule grid container ---------- */
+  .grid-card {
+    background: #fff;
+    border: 1px solid var(--rg-line);
+    border-radius: var(--rg-radius-lg);
+    box-shadow: var(--rg-shadow-sm);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .grid-scroll {
+    flex: 1 1 auto;
+    overflow: auto;
+    min-height: 0;
+  }
+  .grid-table {
+    display: grid;
+    grid-template-columns: 168px repeat(5, minmax(170px, 1fr));
+    min-width: 1040px;
+    width: 100%;
+  }
+
+  /* day header */
+  .grid-table .col-head {
+    position: sticky;
+    top: 0;
+    background: var(--rg-cream);
+    border-bottom: 1px solid var(--rg-line-strong);
+    border-right: 1px solid var(--rg-line);
+    padding: 8px 12px;
+    z-index: 4;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+  .grid-table .col-head:last-child { border-right: 0; }
+  .col-head .dow {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--rg-ink-faint);
+    font-weight: 600;
+  }
+  .col-head .date {
+    font-family: var(--rg-font-display);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--rg-green-dk);
+  }
+  .col-head.is-today .date { color: var(--rg-warning); }
+  .col-head.is-today .dow { color: var(--rg-warning); }
+
+  .row-head {
+    position: sticky;
+    left: 0;
+    background: #fff;
+    z-index: 3;
+    border-right: 1px solid var(--rg-line-strong);
+    border-bottom: 1px solid var(--rg-line);
+    padding: 8px 10px 8px 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1px;
+  }
+  .row-head .res-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--rg-ink);
+    line-height: 1.2;
+  }
+  .row-head .res-meta {
+    font-size: 11px;
+    color: var(--rg-ink-faint);
+  }
+
+  /* group rail color */
+  .row-head[data-group="trucks"]    { box-shadow: inset 4px 0 0 var(--rg-green); }
+  .row-head[data-group="trailers"]  { box-shadow: inset 4px 0 0 var(--rg-tan); }
+  .row-head[data-group="crew"]      { box-shadow: inset 4px 0 0 #b3bdb5; }
+
+  /* group separator label */
+  .group-bar {
+    grid-column: 1 / -1;
+    padding: 5px 16px;
+    background: var(--rg-cream-dk);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--rg-ink-dim);
+    font-weight: 700;
+    border-top: 1px solid var(--rg-line);
+    border-bottom: 1px solid var(--rg-line);
+    position: sticky;
+    left: 0;
+  }
+  .group-bar:first-of-type { border-top: 0; }
+
+  /* cells */
+  .cell {
+    border-right: 1px solid var(--rg-line);
+    border-bottom: 1px solid var(--rg-line);
+    padding: 5px;
+    min-height: 60px;
+    position: relative;
+    transition: background 120ms;
+  }
+  .cell:last-child { border-right: 0; }
+  .cell.empty {
+    background-image:
+      radial-gradient(rgba(74,124,78,0.10) 1px, transparent 1px);
+    background-size: 8px 8px;
+    background-position: 4px 4px;
+    color: var(--rg-ink-faint);
+    font-size: 18px;
+    text-align: center;
+    line-height: 60px;
+    cursor: pointer;
+  }
+  .cell.empty::after {
+    content: "—";
+    color: rgba(74,124,78,0.25);
+    font-size: 22px;
+  }
+  .cell.empty:hover {
+    background-color: rgba(74,124,78,0.04);
+  }
+  .cell.drop-active {
+    background-color: var(--rg-green-pale) !important;
+    box-shadow: inset 0 0 0 2px var(--rg-green);
+  }
+
+  /* assignment chip */
+  .chip {
+    height: 100%;
+    background: #fff;
+    border: 1px solid var(--rg-line);
+    border-left: 4px solid var(--rg-green);
+    border-radius: 6px;
+    padding: 6px 8px 6px 9px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    cursor: grab;
+    transition: box-shadow 140ms, transform 140ms;
+    user-select: none;
+    overflow: hidden;
+  }
+  .chip:hover {
+    box-shadow: var(--rg-shadow-md);
+    transform: translateY(-1px);
+  }
+  .chip:active { cursor: grabbing; }
+  .chip.dragging { opacity: 0.45; transform: scale(1.02); }
+
+  .chip[data-svc="lawn"]          { border-left-color: var(--rg-green); }
+  .chip[data-svc="hardscape"]     { border-left-color: var(--rg-tan-dk); }
+  .chip[data-svc="irrigation"]    { border-left-color: #6b9a8e; }
+  .chip[data-svc="consultation"]  { border-left-color: #9aa49b; }
+
+  .chip .cust {
+    font-weight: 700;
+    font-size: 12px;
+    color: var(--rg-ink);
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .chip .meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+  }
+  .chip .svc {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    color: var(--rg-ink-dim);
+  }
+  .chip[data-svc="lawn"] .svc          { color: var(--rg-green); }
+  .chip[data-svc="hardscape"] .svc     { color: var(--rg-tan-dk); }
+  .chip[data-svc="irrigation"] .svc    { color: #4f7d72; }
+  .chip[data-svc="consultation"] .svc  { color: #6c7770; }
+
+  .chip .time {
+    font-family: var(--rg-font-mono);
+    font-size: 10px;
+    color: var(--rg-ink-faint);
+    font-variant-numeric: tabular-nums;
+  }
+  .chip .crew-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--rg-green-pale);
+    color: var(--rg-green-dk);
+    font-size: 9px;
+    font-weight: 700;
+    margin-left: 4px;
+  }
+
+  /* "with X" lightweight chip for trailer rows */
+  .chip.is-link {
+    background: rgba(216, 199, 154, 0.18);
+    border-color: rgba(184, 165, 116, 0.35);
+    border-left-color: var(--rg-tan-dk);
+  }
+  .chip.is-link .cust { font-weight: 600; color: var(--rg-tan-dk); font-size: 11px; }
+
+  /* time-off cell */
+  .cell.timeoff {
+    background-image:
+      repeating-linear-gradient(
+        45deg,
+        rgba(216, 199, 154, 0.45) 0,
+        rgba(216, 199, 154, 0.45) 6px,
+        rgba(216, 199, 154, 0.18) 6px,
+        rgba(216, 199, 154, 0.18) 12px
+      );
+    cursor: default;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .cell.timeoff .timeoff-pill {
+    background: rgba(255,255,255,0.85);
+    border: 1px solid rgba(184, 165, 116, 0.5);
+    color: var(--rg-tan-dk);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 4px 9px;
+    border-radius: 999px;
+    font-weight: 700;
+  }
+
+  /* ---------- Side panel ---------- */
+  .side {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 0;
+  }
+  .side-card {
+    background: #fff;
+    border: 1px solid var(--rg-line);
+    border-radius: var(--rg-radius-lg);
+    box-shadow: var(--rg-shadow-sm);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    flex: 1 1 0;
+    overflow: hidden;
+  }
+  .side-card__hd {
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--rg-line);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .side-card__hd h3 {
+    margin: 0;
+    font-family: var(--rg-font-display);
+    font-size: 13px;
+    color: var(--rg-green-dk);
+    font-weight: 600;
+  }
+  .side-card__hd .hint {
+    font-size: 10px;
+    color: var(--rg-ink-faint);
+    font-style: italic;
+    margin-right: auto;
+  }
+  .side-card__hd .count {
+    margin-left: auto;
+    font-size: 10px;
+    background: var(--rg-green-pale);
+    color: var(--rg-green-dk);
+    padding: 2px 7px;
+    border-radius: 999px;
+    font-weight: 700;
+  }
+  .side-card__btn {
+    background: var(--rg-green-dk);
+    color: var(--rg-cream);
+    border: 0;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    font-size: 14px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 120ms ease, transform 120ms ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+  .side-card__btn:hover { background: var(--rg-green); }
+  .side-card__btn:active { transform: scale(0.92); }
+  .side-card__btn--ghost {
+    background: transparent;
+    color: var(--rg-ink-dim);
+    border: 1px solid var(--rg-line);
+    width: auto; height: 22px;
+    border-radius: 999px;
+    padding: 0 9px;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+  }
+  .side-card__btn--ghost:hover {
+    background: var(--rg-cream-dk);
+    color: var(--rg-green-dk);
+  }
+
+  /* History modal list */
+  .history-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 380px;
+    overflow-y: auto;
+  }
+  .history-row {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 12px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--rg-line);
+    align-items: center;
+    font-size: 12px;
+  }
+  .history-row:last-child { border-bottom: 0; }
+  .history-row .h-decision {
+    font-family: var(--rg-font-mono);
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-weight: 700;
+  }
+  .h-decision--approved {
+    background: var(--rg-green-pale);
+    color: var(--rg-green-dk);
+  }
+  .h-decision--denied {
+    background: rgba(184, 116, 45, 0.15);
+    color: var(--rg-warning);
+  }
+  .history-row .h-who    { font-weight: 600; color: var(--rg-green-dk); }
+  .history-row .h-what   { color: var(--rg-ink-dim); font-size: 11.5px; margin-top: 2px; }
+  .history-row .h-when   { font-family: var(--rg-font-mono); font-size: 10px; color: var(--rg-ink-faint); white-space: nowrap; }
+  .history-empty {
+    padding: 28px 16px;
+    text-align: center;
+    color: var(--rg-ink-faint);
+    font-size: 12px;
+    font-style: italic;
+  }
+
+  /* New-request form fields */
+  .req-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .req-form-grid .full { grid-column: 1 / -1; }
+  .req-form-grid label {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--rg-ink-dim);
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .req-form-grid select,
+  .req-form-grid input[type="text"] {
+    width: 100%;
+    padding: 7px 9px;
+    border: 1px solid var(--rg-line-strong);
+    border-radius: var(--rg-radius);
+    font-size: 12.5px;
+    background: #fff;
+    font-family: inherit;
+  }
+  .side-card__bd {
+    padding: 8px 10px;
+    overflow-y: auto;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-height: 0;
+  }
+
+  /* unassigned card (draggable to grid) */
+  .un-card {
+    border: 1px solid var(--rg-line);
+    border-left: 4px solid var(--rg-green);
+    border-radius: 8px;
+    padding: 7px 9px;
+    background: #fff;
+    cursor: grab;
+    transition: box-shadow 140ms, transform 140ms;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+  .un-card:hover { box-shadow: var(--rg-shadow-md); transform: translateY(-1px); }
+  .un-card.dragging { opacity: 0.45; transform: scale(1.02); }
+  .un-card[data-svc="lawn"]         { border-left-color: var(--rg-green); }
+  .un-card[data-svc="hardscape"]    { border-left-color: var(--rg-tan-dk); }
+  .un-card[data-svc="irrigation"]   { border-left-color: #6b9a8e; }
+  .un-card[data-svc="consultation"] { border-left-color: #9aa49b; }
+  .un-card .cust { font-weight: 700; font-size: 12px; }
+  .un-card .det  { font-size: 11px; color: var(--rg-ink-dim); }
+
+  /* request card */
+  .req-card {
+    border: 1px solid var(--rg-line);
+    border-radius: 8px;
+    padding: 8px 10px;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .req-card .who { font-size: 12px; font-weight: 700; }
+  .req-card .what { font-size: 11px; color: var(--rg-ink-dim); }
+  .req-card .reason { font-size: 11px; color: var(--rg-ink-faint); font-style: italic; }
+  .req-card .actions { display: flex; gap: 6px; margin-top: 2px; }
+  .req-card .rg-btn { padding: 5px 10px; font-size: 11px; }
+
+  /* card removal animation */
+  .removing {
+    transition: opacity 250ms ease, transform 250ms ease, max-height 250ms ease, padding 250ms, margin 250ms, border-color 250ms;
+    opacity: 0;
+    transform: translateX(40px);
+    max-height: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    margin: 0 !important;
+    border-color: transparent !important;
+    overflow: hidden;
+  }
+
+  /* ---------- Footer ---------- */
+  .rg-footer {
+    padding: 8px 24px;
+    font-size: 10px;
+  }
+
+  /* ---------- Modal ---------- */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(31, 42, 31, 0.35);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 160ms ease;
+  }
+  .modal-backdrop.is-open { opacity: 1; pointer-events: auto; }
+  .modal {
+    width: 420px;
+    max-width: 92vw;
+    background: #fff;
+    border: 1px solid var(--rg-line);
+    border-radius: var(--rg-radius-lg);
+    box-shadow: var(--rg-shadow-lg);
+    overflow: hidden;
+    transform: translateY(8px) scale(0.98);
+    transition: transform 160ms ease;
+  }
+  .modal-backdrop.is-open .modal { transform: translateY(0) scale(1); }
+  .modal__hd {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--rg-line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--rg-green-pale);
+  }
+  .modal__hd h3 {
+    margin: 0;
+    font-family: var(--rg-font-display);
+    font-size: 16px;
+    color: var(--rg-green-dk);
+  }
+  .modal__hd .sub {
+    display: block;
+    font-family: var(--rg-font-body);
+    font-style: normal;
+    font-size: 11px;
+    color: var(--rg-ink-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    margin-top: 2px;
+  }
+  .modal__close {
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    color: var(--rg-ink-dim);
+    font-size: 20px;
+    line-height: 1;
+    padding: 4px 8px;
+    border-radius: 6px;
+  }
+  .modal__close:hover { background: rgba(0,0,0,0.05); color: var(--rg-ink); }
+  .modal__bd {
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .modal__ft {
+    padding: 12px 18px;
+    border-top: 1px solid var(--rg-line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255,255,255,0.5);
+  }
+
+  /* ---------- Toasts ---------- */
+  .toasts {
+    position: fixed;
+    bottom: 18px;
+    right: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 200;
+    pointer-events: none;
+  }
+  .toast {
+    background: var(--rg-ink);
+    color: var(--rg-cream);
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    box-shadow: var(--rg-shadow-lg);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 180ms ease, transform 180ms ease;
+    border-left: 3px solid var(--rg-green);
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .toast.warn { border-left-color: var(--rg-warning); }
+  .toast .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--rg-green);
+  }
+  .toast.warn .dot { background: var(--rg-warning); }
+
+  /* compact iframe spacing */
+  @media (max-height: 520px) {
+    .rg-header { padding: 8px 24px; }
+    .rg-mark { font-size: 18px; }
+    .rg-tagline { font-size: 10px; }
+    .rg-tag-pill { font-size: 9px; padding: 3px 8px; }
+    .kpi-strip { padding: 8px 24px; }
+    .rg-kpi { padding: 7px 12px; }
+    .rg-kpi__value { font-size: 19px; }
+    .body-wrap { padding: 8px 24px 0; }
+    .rg-footer { padding: 6px 24px; }
+  }
+
+  /* ---------- Empty queue state ---------- */
+  .queue-empty {
+    border: 2px dashed var(--rg-line-strong);
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+    font-size: 11px;
+    color: var(--rg-ink-faint);
+    margin: 6px 4px;
+  }
+</style>
+</head>
+<body>
+  <div class="rg-shell">
+
+    <!-- HEADER BAND -->
+    <header class="rg-header">
+      <span class="rg-mark">Rivera Grounds Co</span>
+      <span class="rg-tag-pill">Veteran Owned</span>
+      <span class="rg-tagline">Utah County, UT · Since 2018</span>
+      <span class="rg-live-pill" title="This is real software running in your browser, not a screenshot">Live · running locally</span>
+    </header>
+
+    <!-- TITLE STRIP -->
+    <div class="rg-title-strip">
+      <div class="ttl-block">
+        <h1>Field Schedule</h1>
+        <span class="rg-sub">This week · Trucks, crew, jobsites at a glance</span>
+      </div>
+
+      <div class="week-switch" role="group" aria-label="Week navigation">
+        <button id="weekPrev" title="Previous week">&larr; Last week</button>
+        <span class="week-label" id="weekLabel">Apr 27 – May 1</span>
+        <button id="weekNext" title="Next week">Next week &rarr;</button>
+        <button class="today-btn" id="weekToday">Today</button>
+      </div>
+
+      <div class="ttl-actions">
+        <button type="button" class="rg-btn--demo" id="demoNewJobBtn"
+                title="Walk through Cody's whole week step-by-step">demo: + new job</button>
+        <button class="rg-btn rg-btn--ghost rg-btn--sm" id="resetBtn" title="Restore demo data">Reset</button>
+        <button class="rg-btn rg-btn--secondary rg-btn--sm" id="exportBtn" title="Export the visible week as CSV">Export</button>
+        <button class="rg-btn rg-btn--primary rg-btn--sm" id="newJobBtn" title="Add a new job to the Inbox">+ New Job</button>
+      </div>
+    </div>
+
+    <!-- KPI STRIP -->
+    <div class="kpi-strip">
+      <div class="rg-kpi">
+        <span class="rg-kpi__label">Jobs scheduled</span>
+        <span class="rg-kpi__value" id="kpiJobs">14</span>
+        <span class="rg-kpi__delta">this week</span>
+      </div>
+      <div class="rg-kpi">
+        <span class="rg-kpi__label">Crew utilization</span>
+        <span class="rg-kpi__value" id="kpiUtil">78%</span>
+        <span class="rg-kpi__delta" id="kpiUtilSub">4 crew · 20 shifts</span>
+      </div>
+      <div class="rg-kpi">
+        <span class="rg-kpi__label">Idle equipment</span>
+        <span class="rg-kpi__value" id="kpiIdle">1 truck</span>
+        <span class="rg-kpi__delta" id="kpiIdleSub">0 trailers</span>
+      </div>
+      <div class="rg-kpi">
+        <span class="rg-kpi__label">Pending requests</span>
+        <span class="rg-kpi__value" id="kpiPending">2</span>
+        <span class="rg-kpi__delta">awaiting approval</span>
+      </div>
+    </div>
+
+    <!-- BODY: grid + side panel -->
+    <div class="body-wrap">
+      <section class="grid-card">
+        <div class="grid-scroll">
+          <div class="grid-table" id="gridTable">
+            <!-- column header row -->
+            <div class="row-head" style="background: var(--rg-cream); box-shadow: none;">
+              <span class="res-name" style="font-size:11px; text-transform:uppercase; letter-spacing:0.14em; color: var(--rg-ink-faint);">Resource</span>
+            </div>
+            <div class="col-head" data-day="0"><span class="dow">Mon</span><span class="date">Apr 27</span></div>
+            <div class="col-head" data-day="1"><span class="dow">Tue</span><span class="date">Apr 28</span></div>
+            <div class="col-head" data-day="2"><span class="dow">Wed</span><span class="date">Apr 29</span></div>
+            <div class="col-head" data-day="3"><span class="dow">Thu</span><span class="date">Apr 30</span></div>
+            <div class="col-head" data-day="4"><span class="dow">Fri</span><span class="date">May 1</span></div>
+
+            <!-- grid body injected by JS -->
+            <div id="gridBody" style="display: contents;"></div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="side">
+        <div class="side-card">
+          <div class="side-card__hd">
+            <h3>Inbox</h3>
+            <span class="hint">drag onto a slot</span>
+            <span class="count" id="unCount">0</span>
+          </div>
+          <div class="side-card__bd" id="unassignedList"></div>
+        </div>
+
+        <div class="side-card">
+          <div class="side-card__hd">
+            <h3>Pending Requests</h3>
+            <button class="side-card__btn" id="newRequestBtn" type="button" title="Submit a new time-off or swap request">+</button>
+            <button class="side-card__btn side-card__btn--ghost" id="historyBtn" type="button" title="See approved & denied history">History</button>
+            <span class="count" id="reqCount">2</span>
+          </div>
+          <div class="side-card__bd" id="requestList"></div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="rg-footer">
+      <span>Built for Rivera Grounds Co · Crew of 4 · 3 trucks · 2 trailers</span>
+      <span>Made with AI · Demo</span>
+    </footer>
+  </div>
+
+  <!-- MODAL -->
+  <div class="modal-backdrop" id="modal" role="dialog" aria-modal="true">
+    <div class="modal" role="document">
+      <div class="modal__hd">
+        <div>
+          <h3 id="modalTitle">Edit assignment</h3>
+          <span class="sub" id="modalSub">Resource · Day</span>
+        </div>
+        <button class="modal__close" id="modalClose" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal__bd">
+        <div class="rg-field">
+          <label class="rg-label">Customer</label>
+          <input class="rg-input" id="fldCustomer" readonly />
+        </div>
+        <div class="rg-row" style="gap: 10px;">
+          <div class="rg-field" style="flex:1;">
+            <label class="rg-label">Service Type</label>
+            <select class="rg-select" id="fldService">
+              <option value="lawn">Lawn care</option>
+              <option value="hardscape">Hardscaping</option>
+              <option value="irrigation">Irrigation</option>
+              <option value="consultation">Consultation</option>
+            </select>
+          </div>
+          <div class="rg-field" style="flex:1;">
+            <label class="rg-label">Time Block</label>
+            <input class="rg-input" id="fldTime" placeholder="8a–12p" />
+          </div>
+        </div>
+        <div class="rg-field">
+          <label class="rg-label">Notes</label>
+          <textarea class="rg-textarea" id="fldNotes" placeholder="Equipment, gate code, prep list..."></textarea>
+        </div>
+      </div>
+      <div class="modal__ft">
+        <button class="rg-btn rg-btn--danger rg-btn--sm" id="btnRemove">Remove from schedule</button>
+        <div class="rg-row" style="gap: 8px;">
+          <button class="rg-btn rg-btn--ghost rg-btn--sm" id="btnCancel">Cancel</button>
+          <button class="rg-btn rg-btn--primary rg-btn--sm" id="btnDone">Done</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEW JOB MODAL -->
+  <div class="modal-backdrop" id="newJobModal" role="dialog" aria-modal="true">
+    <div class="modal" role="document">
+      <div class="modal__hd">
+        <div>
+          <h3>Add a new job</h3>
+          <span class="sub">Lands in the Inbox · drag onto a slot to schedule</span>
+        </div>
+        <button class="modal__close" id="newJobClose" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal__bd">
+        <div class="req-form-grid">
+          <div class="full">
+            <label>Customer</label>
+            <input type="text" id="newJobCustomer" placeholder="e.g., Linda Park" />
+          </div>
+          <div>
+            <label>Service</label>
+            <select id="newJobSvc">
+              <option value="lawn">Lawn care</option>
+              <option value="hardscape">Hardscaping</option>
+              <option value="irrigation">Irrigation</option>
+              <option value="consultation">Consultation</option>
+            </select>
+          </div>
+          <div>
+            <label>Estimated time</label>
+            <input type="text" id="newJobTime" placeholder="e.g., 4.0 hrs · Wed AM" />
+          </div>
+          <div class="full">
+            <label>Detail (optional)</label>
+            <input type="text" id="newJobDet" placeholder="Address, notes, gate code, anything Cody needs" />
+          </div>
+        </div>
+      </div>
+      <div class="modal__ft">
+        <div class="rg-row" style="gap: 8px; margin-left: auto;">
+          <button class="rg-btn rg-btn--ghost rg-btn--sm" id="newJobCancel">Cancel</button>
+          <button class="rg-btn rg-btn--primary rg-btn--sm" id="newJobSubmit">Add to Inbox</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEW REQUEST MODAL -->
+  <div class="modal-backdrop" id="newReqModal" role="dialog" aria-modal="true">
+    <div class="modal" role="document">
+      <div class="modal__hd">
+        <div>
+          <h3>Submit a request</h3>
+          <span class="sub">Time off or schedule swap</span>
+        </div>
+        <button class="modal__close" id="newReqClose" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal__bd">
+        <div class="req-form-grid">
+          <div>
+            <label>Crew member</label>
+            <select id="newReqWho"></select>
+          </div>
+          <div>
+            <label>Type</label>
+            <select id="newReqKind">
+              <option value="timeoff">Time off</option>
+              <option value="swap">Schedule swap</option>
+            </select>
+          </div>
+          <div>
+            <label>Day</label>
+            <select id="newReqDay">
+              <option value="0">Mon</option>
+              <option value="1">Tue</option>
+              <option value="2">Wed</option>
+              <option value="3">Thu</option>
+              <option value="4">Fri</option>
+            </select>
+          </div>
+          <div>
+            <label>Reason (optional)</label>
+            <input type="text" id="newReqReason" placeholder="Medical appt, family event, etc." />
+          </div>
+        </div>
+      </div>
+      <div class="modal__ft">
+        <div class="rg-row" style="gap: 8px; margin-left: auto;">
+          <button class="rg-btn rg-btn--ghost rg-btn--sm" id="newReqCancel">Cancel</button>
+          <button class="rg-btn rg-btn--primary rg-btn--sm" id="newReqSubmit">Submit request</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY MODAL -->
+  <div class="modal-backdrop" id="historyModal" role="dialog" aria-modal="true">
+    <div class="modal" role="document" style="max-width: 580px;">
+      <div class="modal__hd">
+        <div>
+          <h3>Request history</h3>
+          <span class="sub" id="historySub">Approved &amp; denied decisions</span>
+        </div>
+        <button class="modal__close" id="historyClose" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal__bd" style="padding: 0;">
+        <ul class="history-list" id="historyList"></ul>
+      </div>
+      <div class="modal__ft">
+        <div class="rg-row" style="gap: 8px; margin-left: auto;">
+          <button class="rg-btn rg-btn--ghost rg-btn--sm" id="historyCloseFt">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script>
+(function(){
+  'use strict';
+
+  // ===== Storage key =====
+  const LS_KEY = 'rivera-schedule-v1';
+
+  // Stage-reset hook: if the deck's "Stage reset" button reloaded us with
+  // ?reset=, wipe persistent state before init so we boot clean.
+  try {
+    if (new URLSearchParams(location.search).has('reset')) {
+      localStorage.removeItem(LS_KEY);
+    }
+  } catch (_) {}
+
+  // ===== Resource list =====
+  const RESOURCES = [
+    { id: 'truck-sequoia', group: 'trucks',   name: 'Sequoia',   meta: 'F-150' },
+    { id: 'truck-bear',    group: 'trucks',   name: 'Bear',      meta: 'F-250' },
+    { id: 'truck-mule',    group: 'trucks',   name: 'Mule',      meta: 'Box truck' },
+    { id: 'trailer-a',     group: 'trailers', name: 'Trailer A', meta: '16ft enclosed' },
+    { id: 'trailer-b',     group: 'trailers', name: 'Trailer B', meta: '20ft open' },
+    { id: 'crew-mateo',    group: 'crew',     name: 'Mateo R.',  meta: 'Crew lead · USMC' },
+    { id: 'crew-diego',    group: 'crew',     name: 'Diego L.',  meta: 'Lead crew' },
+    { id: 'crew-sam',      group: 'crew',     name: 'Sam T.',    meta: 'Operator · Box truck driver' },
+    { id: 'crew-casey',    group: 'crew',     name: 'Casey J.',  meta: 'Crew' },
+  ];
+
+  // Sam is the only crew member certified to drive the box truck. When he
+  // takes time off, the Mule is unavailable that day too — a small "ripple"
+  // that demonstrates how connected real-world scheduling is.
+  const MULE_DRIVER_ID  = 'crew-sam';
+  const MULE_TRUCK_ID   = 'truck-mule';
+  const DAYS = ['Mon Apr 27', 'Tue Apr 28', 'Wed Apr 29', 'Thu Apr 30', 'Fri May 1'];
+
+  // ===== Service color labels =====
+  const SVC_LABEL = {
+    lawn:         'Lawn',
+    hardscape:    'Hardscape',
+    irrigation:   'Irrigation',
+    consultation: 'Consult',
+  };
+
+  // ===== Helper to make assignment =====
+  function a(customer, svc, time, opts) {
+    return Object.assign({
+      id: 'asg-' + Math.random().toString(36).slice(2, 9),
+      customer, svc, time,
+      crew: '', notes: '', kind: 'job'
+    }, opts || {});
+  }
+
+  // ===== Seed schedule =====
+  // Sized so each crew row has at least one visible open cell — Cody needs
+  // somewhere obvious to drop new work from the Inbox during the demo.
+  // Visible gaps:
+  //   • Diego — Wed (Linda Park's first lawn drop target)
+  //   • Mateo — Thu (planning / site visits)
+  //   • Sam   — Mon (also leads into his Tue time-off request)
+  //   • Casey — Fri (half-day wrap)
+  //   • Sequoia — Wed (pairs with Diego)
+  //   • Mule — Mon, Thu
+  function seedAssignments(){
+    return {
+      // SEQUOIA  · F-150  (Wed open — Diego is open Wed too)
+      'truck-sequoia|0': a('Walgrove HOA',           'lawn',      '8a–12p', { crew: 'DL' }),
+      'truck-sequoia|1': a('Cedar Ridge Apts',       'lawn',      '8a–4p',  { crew: 'DL' }),
+      'truck-sequoia|3': a('Cedar Ridge Apts',       'lawn',      '8a–4p',  { crew: 'DL' }),
+      'truck-sequoia|4': a('Walgrove HOA',           'lawn',      '8a–12p', { crew: 'ST' }),
+
+      // BEAR · F-250
+      'truck-bear|0': a('Pemberton Estate',          'hardscape', '7a–5p',  { crew: 'MR' }),
+      'truck-bear|1': a('Pemberton Estate',          'hardscape', '7a–5p',  { crew: 'MR' }),
+      'truck-bear|2': a('Pemberton Estate',          'hardscape', '7a–5p',  { crew: 'MR' }),
+      'truck-bear|3': a('Bartlett Family',           'hardscape', '7a–5p',  { crew: 'MR' }),
+      'truck-bear|4': a('Bartlett Family',           'hardscape', '7a–5p',  { crew: 'MR' }),
+
+      // MULE · Box truck (Sam-only driver — his time-off cascades to the truck)
+      'truck-mule|1': a('Marcus Reilly',             'irrigation', '9a–3p',  { crew: 'ST' }),
+      'truck-mule|2': a('Sandra Yu',                 'lawn',       '1p–3p',  { crew: 'ST' }),
+      'truck-mule|4': a('Marcus Reilly',             'irrigation', '9a–12p', { crew: 'ST' }),
+
+      // TRAILER A — paired with Bear all week
+      'trailer-a|0': a('with Bear · Pemberton',      'hardscape', '', { kind: 'link', crew: '' }),
+      'trailer-a|1': a('with Bear · Pemberton',      'hardscape', '', { kind: 'link' }),
+      'trailer-a|2': a('with Bear · Pemberton',      'hardscape', '', { kind: 'link' }),
+      'trailer-a|3': a('with Bear · Bartlett',       'hardscape', '', { kind: 'link' }),
+      'trailer-a|4': a('with Bear · Bartlett',       'hardscape', '', { kind: 'link' }),
+
+      // TRAILER B
+      'trailer-b|0': a('with Sequoia · Walgrove',    'lawn', '', { kind: 'link' }),
+      'trailer-b|4': a('with Mule · Reilly',         'irrigation', '', { kind: 'link' }),
+
+      // MATEO R. (Thu open)
+      'crew-mateo|0': a('Pemberton Estate',          'hardscape', '7a–5p'),
+      'crew-mateo|1': a('Pemberton Estate',          'hardscape', '7a–5p'),
+      'crew-mateo|2': a('Pemberton Estate',          'hardscape', '7a–5p'),
+      'crew-mateo|4': a('Bartlett Family',           'hardscape', '7a–5p'),
+
+      // DIEGO L. (Wed open — Linda's drop target; Fri approved time off)
+      'crew-diego|0': a('Walgrove HOA',              'lawn', '8a–12p'),
+      'crew-diego|1': a('Cedar Ridge Apts',          'lawn', '8a–4p'),
+      'crew-diego|3': a('Cedar Ridge Apts',          'lawn', '8a–4p'),
+      'crew-diego|4': { id: 'tof-diego-fri', kind: 'timeoff', label: 'Time off · Approved' },
+
+      // SAM T. (Mon open — Tue is the pending time-off request)
+      'crew-sam|1': a('Marcus Reilly',               'irrigation', '9a–3p'),
+      'crew-sam|2': a('Sandra Yu',                   'lawn', '1p–3p'),
+      'crew-sam|3': a('Bartlett Family',             'hardscape', '7a–5p'),
+      'crew-sam|4': a('Bartlett Family',             'hardscape', '7a–5p'),
+
+      // CASEY J. (Fri open)
+      'crew-casey|0': a('Pemberton Estate',          'hardscape', '7a–5p'),
+      'crew-casey|1': a('Pemberton Estate',          'hardscape', '7a–5p'),
+      'crew-casey|2': a('Pemberton Estate',          'hardscape', '7a–5p'),
+      'crew-casey|3': a('Marcus Reilly',             'irrigation', '9a–3p'),
+    };
+  }
+
+  function seedUnassigned(){
+    // Inbox starts empty — new work flows in from the inquiry form,
+    // the CRM, or the demo button on stage.
+    return [];
+  }
+
+  function seedRequests(){
+    return [
+      { id: 'rq-1', who: 'Sam T.',   what: 'Time off · Tuesday Apr 28', reason: 'Reason: medical appointment', kind: 'timeoff', day: 1 },
+      { id: 'rq-2', who: 'Casey J.', what: 'Schedule swap · Thursday → Friday', reason: 'Trade with Sam T.', kind: 'swap' },
+    ];
+  }
+
+  function seedRequestHistory(){
+    return [];
+  }
+
+  // ===== App state =====
+  let state = loadState();
+
+  function defaultState(){
+    return {
+      assignments:    seedAssignments(),
+      unassigned:     seedUnassigned(),
+      requests:       seedRequests(),
+      requestHistory: seedRequestHistory(),
+      weekOffset:     0,  // weeks from "this week" (display only)
+    };
+  }
+
+  function loadState(){
+    try {
+      const raw = localStorage.getItem(LS_KEY);
+      if (!raw) return defaultState();
+      const parsed = JSON.parse(raw);
+      if (!parsed || !parsed.assignments) return defaultState();
+      // Forward-compat: older saved state may not have these keys yet
+      if (!Array.isArray(parsed.requestHistory)) parsed.requestHistory = [];
+      if (!Array.isArray(parsed.requests))       parsed.requests = [];
+      if (!Array.isArray(parsed.unassigned))     parsed.unassigned = [];
+      return parsed;
+    } catch (e) { return defaultState(); }
+  }
+  function saveState(){
+    try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch(e) {}
+  }
+  function resetState(){
+    state = defaultState();
+    saveState();
+    render();
+    toast('Demo data restored', 'warn');
+  }
+
+  // ===== Element refs =====
+  const $gridBody = document.getElementById('gridBody');
+  const $unList   = document.getElementById('unassignedList');
+  const $reqList  = document.getElementById('requestList');
+  const $kJobs    = document.getElementById('kpiJobs');
+  const $kUtil    = document.getElementById('kpiUtil');
+  const $kUtilSub = document.getElementById('kpiUtilSub');
+  const $kIdle    = document.getElementById('kpiIdle');
+  const $kIdleSub = document.getElementById('kpiIdleSub');
+  const $kPending = document.getElementById('kpiPending');
+  const $unCount  = document.getElementById('unCount');
+  const $reqCount = document.getElementById('reqCount');
+  const $weekLabel = document.getElementById('weekLabel');
+
+  // ===== Render =====
+  function render(){
+    renderGrid();
+    renderUnassigned();
+    renderRequests();
+    renderKPIs();
+    renderWeek();
+  }
+
+  // ----- Grid -----
+  function renderGrid(){
+    $gridBody.innerHTML = '';
+
+    let lastGroup = null;
+    RESOURCES.forEach((res) => {
+      if (res.group !== lastGroup) {
+        const bar = document.createElement('div');
+        bar.className = 'group-bar';
+        bar.textContent =
+          res.group === 'trucks'   ? 'Trucks (3)'   :
+          res.group === 'trailers' ? 'Trailers (2)' :
+          'Crew (4)';
+        $gridBody.appendChild(bar);
+        lastGroup = res.group;
+      }
+
+      // row head
+      const head = document.createElement('div');
+      head.className = 'row-head';
+      head.dataset.group = res.group;
+      head.innerHTML = `
+        <span class="res-name">${res.name}</span>
+        <span class="res-meta">${res.meta}</span>
+      `;
+      $gridBody.appendChild(head);
+
+      // 5 day cells
+      for (let d = 0; d < 5; d++) {
+        const key = res.id + '|' + d;
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.dataset.key = key;
+        cell.dataset.resource = res.id;
+        cell.dataset.day = d;
+
+        const asg = state.assignments[key];
+        if (!asg) {
+          cell.classList.add('empty');
+        } else if (asg.kind === 'timeoff') {
+          cell.classList.add('timeoff');
+          cell.innerHTML = `<span class="timeoff-pill">${asg.label || 'Time off · Approved'}</span>`;
+        } else {
+          cell.appendChild(renderChip(asg, key, res));
+        }
+
+        wireCell(cell);
+        $gridBody.appendChild(cell);
+      }
+    });
+  }
+
+  function renderChip(asg, key, res){
+    const chip = document.createElement('div');
+    chip.className = 'chip' + (asg.kind === 'link' ? ' is-link' : '');
+    chip.dataset.svc = asg.svc;
+    chip.draggable = true;
+    chip.dataset.sourceKey = key;
+
+    const crewBadge = (asg.crew && asg.kind !== 'link')
+      ? `<span class="crew-badge" title="Operator">${asg.crew}</span>`
+      : '';
+
+    const svcLabel = SVC_LABEL[asg.svc] || asg.svc;
+
+    chip.innerHTML = `
+      <div class="cust" title="${esc(asg.customer)}">${esc(asg.customer)}</div>
+      <div class="meta">
+        <span class="svc">${svcLabel}</span>
+        ${asg.time ? `<span class="time">${esc(asg.time)}</span>` : ''}
+      </div>
+      ${crewBadge ? `<div style="display:flex; justify-content:flex-end;">${crewBadge}</div>` : ''}
+    `;
+
+    const tip = `${asg.customer} · ${svcLabel}${asg.time ? ' · ' + asg.time : ''}${asg.notes ? '\n' + asg.notes : ''}\n(${res.name} · ${DAYS[+key.split('|')[1]]})`;
+    chip.title = tip;
+
+    chip.addEventListener('dragstart', (e) => {
+      chip.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', JSON.stringify({
+        type: 'cell', sourceKey: key
+      }));
+    });
+    chip.addEventListener('dragend', () => chip.classList.remove('dragging'));
+    chip.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openModal(key);
+    });
+
+    return chip;
+  }
+
+  function wireCell(cell){
+    cell.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      cell.classList.add('drop-active');
+    });
+    cell.addEventListener('dragleave', () => {
+      cell.classList.remove('drop-active');
+    });
+    cell.addEventListener('drop', (e) => {
+      e.preventDefault();
+      cell.classList.remove('drop-active');
+      handleDrop(e, cell);
+    });
+    cell.addEventListener('click', () => {
+      const key = cell.dataset.key;
+      const asg = state.assignments[key];
+      if (!asg) {
+        openModal(key, true);
+      }
+      // chips have their own click handler that stopPropagation
+    });
+  }
+
+  function handleDrop(e, cell){
+    let payload;
+    try { payload = JSON.parse(e.dataTransfer.getData('text/plain')); }
+    catch (err) { return; }
+
+    const targetKey = cell.dataset.key;
+    const targetAsg = state.assignments[targetKey];
+
+    // can't drop onto a time-off cell
+    if (targetAsg && targetAsg.kind === 'timeoff') {
+      toast('Cannot assign over approved time off', 'warn');
+      return;
+    }
+
+    if (payload.type === 'unassigned') {
+      // assign new
+      const job = state.unassigned.find(u => u.id === payload.id);
+      if (!job) return;
+      if (targetAsg) {
+        toast('That slot is full — choose an empty slot', 'warn');
+        return;
+      }
+      state.assignments[targetKey] = {
+        id: 'asg-' + Math.random().toString(36).slice(2,9),
+        customer: job.customer,
+        svc: job.svc,
+        time: parseTimeFromDet(job.det) || '',
+        crew: '',
+        notes: job.det,
+        kind: 'job',
+      };
+      state.unassigned = state.unassigned.filter(u => u.id !== payload.id);
+      saveState();
+      render();
+      toast(`Assigned ${job.customer}`);
+      return;
+    }
+
+    if (payload.type === 'cell') {
+      const sourceKey = payload.sourceKey;
+      if (sourceKey === targetKey) return;
+      const sourceAsg = state.assignments[sourceKey];
+      if (!sourceAsg) return;
+
+      if (targetAsg) {
+        // swap (don't swap with time-off; already returned above)
+        state.assignments[targetKey] = sourceAsg;
+        state.assignments[sourceKey] = targetAsg;
+        toast('Swapped assignments');
+      } else {
+        state.assignments[targetKey] = sourceAsg;
+        delete state.assignments[sourceKey];
+        toast('Moved assignment');
+      }
+      saveState();
+      render();
+    }
+  }
+
+  function parseTimeFromDet(det){
+    if (!det) return '';
+    const m = det.match(/(am|pm)/i);
+    if (/wed pm/i.test(det)) return '1p–3p';
+    if (/thu am/i.test(det)) return '8a–11a';
+    if (/fri am/i.test(det)) return '9a–11a';
+    return '';
+  }
+
+  // ----- Unassigned panel -----
+  function renderUnassigned(){
+    $unList.innerHTML = '';
+    if (state.unassigned.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'queue-empty';
+      empty.textContent = 'Inbox is clear · drag a cell here to unschedule';
+      $unList.appendChild(empty);
+    } else {
+      state.unassigned.forEach(job => {
+        const card = document.createElement('div');
+        card.className = 'un-card';
+        card.dataset.svc = job.svc;
+        card.draggable = true;
+        card.innerHTML = `
+          <span class="cust">${esc(job.customer)}</span>
+          <span class="det">${esc(job.det)}</span>
+        `;
+        card.addEventListener('dragstart', (e) => {
+          card.classList.add('dragging');
+          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData('text/plain', JSON.stringify({
+            type: 'unassigned', id: job.id
+          }));
+        });
+        card.addEventListener('dragend', () => card.classList.remove('dragging'));
+        $unList.appendChild(card);
+      });
+    }
+    $unCount.textContent = state.unassigned.length;
+  }
+
+  // ----- Requests -----
+  function renderRequests(){
+    $reqList.innerHTML = '';
+    if (state.requests.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'queue-empty';
+      empty.textContent = 'No pending requests';
+      $reqList.appendChild(empty);
+    } else {
+      state.requests.forEach(req => {
+        const card = document.createElement('div');
+        card.className = 'req-card';
+        card.dataset.id = req.id;
+        card.innerHTML = `
+          <span class="who">${esc(req.who)}</span>
+          <span class="what">${esc(req.what)}</span>
+          <span class="reason">${esc(req.reason)}</span>
+          <div class="actions">
+            <button class="rg-btn rg-btn--primary rg-btn--sm" data-action="approve">Approve</button>
+            <button class="rg-btn rg-btn--ghost rg-btn--sm"   data-action="deny">Deny</button>
+          </div>
+        `;
+        card.querySelector('[data-action="approve"]').addEventListener('click', () => handleRequest(req.id, true));
+        card.querySelector('[data-action="deny"]')   .addEventListener('click', () => handleRequest(req.id, false));
+        $reqList.appendChild(card);
+      });
+    }
+    $reqCount.textContent = state.requests.length;
+  }
+
+  // ----- Approve / Deny + ripple effects -----
+  // Maps "Sam T." → "crew-sam" by matching against the RESOURCES list.
+  function crewIdFromName(name){
+    if (!name) return null;
+    const n = name.trim().toLowerCase();
+    const r = RESOURCES.find(r => r.group === 'crew' && r.name.trim().toLowerCase() === n);
+    return r ? r.id : null;
+  }
+
+  // Returns the day index 0–4 (Mon–Fri) from a request, or null if unknown.
+  function dayFromRequest(req){
+    if (typeof req.day === 'number') return req.day;
+    const text = (req.what || '').toLowerCase();
+    const dows = ['mon', 'tue', 'wed', 'thu', 'fri'];
+    for (let i = 0; i < dows.length; i++) {
+      if (text.includes(dows[i])) return i;
+    }
+    return null;
+  }
+
+  // Returns count of unique jobs displaced (pushed back to the inbox).
+  // Two cells (e.g. crew-sam|Tue and truck-mule|Tue) often hold the SAME
+  // logical job (same customer + service). We collect both, group by
+  // customer+service, and only push ONE inbox card with a merged "was on …"
+  // label so the user doesn't see a duplicate card per cell.
+  function applyTimeoffApproval(req){
+    const day = dayFromRequest(req);
+    const crewId = crewIdFromName(req.who);
+    if (day == null || !crewId) return { displaced: 0, mule: false };
+
+    const dayShort = (DAYS[day] || '').split(' ')[0];
+    const collected = []; // each: { customer, svc, notes, label }
+    const collect = (key, label) => {
+      const cur = state.assignments[key];
+      if (cur && cur.kind === 'job') {
+        collected.push({
+          customer: cur.customer || '—',
+          svc:      cur.svc      || 'lawn',
+          notes:    cur.notes    || '',
+          label,
+        });
+      }
+    };
+
+    // 1. Crew member's existing job → collect, then mark cell as time off.
+    collect(`${crewId}|${day}`, RESOURCES.find(r => r.id === crewId).name);
+    state.assignments[`${crewId}|${day}`] = {
+      id: 'tof-' + Math.random().toString(36).slice(2, 7),
+      kind: 'timeoff',
+      label: 'Time off · Approved',
+    };
+
+    // 2. Mule ripple: if requester is the sole Mule driver, the truck is
+    //    unavailable too — collect any existing Mule job and mark unavailable.
+    let muleAffected = false;
+    if (crewId === MULE_DRIVER_ID) {
+      collect(`${MULE_TRUCK_ID}|${day}`, 'Mule');
+      state.assignments[`${MULE_TRUCK_ID}|${day}`] = {
+        id: 'unav-' + Math.random().toString(36).slice(2, 7),
+        kind: 'timeoff',
+        label: `Unavailable · no driver`,
+      };
+      muleAffected = true;
+    }
+
+    // 3. Group collected items by (customer, svc) and push one inbox card per
+    //    unique job, with a merged label (e.g., "Was on Sam T. + Mule · Tue").
+    const groups = new Map();
+    collected.forEach(item => {
+      const k = `${item.customer}|${item.svc}`;
+      if (!groups.has(k)) {
+        groups.set(k, { customer: item.customer, svc: item.svc, notes: item.notes, labels: [item.label] });
+      } else {
+        groups.get(k).labels.push(item.label);
+      }
+    });
+    groups.forEach(g => {
+      const labelStr = g.labels.join(' + ');
+      const detail = g.notes
+        ? `${g.notes} · was on ${labelStr} · ${dayShort}`
+        : `Was on ${labelStr} · ${dayShort}`;
+      state.unassigned.push({
+        id: 'un-' + Math.random().toString(36).slice(2, 9),
+        customer: g.customer,
+        svc:      g.svc,
+        det:      detail,
+      });
+    });
+
+    return { displaced: groups.size, mule: muleAffected };
+  }
+
+  function handleRequest(id, approve){
+    const card = $reqList.querySelector(`.req-card[data-id="${id}"]`);
+    if (!card) return;
+    const req = state.requests.find(r => r.id === id);
+    if (!req) return;
+
+    let ripple = { displaced: 0, mule: false };
+    if (approve && req.kind === 'timeoff') {
+      ripple = applyTimeoffApproval(req);
+    }
+
+    // Log decision to history (newest first)
+    state.requestHistory.unshift({
+      id:       'h-' + Math.random().toString(36).slice(2, 9),
+      who:      req.who,
+      what:     req.what,
+      reason:   req.reason,
+      kind:     req.kind,
+      decision: approve ? 'approved' : 'denied',
+      at:       new Date().toISOString(),
+    });
+
+    // animate out
+    card.style.maxHeight = card.offsetHeight + 'px';
+    requestAnimationFrame(() => card.classList.add('removing'));
+
+    setTimeout(() => {
+      state.requests = state.requests.filter(r => r.id !== id);
+      saveState();
+      render();
+    }, 260);
+
+    if (approve) {
+      let msg = `Approved · ${req.who}`;
+      const extras = [];
+      if (ripple.mule) extras.push('Mule unavailable');
+      if (ripple.displaced) extras.push(`${ripple.displaced} job${ripple.displaced === 1 ? '' : 's'} → Inbox`);
+      if (extras.length) msg += ` · ${extras.join(' · ')}`;
+      toast(msg);
+    } else {
+      toast(`Denied · ${req.who}`, 'warn');
+    }
+  }
+
+  // ----- KPIs -----
+  function renderKPIs(){
+    let jobsCount = 0;
+    let crewBusy = 0; // crew shifts
+    let crewSlots = 0;
+    let truckIdle = 0, trailerIdle = 0;
+
+    RESOURCES.forEach(res => {
+      for (let d = 0; d < 5; d++) {
+        const asg = state.assignments[res.id + '|' + d];
+        const isReal = asg && asg.kind !== 'timeoff' && asg.kind !== 'link';
+
+        if (res.group === 'crew') {
+          crewSlots++;
+          if (asg && asg.kind !== 'timeoff') crewBusy++;
+        }
+
+        if (isReal && res.group === 'trucks') jobsCount++;
+      }
+    });
+
+    // idle: count resources fully empty all week
+    ['trucks','trailers'].forEach(g => {
+      RESOURCES.filter(r => r.group === g).forEach(res => {
+        let any = false;
+        for (let d = 0; d < 5; d++) {
+          if (state.assignments[res.id + '|' + d]) { any = true; break; }
+        }
+        if (!any) {
+          if (g === 'trucks') truckIdle++;
+          else trailerIdle++;
+        }
+      });
+    });
+
+    // count partial idle (any cell empty)
+    let truckPartial = 0;
+    RESOURCES.filter(r => r.group === 'trucks').forEach(res => {
+      let empty = 0;
+      for (let d = 0; d < 5; d++) {
+        if (!state.assignments[res.id + '|' + d]) empty++;
+      }
+      if (empty >= 3) truckPartial++;
+    });
+
+    $kJobs.textContent = jobsCount;
+    const util = crewSlots ? Math.round((crewBusy / crewSlots) * 100) : 0;
+    $kUtil.textContent = util + '%';
+    $kUtilSub.textContent = `4 crew · ${crewBusy}/${crewSlots} shifts`;
+
+    const idleTrucks = truckIdle || truckPartial; // show 1 truck if Mule has lots of empty
+    $kIdle.textContent = idleTrucks + (idleTrucks === 1 ? ' truck' : ' trucks');
+    $kIdleSub.textContent = trailerIdle + (trailerIdle === 1 ? ' trailer idle' : ' trailers idle');
+
+    $kPending.textContent = state.requests.length;
+  }
+
+  // ----- Week label -----
+  function renderWeek(){
+    const labels = [
+      'Apr 27 – May 1',
+      'May 4 – May 8',
+      'May 11 – May 15',
+      'Apr 20 – Apr 24',
+      'Apr 13 – Apr 17',
+    ];
+    let label;
+    const o = state.weekOffset;
+    if (o === 0) label = 'Apr 27 – May 1';
+    else if (o === 1) label = 'May 4 – May 8';
+    else if (o === 2) label = 'May 11 – May 15';
+    else if (o === -1) label = 'Apr 20 – Apr 24';
+    else if (o === -2) label = 'Apr 13 – Apr 17';
+    else label = (o > 0 ? '+' : '') + o + ' weeks from current';
+    $weekLabel.textContent = label;
+  }
+
+  // ===== Modal =====
+  const $modal = document.getElementById('modal');
+  const $modalTitle = document.getElementById('modalTitle');
+  const $modalSub   = document.getElementById('modalSub');
+  const $fldCustomer = document.getElementById('fldCustomer');
+  const $fldService  = document.getElementById('fldService');
+  const $fldTime     = document.getElementById('fldTime');
+  const $fldNotes    = document.getElementById('fldNotes');
+  const $btnRemove   = document.getElementById('btnRemove');
+  const $btnDone     = document.getElementById('btnDone');
+  const $btnCancel   = document.getElementById('btnCancel');
+  const $modalClose  = document.getElementById('modalClose');
+
+  let modalKey = null;
+  let modalIsNew = false;
+
+  function openModal(key, isNew){
+    modalKey = key;
+    modalIsNew = !!isNew;
+    const [resId, dayIdx] = key.split('|');
+    const res = RESOURCES.find(r => r.id === resId);
+    const dayLabel = DAYS[+dayIdx];
+
+    $modalSub.textContent = `${res.name} · ${res.meta} · ${dayLabel}`;
+
+    if (modalIsNew) {
+      $modalTitle.textContent = 'Add assignment';
+      $fldCustomer.value = '';
+      $fldCustomer.removeAttribute('readonly');
+      $fldCustomer.placeholder = 'Customer name';
+      $fldService.value = 'lawn';
+      $fldTime.value = '8a–12p';
+      $fldNotes.value = '';
+      $btnRemove.style.display = 'none';
+    } else {
+      const asg = state.assignments[key];
+      $modalTitle.textContent = 'Edit assignment';
+      $fldCustomer.value = asg.customer || '';
+      $fldCustomer.setAttribute('readonly', 'readonly');
+      $fldService.value = asg.svc || 'lawn';
+      $fldTime.value = asg.time || '';
+      $fldNotes.value = asg.notes || '';
+      $btnRemove.style.display = '';
+    }
+
+    $modal.classList.add('is-open');
+    setTimeout(() => $fldTime.focus(), 100);
+  }
+  function closeModal(){
+    $modal.classList.remove('is-open');
+    modalKey = null;
+  }
+
+  $modalClose.addEventListener('click', closeModal);
+  $btnCancel.addEventListener('click', closeModal);
+  $modal.addEventListener('click', (e) => {
+    if (e.target === $modal) closeModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && $modal.classList.contains('is-open')) closeModal();
+  });
+
+  $btnDone.addEventListener('click', () => {
+    if (!modalKey) return;
+    const cust = $fldCustomer.value.trim();
+    if (modalIsNew) {
+      if (!cust) { $fldCustomer.focus(); return; }
+      state.assignments[modalKey] = {
+        id: 'asg-' + Math.random().toString(36).slice(2,9),
+        customer: cust,
+        svc: $fldService.value,
+        time: $fldTime.value.trim(),
+        crew: '',
+        notes: $fldNotes.value.trim(),
+        kind: 'job',
+      };
+      toast('Assignment added');
+    } else {
+      const asg = state.assignments[modalKey];
+      if (asg) {
+        asg.svc = $fldService.value;
+        asg.time = $fldTime.value.trim();
+        asg.notes = $fldNotes.value.trim();
+      }
+      toast('Assignment updated');
+    }
+    saveState();
+    render();
+    closeModal();
+  });
+
+  $btnRemove.addEventListener('click', () => {
+    if (!modalKey) return;
+    const asg = state.assignments[modalKey];
+    if (asg && asg.kind !== 'link' && asg.kind !== 'timeoff') {
+      // push back to unassigned queue
+      state.unassigned.push({
+        id: 'un-' + Math.random().toString(36).slice(2,9),
+        customer: asg.customer,
+        svc: asg.svc,
+        det: (asg.notes || asg.customer) + (asg.time ? ' · ' + asg.time : '')
+      });
+    }
+    delete state.assignments[modalKey];
+    saveState();
+    render();
+    toast('Removed from schedule', 'warn');
+    closeModal();
+  });
+
+  // ===== Toasts =====
+  const $toasts = document.getElementById('toasts');
+  function toast(msg, kind){
+    const t = document.createElement('div');
+    t.className = 'toast' + (kind === 'warn' ? ' warn' : '');
+    t.innerHTML = `<span class="dot"></span><span>${esc(msg)}</span>`;
+    $toasts.appendChild(t);
+    requestAnimationFrame(() => t.classList.add('show'));
+    setTimeout(() => {
+      t.classList.remove('show');
+      setTimeout(() => t.remove(), 250);
+    }, 2000);
+  }
+
+  // ===== Misc =====
+  function esc(s){
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  // ===== Week switcher =====
+  document.getElementById('weekPrev').addEventListener('click', () => {
+    state.weekOffset = (state.weekOffset || 0) - 1;
+    saveState();
+    renderWeek();
+  });
+  document.getElementById('weekNext').addEventListener('click', () => {
+    state.weekOffset = (state.weekOffset || 0) + 1;
+    saveState();
+    renderWeek();
+  });
+  document.getElementById('weekToday').addEventListener('click', () => {
+    state.weekOffset = 0;
+    saveState();
+    renderWeek();
+  });
+
+  // ===== Reset =====
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    try { localStorage.removeItem(LS_KEY); } catch(e){}
+    resetState();
+    // Reset demo walkthrough so it can re-run cleanly
+    demoStep = 0;
+    const btn = document.getElementById('demoNewJobBtn');
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = DEMO_STEPS[0].label;
+    }
+  });
+
+  // ===== Demo walkthrough — auto-proceed through Cody's whole week =====
+  // Each click advances one step. Steps narrate via toast + visual change so
+  // the audience sees the story unfold without the presenter having to drag
+  // anything. (They still CAN drag — this just makes a hands-off run easy.)
+  const DEMO_STEPS = [
+    {
+      label: "demo: + Linda's job",
+      run: () => {
+        // Add Linda's first lawn job to the Inbox
+        if (!state.unassigned.some(u => u.customer === 'Linda Park')) {
+          state.unassigned.push({
+            id: 'un-demo-linda',
+            customer: 'Linda Park',
+            svc: 'lawn',
+            det: '412 Birch Lane · 3.5 hrs · new homeowner',
+          });
+        }
+        toast('+ Linda Park · she landed in the Inbox');
+      },
+    },
+    {
+      label: "demo: drop onto the grid",
+      run: () => {
+        // Move Linda from Inbox to Diego's Wednesday slot
+        const idx = state.unassigned.findIndex(u => u.customer === 'Linda Park');
+        if (idx >= 0) state.unassigned.splice(idx, 1);
+        state.assignments['crew-diego|2'] = a('Linda Park', 'lawn', '8a–11:30a', { crew: 'DL' });
+        toast('Linda → Diego · Wed 8 AM');
+      },
+    },
+    {
+      label: "demo: approve time-off",
+      run: () => {
+        // Approve Sam's pending time-off — triggers the Mule ripple
+        const samReq = state.requests.find(r => r.kind === 'timeoff' && r.who === 'Sam T.');
+        if (!samReq) {
+          toast('Sam already approved · skipping', 'warn');
+          return;
+        }
+        const ripple = applyTimeoffApproval(samReq);
+        state.requestHistory.unshift({
+          id: 'h-' + Math.random().toString(36).slice(2, 9),
+          who: samReq.who,
+          what: samReq.what,
+          reason: samReq.reason,
+          kind: samReq.kind,
+          decision: 'approved',
+          at: new Date().toISOString(),
+        });
+        state.requests = state.requests.filter(r => r.id !== samReq.id);
+        const extras = [];
+        if (ripple.mule)      extras.push('Mule unavailable');
+        if (ripple.displaced) extras.push(`${ripple.displaced} jobs → Inbox`);
+        toast(`Approved · Sam T.${extras.length ? ' · ' + extras.join(' · ') : ''}`);
+      },
+    },
+    {
+      label: "demo: rebalance",
+      run: () => {
+        // Auto-place displaced Inbox items onto the remaining open crew slots
+        const targets = [
+          { key: 'crew-casey|4', crew: 'CJ', time: '9a–12p' }, // Casey's open Fri
+          { key: 'crew-mateo|3', crew: 'MR', time: '7a–5p'  }, // Mateo's open Thu
+        ];
+        let placed = 0;
+        for (const t of targets) {
+          if (state.unassigned.length === 0) break;
+          if (state.assignments[t.key]) continue; // skip if slot is somehow taken
+          const job = state.unassigned.shift();
+          state.assignments[t.key] = a(job.customer, job.svc, t.time, { crew: t.crew });
+          placed++;
+        }
+        toast(placed
+          ? `Rebalanced · ${placed} job${placed === 1 ? '' : 's'} placed`
+          : 'Inbox already clear', placed ? 'success' : 'warn');
+      },
+    },
+  ];
+
+  let demoStep = 0;
+  // Set initial label on boot so it matches the first step
+  (function initDemoBtn(){
+    const btn = document.getElementById('demoNewJobBtn');
+    if (btn) btn.textContent = DEMO_STEPS[0].label;
+  })();
+
+  document.getElementById('demoNewJobBtn').addEventListener('click', () => {
+    const btn = document.getElementById('demoNewJobBtn');
+    if (demoStep >= DEMO_STEPS.length) {
+      btn.disabled = true;
+      btn.textContent = 'demo: complete · reset to re-run';
+      toast('Demo complete · click Reset to re-run', 'info');
+      return;
+    }
+    const step = DEMO_STEPS[demoStep];
+    step.run();
+    saveState();
+    render();
+    demoStep++;
+    if (demoStep < DEMO_STEPS.length) {
+      btn.textContent = DEMO_STEPS[demoStep].label;
+    } else {
+      btn.textContent = 'demo: complete · reset to re-run';
+      btn.disabled = true;
+    }
+  });
+
+  // ===== New-job modal =====
+  const $newJobModal    = document.getElementById('newJobModal');
+  const $newJobCustomer = document.getElementById('newJobCustomer');
+  const $newJobSvc      = document.getElementById('newJobSvc');
+  const $newJobTime     = document.getElementById('newJobTime');
+  const $newJobDet      = document.getElementById('newJobDet');
+
+  function openNewJobModal(){
+    $newJobCustomer.value = '';
+    $newJobSvc.value = 'lawn';
+    $newJobTime.value = '';
+    $newJobDet.value = '';
+    $newJobModal.classList.add('is-open');
+    setTimeout(() => $newJobCustomer.focus(), 30);
+  }
+  function closeNewJobModal(){ $newJobModal.classList.remove('is-open'); }
+
+  document.getElementById('newJobBtn').addEventListener('click', openNewJobModal);
+  document.getElementById('newJobClose').addEventListener('click', closeNewJobModal);
+  document.getElementById('newJobCancel').addEventListener('click', closeNewJobModal);
+  $newJobModal.addEventListener('click', (e) => { if (e.target === $newJobModal) closeNewJobModal(); });
+
+  document.getElementById('newJobSubmit').addEventListener('click', () => {
+    const customer = $newJobCustomer.value.trim();
+    if (!customer) { $newJobCustomer.focus(); return; }
+    const det = [$newJobTime.value.trim(), $newJobDet.value.trim()].filter(Boolean).join(' · ') || customer;
+    state.unassigned.push({
+      id: 'un-' + Math.random().toString(36).slice(2, 9),
+      customer,
+      svc: $newJobSvc.value,
+      det,
+    });
+    saveState();
+    renderUnassigned();
+    renderKPIs();
+    closeNewJobModal();
+    toast(`+ ${customer} · added to Inbox`);
+  });
+
+  // ===== New-request modal =====
+  const $newReqModal  = document.getElementById('newReqModal');
+  const $newReqWho    = document.getElementById('newReqWho');
+  const $newReqKind   = document.getElementById('newReqKind');
+  const $newReqDay    = document.getElementById('newReqDay');
+  const $newReqReason = document.getElementById('newReqReason');
+
+  // Populate the crew dropdown once
+  RESOURCES.filter(r => r.group === 'crew').forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.name;
+    opt.textContent = c.name + (c.id === MULE_DRIVER_ID ? ' (Box truck driver)' : '');
+    $newReqWho.appendChild(opt);
+  });
+
+  function openNewReqModal(){
+    $newReqReason.value = '';
+    $newReqDay.value = '1';
+    $newReqKind.value = 'timeoff';
+    $newReqWho.selectedIndex = 0;
+    $newReqModal.classList.add('is-open');
+    setTimeout(() => $newReqWho.focus(), 30);
+  }
+  function closeNewReqModal(){ $newReqModal.classList.remove('is-open'); }
+
+  document.getElementById('newRequestBtn').addEventListener('click', openNewReqModal);
+  document.getElementById('newReqClose').addEventListener('click', closeNewReqModal);
+  document.getElementById('newReqCancel').addEventListener('click', closeNewReqModal);
+  $newReqModal.addEventListener('click', (e) => { if (e.target === $newReqModal) closeNewReqModal(); });
+
+  document.getElementById('newReqSubmit').addEventListener('click', () => {
+    const who    = $newReqWho.value;
+    const kind   = $newReqKind.value;
+    const day    = parseInt($newReqDay.value, 10);
+    const reason = $newReqReason.value.trim();
+    const dayLabel = (DAYS[day] || '').split(' ').slice(0, 2).join(' ');
+    const what = kind === 'timeoff'
+      ? `Time off · ${dayLabel}`
+      : `Schedule swap · ${dayLabel}`;
+    state.requests.push({
+      id: 'rq-' + Math.random().toString(36).slice(2, 7),
+      who, what,
+      reason: reason || (kind === 'timeoff' ? 'Reason: not specified' : 'Trade with another crew member'),
+      kind,
+      day,
+    });
+    saveState();
+    renderRequests();
+    closeNewReqModal();
+    toast(`+ Request from ${who}`);
+  });
+
+  // ===== History modal =====
+  const $historyModal = document.getElementById('historyModal');
+  const $historyList  = document.getElementById('historyList');
+  const $historySub   = document.getElementById('historySub');
+
+  function openHistoryModal(){
+    const items = state.requestHistory || [];
+    $historySub.textContent = items.length
+      ? `${items.length} decision${items.length === 1 ? '' : 's'} logged`
+      : 'No decisions yet';
+    if (!items.length) {
+      $historyList.innerHTML = `<li class="history-empty">No requests have been approved or denied yet.</li>`;
+    } else {
+      $historyList.innerHTML = items.map(h => {
+        const dt = new Date(h.at);
+        const when = isNaN(dt) ? '' : dt.toLocaleString(undefined, {
+          month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
+        });
+        return `
+          <li class="history-row">
+            <span class="h-decision h-decision--${h.decision}">${h.decision}</span>
+            <div>
+              <div class="h-who">${esc(h.who)}</div>
+              <div class="h-what">${esc(h.what)}${h.reason ? ' — ' + esc(h.reason) : ''}</div>
+            </div>
+            <span class="h-when">${esc(when)}</span>
+          </li>
+        `;
+      }).join('');
+    }
+    $historyModal.classList.add('is-open');
+  }
+  function closeHistoryModal(){ $historyModal.classList.remove('is-open'); }
+
+  document.getElementById('historyBtn').addEventListener('click', openHistoryModal);
+  document.getElementById('historyClose').addEventListener('click', closeHistoryModal);
+  document.getElementById('historyCloseFt').addEventListener('click', closeHistoryModal);
+  $historyModal.addEventListener('click', (e) => { if (e.target === $historyModal) closeHistoryModal(); });
+
+  // Esc closes any open modal-backdrop
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    [$newJobModal, $newReqModal, $historyModal].forEach(m => m.classList.remove('is-open'));
+  });
+
+  // ===== Boot =====
+  render();
+
+})();
+</script>
+</body>
+</html>

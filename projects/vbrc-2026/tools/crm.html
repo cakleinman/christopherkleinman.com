@@ -1,0 +1,1543 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Rivera Grounds Co — Customers</title>
+<link rel="stylesheet" href="_shared.css">
+<style>
+  /* ============================================================
+     CRM — tool-local styles
+     ============================================================ */
+  html, body { height: 100%; }
+  body { overflow: hidden; }
+
+  .rg-shell {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  /* ---------- Header tweaks ---------- */
+  .rg-header { padding: 10px 20px; }
+  .rg-mark { font-size: 18px; }
+  .rg-tagline { font-size: 10px; }
+
+  /* ---------- Title strip + KPIs ---------- */
+  .rg-title-strip {
+    padding: 12px 20px;
+    gap: 14px;
+  }
+  .rg-title-strip h1 { font-size: 18px; }
+  .rg-title-strip .rg-sub { font-size: 12px; }
+  .rg-title-strip .strip-actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .kpi-row {
+    display: flex;
+    gap: 10px;
+  }
+  .rg-kpi {
+    padding: 8px 14px;
+    min-width: 110px;
+  }
+  .rg-kpi__label { font-size: 9px; letter-spacing: 0.12em; }
+  .rg-kpi__value { font-size: 20px; }
+  .rg-kpi--warn .rg-kpi__value { color: var(--rg-warning); }
+  /* KPI tiles double as filter buttons that swap the left list view. */
+  .rg-kpi--btn {
+    background: var(--rg-cream);
+    border: 1px solid var(--rg-line);
+    border-radius: var(--rg-radius);
+    cursor: pointer;
+    text-align: left;
+    font: inherit;
+    color: inherit;
+    transition: border-color 140ms ease, background 140ms ease, transform 140ms ease, box-shadow 140ms ease;
+    position: relative;
+  }
+  .rg-kpi--btn:hover {
+    border-color: var(--rg-green);
+    background: #fff;
+  }
+  .rg-kpi--btn:focus-visible {
+    outline: 2px solid var(--rg-green);
+    outline-offset: 2px;
+  }
+  .rg-kpi--btn.is-active {
+    border-color: var(--rg-green-dk);
+    background: #fff;
+    box-shadow: 0 0 0 1px var(--rg-green-dk) inset, 0 4px 14px rgba(45, 74, 48, 0.10);
+  }
+  .rg-kpi--btn.is-active::after {
+    content: "";
+    position: absolute;
+    left: 14px; right: 14px; bottom: -1px;
+    height: 2px;
+    background: var(--rg-green-dk);
+    border-radius: 2px 2px 0 0;
+  }
+  .rg-kpi--btn.rg-kpi--warn.is-active {
+    border-color: var(--rg-warning);
+    box-shadow: 0 0 0 1px var(--rg-warning) inset, 0 4px 14px rgba(184, 116, 45, 0.12);
+  }
+  .rg-kpi--btn.rg-kpi--warn.is-active::after { background: var(--rg-warning); }
+
+  /* List view variants */
+  .call-card {
+    display: flex; gap: 12px; padding: 10px 14px;
+    border-bottom: 1px solid var(--rg-line);
+    cursor: pointer;
+    transition: background 120ms ease;
+  }
+  .call-card:hover { background: rgba(74, 124, 78, 0.05); }
+  .call-card__time {
+    font-family: var(--rg-font-mono);
+    font-size: 10px;
+    color: var(--rg-ink-faint);
+    white-space: nowrap;
+    flex-shrink: 0;
+    width: 76px;
+    line-height: 1.4;
+    padding-top: 2px;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+  .call-card__time .t-time { color: var(--rg-ink-dim); }
+  .call-card__body { flex: 1; min-width: 0; }
+  .call-card__name {
+    font-weight: 600;
+    color: var(--rg-green-dk);
+    font-size: 13px;
+    margin-bottom: 2px;
+  }
+  .call-card__note {
+    font-size: 12px;
+    color: var(--rg-ink-dim);
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  .overdue-card {
+    display: flex; align-items: center; gap: 12px; padding: 10px 14px;
+    border-bottom: 1px solid var(--rg-line);
+    cursor: pointer;
+    transition: background 120ms ease;
+  }
+  .overdue-card--overdue:hover { background: rgba(184, 116, 45, 0.06); }
+  .overdue-card--upcoming:hover { background: rgba(74, 124, 78, 0.05); }
+  .overdue-card.is-selected.overdue-card--overdue {
+    background: rgba(184, 116, 45, 0.10);
+    border-left: 3px solid var(--rg-warning);
+    padding-left: 11px;
+  }
+  .overdue-card.is-selected.overdue-card--upcoming {
+    background: rgba(74, 124, 78, 0.08);
+    border-left: 3px solid var(--rg-green);
+    padding-left: 11px;
+  }
+  .overdue-card__body { flex: 1; min-width: 0; }
+  .overdue-card__name { font-weight: 600; color: var(--rg-green-dk); font-size: 13px; }
+  .overdue-card__date {
+    font-family: var(--rg-font-mono);
+    font-size: 11px;
+    margin-top: 2px;
+    font-weight: 600;
+  }
+  .overdue-card--overdue .overdue-card__date { color: var(--rg-warning); }
+  .overdue-card--upcoming .overdue-card__date { color: var(--rg-green-dk); }
+  .overdue-card__note {
+    font-size: 11.5px;
+    color: var(--rg-ink-dim);
+    margin-top: 3px;
+    line-height: 1.35;
+  }
+  .overdue-section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 10px 14px 6px;
+    font-size: 9.5px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--rg-ink-faint);
+    font-weight: 700;
+    background: var(--rg-cream-dk);
+    border-bottom: 1px solid var(--rg-line);
+  }
+  .overdue-section-head .count {
+    font-family: var(--rg-font-mono);
+    font-size: 10px;
+    color: var(--rg-ink-dim);
+    letter-spacing: 0.05em;
+  }
+
+  /* ---------- Main two-pane region ---------- */
+  .crm-main {
+    flex: 1 1 auto;
+    display: grid;
+    grid-template-columns: 35% 65%;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  /* ---------- Left pane: contacts list ---------- */
+  .pane-left {
+    border-right: 1px solid var(--rg-line);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    background: rgba(255,255,255,0.5);
+  }
+  .list-toolbar {
+    padding: 12px 14px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-bottom: 1px solid var(--rg-line);
+    background: rgba(255,255,255,0.7);
+  }
+  .search-wrap { position: relative; }
+  .search-wrap .rg-input {
+    padding: 8px 12px 8px 32px;
+    font-size: 13px;
+  }
+  .search-wrap::before {
+    content: "";
+    position: absolute;
+    left: 11px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 13px;
+    height: 13px;
+    border: 1.6px solid var(--rg-ink-faint);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  .search-wrap::after {
+    content: "";
+    position: absolute;
+    left: 21px;
+    top: 50%;
+    width: 7px;
+    height: 1.6px;
+    background: var(--rg-ink-faint);
+    transform: translateY(2px) rotate(45deg);
+    transform-origin: left center;
+    pointer-events: none;
+  }
+  .add-btn { width: 100%; }
+
+  .contact-list {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 8px 6px 14px;
+  }
+  .contact-card {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 10px 12px;
+    margin: 2px 4px;
+    border-radius: 10px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-left: 4px solid transparent;
+    transition: background 100ms, border-color 100ms;
+  }
+  .contact-card:hover {
+    background: rgba(74, 124, 78, 0.05);
+  }
+  .contact-card.is-selected {
+    background: var(--rg-green-pale);
+    border-color: var(--rg-line);
+    border-left-color: var(--rg-green);
+  }
+  .avatar {
+    flex: 0 0 auto;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--rg-green-pale), var(--rg-cream-dk));
+    color: var(--rg-green-dk);
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--rg-line);
+  }
+  .avatar--lg { width: 48px; height: 48px; font-size: 15px; }
+  .contact-card__body {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .contact-card__name {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--rg-ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .contact-card__meta {
+    margin-top: 3px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--rg-ink-dim);
+    flex-wrap: wrap;
+  }
+  .contact-card__meta .rg-pill {
+    padding: 2px 7px;
+    font-size: 10px;
+    font-weight: 600;
+  }
+  .overdue-dot {
+    position: absolute;
+    top: 9px;
+    right: 10px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--rg-warning);
+    box-shadow: 0 0 0 2px rgba(247, 245, 240, 1);
+  }
+
+  .empty-list {
+    padding: 30px 20px;
+    text-align: center;
+    color: var(--rg-ink-faint);
+    font-size: 12px;
+    font-style: italic;
+  }
+
+  /* ---------- Right pane: detail ---------- */
+  .pane-right {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 14px 20px 18px;
+  }
+
+  .detail-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--rg-line);
+  }
+  .detail-head__body { flex: 1 1 auto; min-width: 0; }
+  .detail-head__name {
+    font-family: var(--rg-font-display);
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--rg-green-dk);
+    margin: 0;
+    line-height: 1.2;
+  }
+  .detail-head__sub {
+    margin-top: 3px;
+    font-size: 12px;
+    color: var(--rg-ink-dim);
+  }
+  .ltv {
+    color: var(--rg-green-dk);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 22px;
+    padding: 12px 0 6px;
+    border-bottom: 1px solid var(--rg-line);
+    font-size: 12.5px;
+  }
+  .detail-grid > div { display: flex; flex-direction: column; gap: 2px; }
+  .detail-grid .lbl {
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--rg-ink-faint);
+    font-weight: 600;
+  }
+  .detail-grid .val {
+    color: var(--rg-ink);
+    font-size: 12.5px;
+    word-break: break-word;
+  }
+
+  /* ---------- Sections ---------- */
+  .section {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--rg-line);
+  }
+  .section:last-child { border-bottom: none; }
+  .section__head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .section__title {
+    font-family: var(--rg-font-display);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--rg-green-dk);
+    margin: 0;
+  }
+  .section__head .spacer { flex: 1; }
+  .saved-pill {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--rg-success);
+    letter-spacing: 0.06em;
+    opacity: 0;
+    transition: opacity 200ms ease;
+    background: var(--rg-green-pale);
+    padding: 2px 8px;
+    border-radius: 999px;
+  }
+  .saved-pill.is-visible { opacity: 1; }
+
+  .notes-textarea {
+    min-height: 64px;
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  /* ---------- Follow-up ---------- */
+  .followup-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .followup-row .rg-input {
+    width: auto;
+    flex: 0 0 160px;
+    padding: 7px 10px;
+    font-size: 12.5px;
+  }
+  .preset-row {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+  .preset-row .rg-btn { padding: 4px 10px; font-size: 11px; }
+  .followup-display {
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .followup-display .clear-link {
+    font-size: 11px;
+    color: var(--rg-ink-dim);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: underline;
+    font-family: inherit;
+  }
+  .followup-display .clear-link:hover { color: var(--rg-warning); }
+  .followup-note {
+    font-size: 11.5px;
+    color: var(--rg-ink-dim);
+    font-style: italic;
+  }
+
+  /* ---------- Calls ---------- */
+  .call-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 4px;
+  }
+  .call-entry {
+    position: relative;
+    background: rgba(255,255,255,0.7);
+    border: 1px solid var(--rg-line);
+    border-radius: 8px;
+    padding: 8px 32px 8px 12px;
+  }
+  .call-entry__time {
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--rg-ink-faint);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-variant-numeric: tabular-nums;
+  }
+  .call-entry__note {
+    font-size: 12.5px;
+    color: var(--rg-ink);
+    margin-top: 2px;
+    line-height: 1.4;
+  }
+  .call-entry__del {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+    color: var(--rg-ink-faint);
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 120ms, background 120ms, color 120ms;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .call-entry:hover .call-entry__del { opacity: 1; }
+  .call-entry__del:hover {
+    background: rgba(184,116,45,0.12);
+    color: var(--rg-warning);
+  }
+
+  .call-form {
+    margin-top: 8px;
+    background: rgba(74,124,78,0.04);
+    border: 1px solid var(--rg-line);
+    border-radius: 10px;
+    padding: 10px;
+  }
+  .call-form .rg-textarea { min-height: 56px; font-size: 13px; }
+  .call-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .empty-soft {
+    font-size: 12px;
+    font-style: italic;
+    color: var(--rg-ink-faint);
+    padding: 6px 0 2px;
+  }
+
+  /* ---------- Empty detail (no contact selected) ---------- */
+  .detail-empty {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--rg-ink-faint);
+    font-style: italic;
+    font-size: 13px;
+  }
+
+  /* ---------- Modal ---------- */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(31,42,31,0.45);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    backdrop-filter: blur(2px);
+  }
+  .modal-backdrop.is-open { display: flex; }
+  .modal {
+    background: var(--rg-cream);
+    border: 1px solid var(--rg-line-strong);
+    border-radius: var(--rg-radius-lg);
+    box-shadow: var(--rg-shadow-lg);
+    padding: 18px 20px 16px;
+    width: 420px;
+    max-width: 90vw;
+  }
+  .modal h2 {
+    font-family: var(--rg-font-display);
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--rg-green-dk);
+    margin: 0 0 12px;
+  }
+  .modal .field-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 12px;
+  }
+  .modal .field-grid .rg-field.full { grid-column: 1 / -1; }
+  .modal-actions {
+    margin-top: 14px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  /* ---------- Footer ---------- */
+  .rg-footer { padding: 7px 20px; font-size: 10px; }
+
+  /* small screens / narrow iframes */
+  @media (max-width: 900px) {
+    .crm-main { grid-template-columns: 40% 60%; }
+    .kpi-row .rg-kpi { min-width: 90px; }
+  }
+</style>
+</head>
+<body>
+<div class="rg-shell">
+
+  <!-- ==================== HEADER ==================== -->
+  <header class="rg-header">
+    <a class="rg-mark" href="#">Rivera Grounds Co</a>
+    <span class="rg-tag-pill">Customers</span>
+    <span class="rg-tagline">Veteran-Owned · Utah County, UT · Since 2018</span>
+    <span class="rg-live-pill" title="This is real software running in your browser, not a screenshot">Live · running locally</span>
+  </header>
+
+  <!-- ==================== TITLE + KPIs ==================== -->
+  <div class="rg-title-strip">
+    <div>
+      <h1>Customers</h1>
+      <div class="rg-sub">Notes, calls, follow-ups</div>
+    </div>
+    <div class="strip-actions">
+      <div class="kpi-row" role="tablist" aria-label="List filter">
+        <button type="button" class="rg-kpi rg-kpi--btn is-active" data-view="customers" aria-pressed="true">
+          <div class="rg-kpi__label">Total customers</div>
+          <div class="rg-kpi__value" id="kpi-total">0</div>
+        </button>
+        <button type="button" class="rg-kpi rg-kpi--btn" data-view="calls" aria-pressed="false">
+          <div class="rg-kpi__label">Calls this week</div>
+          <div class="rg-kpi__value" id="kpi-calls">0</div>
+        </button>
+        <button type="button" class="rg-kpi rg-kpi--btn rg-kpi--warn" data-view="overdue" aria-pressed="false">
+          <div class="rg-kpi__label">Overdue follow-ups</div>
+          <div class="rg-kpi__value" id="kpi-overdue">0</div>
+        </button>
+      </div>
+      <button type="button" class="rg-btn--demo" id="btn-demo-linda"
+              title="Walk through Linda Park's intake step-by-step">demo: walk through Linda's intake</button>
+      <button class="rg-btn rg-btn--ghost rg-btn--sm" id="btn-reset" title="Restore the seeded demo customers and clear local changes">Reset to demo data</button>
+    </div>
+  </div>
+
+  <!-- Toast for demo button feedback -->
+  <div id="rg-toast" class="rg-toast" role="status" aria-live="polite" hidden></div>
+
+  <!-- ==================== MAIN ==================== -->
+  <div class="crm-main">
+
+    <!-- ---------- LEFT: list ---------- -->
+    <aside class="pane-left">
+      <div class="list-toolbar">
+        <div class="search-wrap">
+          <input type="text" class="rg-input" id="search" placeholder="Search customers…" />
+        </div>
+        <button class="rg-btn rg-btn--primary add-btn" id="btn-add">+ Add customer</button>
+      </div>
+      <div class="contact-list" id="contact-list"></div>
+    </aside>
+
+    <!-- ---------- RIGHT: detail ---------- -->
+    <section class="pane-right" id="pane-right">
+      <div class="detail-empty" id="detail-empty">Select a customer to see notes, calls, and follow-ups.</div>
+      <div id="detail" style="display:none;"></div>
+    </section>
+
+  </div>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="rg-footer">
+    <span>Saved locally · Never leaves your browser</span>
+    <span>Rivera Grounds Co · Mini CRM</span>
+  </footer>
+
+</div>
+
+<!-- ==================== ADD MODAL ==================== -->
+<div class="modal-backdrop" id="modal-backdrop">
+  <div class="modal" role="dialog" aria-label="Add customer">
+    <h2>Add customer</h2>
+    <form id="add-form">
+      <div class="field-grid">
+        <div class="rg-field full">
+          <label class="rg-label">Name *</label>
+          <input class="rg-input" name="name" required />
+        </div>
+        <div class="rg-field">
+          <label class="rg-label">Email</label>
+          <input class="rg-input" name="email" type="email" />
+        </div>
+        <div class="rg-field">
+          <label class="rg-label">Phone</label>
+          <input class="rg-input" name="phone" />
+        </div>
+        <div class="rg-field full">
+          <label class="rg-label">Address</label>
+          <input class="rg-input" name="address" />
+        </div>
+        <div class="rg-field full">
+          <label class="rg-label">Service type</label>
+          <input class="rg-input" name="service_type" placeholder="e.g. Weekly lawn care" />
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="rg-btn rg-btn--ghost" id="btn-add-cancel">Cancel</button>
+        <button type="submit" class="rg-btn rg-btn--primary">Save customer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   Rivera Grounds Co — Mini CRM
+   Pure-vanilla, localStorage-backed, single file.
+   ============================================================ */
+(() => {
+  "use strict";
+
+  const STORAGE_KEY = "rivera-crm-v1";
+
+  // Stage-reset hook: if the deck's "Stage reset" button reloaded us with
+  // ?reset=, wipe persistent state before init so we boot clean.
+  try {
+    if (new URLSearchParams(location.search).has("reset")) {
+      localStorage.removeItem(STORAGE_KEY);
+    }
+  } catch (_) {}
+
+  // ---------- Seed data ------------------------------------------------
+  function seedData() {
+    return {
+      contacts: [
+        {
+          id: "c-pemberton",
+          name: "The Pemberton Estate",
+          email: "kpemberton@pembertonestate.com",
+          phone: "(801) 555-0142",
+          address: "1820 Hillcrest Dr · Holladay UT",
+          service_type: "Hardscaping + weekly lawn",
+          last_service: "2026-04-15",
+          lifetime_value: 18215.00,
+          notes: "Long-time client. Prefers Wednesday mornings. Wants to discuss spring irrigation upgrade.",
+          followup: { date: "2026-05-12", note: "Spring irrigation upgrade discussion" },
+          calls: [
+            { id: "ca-pem-1", at: "2026-04-29T10:24:00", note: "Discussed phase 2 patio. Karen wants to add a fire feature." },
+            { id: "ca-pem-2", at: "2026-04-04T14:10:00", note: "Quoted irrigation, ~$2,200. Awaiting OK." }
+          ]
+        },
+        {
+          id: "c-walgrove",
+          name: "Walgrove HOA",
+          email: "manager@walgrovehoa.org",
+          phone: "(801) 555-0188",
+          address: "Walgrove Community · Sandy UT",
+          service_type: "Weekly lawn care",
+          last_service: "2026-04-02",
+          lifetime_value: 5950.00,
+          notes: "HOA contract — 14 common-area zones. Renews September. Direct contact is Linda K.",
+          followup: { date: "2026-09-01", note: "HOA contract renewal" },
+          calls: [
+            { id: "ca-wal-1", at: "2026-04-22T09:05:00", note: "Linda confirmed Wednesday morning preference." }
+          ]
+        },
+        {
+          id: "c-reilly",
+          name: "Marcus Reilly",
+          email: "marcus.reilly@gmail.com",
+          phone: "(801) 555-0234",
+          address: "447 Elm Ridge Ln · Murray UT",
+          service_type: "Irrigation + lawn",
+          last_service: "2026-04-09",
+          lifetime_value: 8005.00,
+          notes: "Engineer at Northrop. Detail-oriented. Texts photos when something looks off.",
+          followup: { date: "2026-04-30", note: "Sprinkler head replacement — quote sent, awaiting reply" },
+          calls: [
+            { id: "ca-rei-1", at: "2026-04-25T16:48:00", note: "Texted photo of broken sprinkler head — sent quote ($185 incl. labor)." },
+            { id: "ca-rei-2", at: "2026-04-15T11:02:00", note: "Walked the back yard. Two zones running short. Recommended a controller upgrade." },
+            { id: "ca-rei-3", at: "2026-03-30T08:30:00", note: "Spring start-up — all zones tested OK. Marcus will email if anything looks off." }
+          ]
+        },
+        {
+          id: "c-bartlett",
+          name: "Bartlett Family",
+          email: "bartlett.k@outlook.com",
+          phone: "(801) 555-0307",
+          address: "2218 Ridgeline Way · Cottonwood Heights UT",
+          service_type: "Hardscaping projects",
+          last_service: "2026-04-21",
+          lifetime_value: 12345.00,
+          notes: "New build. Phase 2 patio scheduled May. Possible referral to neighbor.",
+          followup: null,
+          calls: [
+            { id: "ca-bar-1", at: "2026-04-21T13:15:00", note: "Phase 2 patio scheduled May 12. Will need backhoe rental." }
+          ]
+        },
+        {
+          id: "c-cedar",
+          name: "Cedar Ridge Apartments",
+          email: "ops@cedarridgeapts.com",
+          phone: "(801) 555-0411",
+          address: "Cedar Ridge Apartment Complex · West Jordan UT",
+          service_type: "Property maintenance",
+          last_service: "2026-04-28",
+          lifetime_value: 7560.00,
+          notes: "Monthly contract. 18-unit complex. Dale handles approvals — slow to reply on email.",
+          followup: { date: "2026-05-20", note: "Quarterly walk-through w/ Dale" },
+          calls: []
+        },
+        {
+          id: "c-yu",
+          name: "Sandra Yu",
+          email: "sandra.yu.utah@gmail.com",
+          phone: "(801) 555-0599",
+          address: "914 Birchwood Ct · South Jordan UT",
+          service_type: "Small lawn — quarterly",
+          last_service: "2026-03-25",
+          lifetime_value: 1080.00,
+          notes: "Small property. Pays on time. Mentioned a relocation in Q3 — follow up summer.",
+          followup: { date: "2026-08-01", note: "Possible relocation Q3 — confirm" },
+          calls: []
+        }
+      ],
+      selectedId: "c-pemberton"
+    };
+  }
+
+  // ---------- State + persistence -------------------------------------
+  let state = load();
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return seedData();
+      const parsed = JSON.parse(raw);
+      if (!parsed || !Array.isArray(parsed.contacts)) return seedData();
+      return parsed;
+    } catch (e) {
+      return seedData();
+    }
+  }
+  function save() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+    catch (e) { /* quota ignored */ }
+  }
+
+  // ---------- Helpers --------------------------------------------------
+  const $  = (sel, root = document) => root.querySelector(sel);
+  const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+  function todayISO() {
+    const d = new Date();
+    return d.toISOString().slice(0, 10);
+  }
+  function parseISODate(iso) {
+    if (!iso) return null;
+    const [y, m, d] = iso.split("-").map(Number);
+    return new Date(y, m - 1, d);
+  }
+  function fmtDateShort(iso) {
+    if (!iso) return "";
+    const dt = parseISODate(iso);
+    if (!dt || isNaN(dt)) return iso;
+    return dt.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  }
+  function fmtCallTime(iso) {
+    const dt = new Date(iso);
+    if (isNaN(dt)) return iso;
+    const date = dt.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+    const time = dt.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+    return `${date} · ${time}`;
+  }
+  function fmtMoney(n) {
+    if (typeof n !== "number") return "—";
+    return n.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+  }
+  function initials(name) {
+    if (!name) return "?";
+    const parts = name.trim().split(/\s+/).filter(Boolean);
+    const cleaned = parts.filter(p => !/^(the|a|an)$/i.test(p));
+    const use = cleaned.length ? cleaned : parts;
+    if (use.length === 1) return use[0].slice(0, 2).toUpperCase();
+    return (use[0][0] + use[use.length - 1][0]).toUpperCase();
+  }
+  function isOverdue(followup) {
+    if (!followup || !followup.date) return false;
+    const d = parseISODate(followup.date);
+    const today = parseISODate(todayISO());
+    return d < today;
+  }
+  function uid(prefix = "id") {
+    return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+  }
+  function escapeHtml(s) {
+    if (s == null) return "";
+    return String(s).replace(/[&<>"']/g, c => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[c]));
+  }
+  function lastActivityISO(c) {
+    let candidates = [];
+    if (c.last_service) candidates.push(c.last_service);
+    if (c.calls && c.calls.length) {
+      candidates.push(c.calls[0].at.slice(0, 10));
+    }
+    if (!candidates.length) return "0000-00-00";
+    candidates.sort();
+    return candidates[candidates.length - 1];
+  }
+
+  // ---------- KPI render ----------------------------------------------
+  function renderKPIs() {
+    const total = state.contacts.length;
+    const today = parseISODate(todayISO());
+    const weekAgo = new Date(today);
+    weekAgo.setDate(weekAgo.getDate() - 7);
+
+    let calls = 0;
+    let overdue = 0;
+    state.contacts.forEach(c => {
+      (c.calls || []).forEach(call => {
+        const dt = new Date(call.at);
+        if (!isNaN(dt) && dt >= weekAgo && dt <= new Date(today.getTime() + 86400000)) calls++;
+      });
+      if (isOverdue(c.followup)) overdue++;
+    });
+
+    $("#kpi-total").textContent = total;
+    $("#kpi-calls").textContent = calls;
+    $("#kpi-overdue").textContent = overdue;
+  }
+
+  // ---------- List views ---------------------------------------------
+  // The KPI tiles in the title strip double as filter buttons. The
+  // currently-active view determines what the left pane displays:
+  //   customers — every contact, sorted by last activity (default)
+  //   calls    — every logged call across contacts, newest first
+  //   overdue  — every contact whose follow-up date is in the past
+  let currentView = "customers";
+
+  function renderList() {
+    const list = $("#contact-list");
+    if (currentView === "calls")    return renderCallsList(list);
+    if (currentView === "overdue")  return renderOverdueList(list);
+    return renderCustomersList(list);
+  }
+
+  function renderCustomersList(list) {
+    const q = ($("#search").value || "").trim().toLowerCase();
+
+    const filtered = state.contacts
+      .slice()
+      .filter(c => {
+        if (!q) return true;
+        return (
+          (c.name || "").toLowerCase().includes(q) ||
+          (c.email || "").toLowerCase().includes(q) ||
+          (c.phone || "").toLowerCase().includes(q)
+        );
+      })
+      .sort((a, b) => lastActivityISO(b).localeCompare(lastActivityISO(a)));
+
+    if (!filtered.length) {
+      list.innerHTML = `<div class="empty-list">No customers match “${escapeHtml(q)}”.</div>`;
+      return;
+    }
+
+    list.innerHTML = filtered.map(c => {
+      const sel = c.id === state.selectedId ? " is-selected" : "";
+      const overdue = isOverdue(c.followup);
+      const dot = overdue ? `<span class="overdue-dot" title="Overdue follow-up"></span>` : "";
+      const lastSvc = c.last_service ? fmtDateShort(c.last_service) : "—";
+      const svc = c.service_type ? `<span class="rg-pill">${escapeHtml(c.service_type)}</span>` : "";
+      return `
+        <div class="contact-card${sel}" data-id="${c.id}">
+          <div class="avatar">${escapeHtml(initials(c.name))}</div>
+          <div class="contact-card__body">
+            <div class="contact-card__name">${escapeHtml(c.name)}</div>
+            <div class="contact-card__meta">
+              <span>${lastSvc}</span>
+              ${svc}
+            </div>
+          </div>
+          ${dot}
+        </div>
+      `;
+    }).join("");
+
+    $$(".contact-card", list).forEach(el => {
+      el.addEventListener("click", () => {
+        state.selectedId = el.getAttribute("data-id");
+        save();
+        renderList();
+        renderDetail();
+      });
+    });
+  }
+
+  function renderCallsList(list) {
+    const q = ($("#search").value || "").trim().toLowerCase();
+    // Flatten calls across all contacts, attach the contact name + id
+    const allCalls = [];
+    state.contacts.forEach(c => {
+      (c.calls || []).forEach(call => {
+        allCalls.push({ ...call, contactId: c.id, contactName: c.name });
+      });
+    });
+    const filtered = allCalls
+      .filter(call => {
+        if (!q) return true;
+        return (
+          (call.contactName || "").toLowerCase().includes(q) ||
+          (call.note || "").toLowerCase().includes(q)
+        );
+      })
+      .sort((a, b) => (b.at || "").localeCompare(a.at || ""));
+
+    if (!filtered.length) {
+      list.innerHTML = `<div class="empty-list">${q
+        ? `No calls match “${escapeHtml(q)}”.`
+        : `No calls logged yet · open a customer and click "Log a call" to start.`}</div>`;
+      return;
+    }
+
+    list.innerHTML = filtered.map(call => {
+      const dt = new Date(call.at);
+      const dateStr = isNaN(dt) ? "—" : dt.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+      const timeStr = isNaN(dt) ? "" : dt.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+      return `
+      <div class="call-card" data-contact-id="${call.contactId}">
+        <div class="call-card__time">
+          <span class="t-date">${escapeHtml(dateStr)}</span>
+          <span class="t-time">${escapeHtml(timeStr)}</span>
+        </div>
+        <div class="call-card__body">
+          <div class="call-card__name">${escapeHtml(call.contactName)}</div>
+          <div class="call-card__note">${escapeHtml(call.note || "")}</div>
+        </div>
+      </div>
+    `;}).join("");
+
+    $$(".call-card", list).forEach(el => {
+      el.addEventListener("click", () => {
+        state.selectedId = el.getAttribute("data-contact-id");
+        save();
+        // Switch back to customers view so the selection is visible in the list
+        setView("customers");
+      });
+    });
+  }
+
+  function renderOverdueList(list) {
+    const q = ($("#search").value || "").trim().toLowerCase();
+    // Both overdue AND upcoming follow-ups: overdue first (warn-styled), then
+    // upcoming sorted by soonest date. The KPI count still tracks overdue, but
+    // the list shows everything you might need to act on.
+    const withFu = state.contacts
+      .filter(c => c.followup && c.followup.date)
+      .filter(c => !q || (c.name || "").toLowerCase().includes(q));
+    const overdue = withFu
+      .filter(c => isOverdue(c.followup))
+      .sort((a, b) => (a.followup.date || "").localeCompare(b.followup.date || ""));
+    const upcoming = withFu
+      .filter(c => !isOverdue(c.followup))
+      .sort((a, b) => (a.followup.date || "").localeCompare(b.followup.date || ""));
+
+    if (!overdue.length && !upcoming.length) {
+      list.innerHTML = `<div class="empty-list">${q
+        ? `No follow-ups match “${escapeHtml(q)}”.`
+        : `No follow-ups set · pick a customer to schedule one.`}</div>`;
+      return;
+    }
+
+    const renderCard = (c, kind) => {
+      const sel = c.id === state.selectedId ? " is-selected" : "";
+      const klass = kind === "overdue" ? " overdue-card--overdue" : " overdue-card--upcoming";
+      const label = kind === "overdue" ? "Due" : "Upcoming";
+      return `
+        <div class="overdue-card${sel}${klass}" data-id="${c.id}">
+          <div class="avatar">${escapeHtml(initials(c.name))}</div>
+          <div class="overdue-card__body">
+            <div class="overdue-card__name">${escapeHtml(c.name)}</div>
+            <div class="overdue-card__date">${label} ${fmtDateShort(c.followup.date)}</div>
+            ${c.followup.note ? `<div class="overdue-card__note">${escapeHtml(c.followup.note)}</div>` : ""}
+          </div>
+        </div>
+      `;
+    };
+
+    const sectionHead = (label, count) => `
+      <div class="overdue-section-head">
+        <span>${label}</span><span class="count">${count}</span>
+      </div>`;
+
+    let html = "";
+    if (overdue.length) {
+      html += sectionHead("Overdue", overdue.length);
+      html += overdue.map(c => renderCard(c, "overdue")).join("");
+    }
+    if (upcoming.length) {
+      html += sectionHead("Upcoming", upcoming.length);
+      html += upcoming.map(c => renderCard(c, "upcoming")).join("");
+    }
+    list.innerHTML = html;
+
+    $$(".overdue-card", list).forEach(el => {
+      el.addEventListener("click", () => {
+        state.selectedId = el.getAttribute("data-id");
+        save();
+        renderList();
+        renderDetail();
+      });
+    });
+  }
+
+  function setView(view) {
+    if (view !== "customers" && view !== "calls" && view !== "overdue") return;
+    currentView = view;
+    $$(".rg-kpi--btn").forEach(btn => {
+      const active = btn.getAttribute("data-view") === view;
+      btn.classList.toggle("is-active", active);
+      btn.setAttribute("aria-pressed", active ? "true" : "false");
+    });
+    // Update placeholder to hint at what search filters in this view
+    const search = $("#search");
+    if (search) {
+      search.placeholder =
+        view === "calls"   ? "Search calls…" :
+        view === "overdue" ? "Search follow-ups…" :
+                             "Search customers…";
+    }
+    renderList();
+  }
+
+  // ---------- Detail render -------------------------------------------
+  function getSelected() {
+    return state.contacts.find(c => c.id === state.selectedId) || null;
+  }
+
+  function renderDetail() {
+    const c = getSelected();
+    const empty = $("#detail-empty");
+    const detail = $("#detail");
+    if (!c) {
+      empty.style.display = "";
+      detail.style.display = "none";
+      return;
+    }
+    empty.style.display = "none";
+    detail.style.display = "";
+
+    const fu = c.followup;
+    const fuOverdue = isOverdue(fu);
+    let fuBlock = "";
+    if (fu && fu.date) {
+      const pillClass = fuOverdue ? "rg-pill--warn" : "rg-pill--tan";
+      const label = fuOverdue ? "Overdue" : "Upcoming";
+      fuBlock = `
+        <div class="followup-display">
+          <span class="rg-pill ${pillClass}">${label} · ${fmtDateShort(fu.date)}</span>
+          ${fu.note ? `<span class="followup-note">${escapeHtml(fu.note)}</span>` : ""}
+          <button class="clear-link" data-action="fu-clear">Clear</button>
+        </div>
+      `;
+    } else {
+      fuBlock = `<div class="empty-soft">No follow-up · pick a date below to set one.</div>`;
+    }
+
+    let callsBlock = "";
+    if (c.calls && c.calls.length) {
+      const sorted = c.calls.slice().sort((a, b) => b.at.localeCompare(a.at));
+      callsBlock = `<div class="call-list">${sorted.map(cl => `
+        <div class="call-entry" data-call-id="${cl.id}">
+          <div class="call-entry__time">${escapeHtml(fmtCallTime(cl.at))}</div>
+          <div class="call-entry__note">${escapeHtml(cl.note)}</div>
+          <button class="call-entry__del" data-action="call-del" data-call-id="${cl.id}" title="Delete">×</button>
+        </div>
+      `).join("")}</div>`;
+    } else {
+      callsBlock = `<div class="empty-soft">No calls yet · click "Log a call" to start.</div>`;
+    }
+
+    detail.innerHTML = `
+      <div class="detail-head">
+        <div class="avatar avatar--lg">${escapeHtml(initials(c.name))}</div>
+        <div class="detail-head__body">
+          <h2 class="detail-head__name">${escapeHtml(c.name)}</h2>
+          <div class="detail-head__sub">
+            Lifetime value <span class="ltv">${fmtMoney(c.lifetime_value)}</span>
+            ${c.service_type ? ` · ${escapeHtml(c.service_type)}` : ""}
+          </div>
+        </div>
+        <button class="rg-btn rg-btn--secondary rg-btn--sm" data-action="edit">Edit</button>
+      </div>
+
+      <div class="detail-grid">
+        <div><span class="lbl">Email</span><span class="val">${escapeHtml(c.email || "—")}</span></div>
+        <div><span class="lbl">Phone</span><span class="val">${escapeHtml(c.phone || "—")}</span></div>
+        <div><span class="lbl">Address</span><span class="val">${escapeHtml(c.address || "—")}</span></div>
+        <div><span class="lbl">Service type</span><span class="val">${escapeHtml(c.service_type || "—")}</span></div>
+        <div><span class="lbl">Last service</span><span class="val">${c.last_service ? fmtDateShort(c.last_service) : "—"}</span></div>
+        <div><span class="lbl">Lifetime value</span><span class="val">${fmtMoney(c.lifetime_value)}</span></div>
+      </div>
+
+      <div class="section">
+        <div class="section__head">
+          <h3 class="section__title">Notes</h3>
+          <span class="spacer"></span>
+          <span class="saved-pill" id="saved-pill">Saved ✓</span>
+        </div>
+        <textarea class="rg-textarea notes-textarea" id="notes-ta" placeholder="Anything worth remembering about this customer…">${escapeHtml(c.notes || "")}</textarea>
+      </div>
+
+      <div class="section">
+        <div class="section__head">
+          <h3 class="section__title">Follow-up</h3>
+        </div>
+        <div class="followup-row">
+          <input type="date" class="rg-input" id="fu-date" value="${fu && fu.date ? fu.date : ""}" />
+          <input type="text" class="rg-input" id="fu-note" placeholder="What's the follow-up about? (optional)" value="${escapeHtml(fu && fu.note ? fu.note : "")}" style="flex: 1 1 200px; padding: 7px 10px; font-size: 12.5px;" />
+          <button class="rg-btn rg-btn--primary rg-btn--sm" data-action="fu-save">Set follow-up</button>
+        </div>
+        <div class="preset-row">
+          <button class="rg-btn rg-btn--secondary" data-preset="7">+1 week</button>
+          <button class="rg-btn rg-btn--secondary" data-preset="14">+2 weeks</button>
+          <button class="rg-btn rg-btn--secondary" data-preset="30">+1 month</button>
+        </div>
+        ${fuBlock}
+      </div>
+
+      <div class="section">
+        <div class="section__head">
+          <h3 class="section__title">Call log</h3>
+          <span class="spacer"></span>
+          <button class="rg-btn rg-btn--secondary rg-btn--sm" data-action="call-open">Log a call</button>
+        </div>
+        <div id="call-form-slot"></div>
+        ${callsBlock}
+      </div>
+    `;
+
+    wireDetailEvents();
+  }
+
+  // ---------- Detail event wiring -------------------------------------
+  function wireDetailEvents() {
+    const detail = $("#detail");
+    const c = getSelected();
+    if (!c) return;
+
+    // Notes autosave on blur
+    const ta = $("#notes-ta", detail);
+    ta.addEventListener("blur", () => {
+      if (ta.value !== (c.notes || "")) {
+        c.notes = ta.value;
+        save();
+        flashSaved();
+      }
+    });
+
+    // Follow-up presets
+    $$("[data-preset]", detail).forEach(btn => {
+      btn.addEventListener("click", () => {
+        const days = parseInt(btn.getAttribute("data-preset"), 10);
+        const d = new Date();
+        d.setDate(d.getDate() + days);
+        const iso = d.toISOString().slice(0, 10);
+        $("#fu-date", detail).value = iso;
+      });
+    });
+
+    // Action delegation — wire ONCE on the stable #detail element. Re-attaching
+    // this on every render would stack listeners with stale `c` closures, which
+    // caused follow-ups (and call deletions / edits) to land on the wrong contact
+    // after switching customers. The handler reads the current selection fresh
+    // each click.
+    if (!detail._clickWired) {
+      detail._clickWired = true;
+      detail.addEventListener("click", (e) => {
+        const btn = e.target.closest("[data-action]");
+        if (!btn) return;
+        const action = btn.getAttribute("data-action");
+        const c = getSelected();
+        if (!c) return;
+
+      if (action === "fu-save") {
+        const date = $("#fu-date", detail).value;
+        const note = $("#fu-note", detail).value.trim();
+        if (!date) { $("#fu-date", detail).focus(); return; }
+        c.followup = { date, note };
+        save();
+        renderKPIs();
+        renderList();
+        renderDetail();
+      }
+      else if (action === "fu-clear") {
+        c.followup = null;
+        save();
+        renderKPIs();
+        renderList();
+        renderDetail();
+      }
+      else if (action === "call-open") {
+        openCallForm();
+      }
+      else if (action === "call-del") {
+        const cid = btn.getAttribute("data-call-id");
+        c.calls = (c.calls || []).filter(x => x.id !== cid);
+        save();
+        renderKPIs();
+        renderDetail();
+      }
+      else if (action === "edit") {
+        // lightweight inline edit: prompt for the basics. Keeps the tool light.
+        const newName = prompt("Customer name:", c.name);
+        if (newName == null) return;
+        const newEmail = prompt("Email:", c.email || "");
+        const newPhone = prompt("Phone:", c.phone || "");
+        const newAddr  = prompt("Address:", c.address || "");
+        const newSvc   = prompt("Service type:", c.service_type || "");
+        c.name = newName.trim() || c.name;
+        c.email = newEmail || "";
+        c.phone = newPhone || "";
+        c.address = newAddr || "";
+        c.service_type = newSvc || "";
+        save();
+        renderList();
+        renderDetail();
+      }
+      });
+    }
+  }
+
+  function openCallForm() {
+    const slot = $("#call-form-slot");
+    if (!slot || slot.querySelector(".call-form")) return;
+    slot.innerHTML = `
+      <div class="call-form">
+        <textarea class="rg-textarea" id="call-note" placeholder="What did you discuss? One line is plenty."></textarea>
+        <div class="call-form-actions">
+          <button class="rg-btn rg-btn--ghost rg-btn--sm" id="call-cancel">Cancel</button>
+          <button class="rg-btn rg-btn--primary rg-btn--sm" id="call-save">Save</button>
+        </div>
+      </div>
+    `;
+    const ta = $("#call-note");
+    ta.focus();
+    $("#call-cancel").addEventListener("click", () => { slot.innerHTML = ""; });
+    $("#call-save").addEventListener("click", () => {
+      const note = ta.value.trim();
+      if (!note) { ta.focus(); return; }
+      const c = getSelected();
+      if (!c) return;
+      c.calls = c.calls || [];
+      c.calls.unshift({
+        id: uid("ca"),
+        at: new Date().toISOString(),
+        note
+      });
+      save();
+      renderKPIs();
+      renderDetail();
+    });
+  }
+
+  // ---------- Saved-pill flash ----------------------------------------
+  let savedTimer = null;
+  function flashSaved() {
+    const pill = $("#saved-pill");
+    if (!pill) return;
+    pill.classList.add("is-visible");
+    clearTimeout(savedTimer);
+    savedTimer = setTimeout(() => pill.classList.remove("is-visible"), 1400);
+  }
+
+  // ---------- Add-customer modal --------------------------------------
+  const modal = $("#modal-backdrop");
+  const addForm = $("#add-form");
+
+  function openAdd() {
+    addForm.reset();
+    modal.classList.add("is-open");
+    setTimeout(() => addForm.elements["name"].focus(), 30);
+  }
+  function closeAdd() { modal.classList.remove("is-open"); }
+
+  $("#btn-add").addEventListener("click", openAdd);
+  $("#btn-add-cancel").addEventListener("click", closeAdd);
+  modal.addEventListener("click", (e) => { if (e.target === modal) closeAdd(); });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && modal.classList.contains("is-open")) closeAdd();
+  });
+
+  addForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const fd = new FormData(addForm);
+    const name = (fd.get("name") || "").toString().trim();
+    if (!name) return;
+    const newC = {
+      id: uid("c"),
+      name,
+      email: (fd.get("email") || "").toString().trim(),
+      phone: (fd.get("phone") || "").toString().trim(),
+      address: (fd.get("address") || "").toString().trim(),
+      service_type: (fd.get("service_type") || "").toString().trim(),
+      last_service: null,
+      lifetime_value: 0,
+      notes: "",
+      followup: null,
+      calls: []
+    };
+    state.contacts.unshift(newC);
+    state.selectedId = newC.id;
+    save();
+    closeAdd();
+    renderKPIs();
+    renderList();
+    renderDetail();
+  });
+
+  // ---------- Reset to demo data --------------------------------------
+  $("#btn-reset").addEventListener("click", () => {
+    if (!confirm("Restore the seeded demo customers? This clears your local changes.")) return;
+    localStorage.removeItem(STORAGE_KEY);
+    state = seedData();
+    save();
+    setView("customers");
+    renderAll();
+    // Reset demo intake counter so the walk-through can re-run cleanly
+    demoLindaStep = 0;
+    const btn = $("#btn-demo-linda");
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = "demo: walk through Linda's intake";
+    }
+  });
+
+  // ---------- Demo: walk through Linda's intake -----------------------
+  // Single button, 4-step state machine. Each click advances by one step.
+  // Click 1: add Linda + select her + populate note
+  // Click 2: log a call (current timestamp)
+  // Click 3: set follow-up one week out
+  // Click 4+: toast "intake complete"
+  let demoLindaStep = 0;
+  let demoLindaId   = null;
+  const LINDA_PROFILE = {
+    name:         "Linda Park",
+    email:        "linda.park@example.com",
+    phone:        "(801) 555-0142",
+    address:      "412 Birch Lane, Provo UT 84601",
+    service_type: "Lawn care · weekly",
+    last_service: null,
+    lifetime_value: 0,
+    notes:        "Inquiry came in 5/05 — wants weekly lawn + backyard hardscape consult. New homeowner.",
+    followup:     null,
+    calls:        []
+  };
+  function showToast(html, kind) {
+    const t = $("#rg-toast");
+    if (!t) return;
+    t.className = `rg-toast rg-toast--${kind || "success"}`;
+    t.innerHTML = html;
+    t.hidden = false;
+    requestAnimationFrame(() => requestAnimationFrame(() => t.classList.add("is-shown")));
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => {
+      t.classList.remove("is-shown");
+      setTimeout(() => { t.hidden = true; }, 240);
+    }, 4000);
+  }
+  $("#btn-demo-linda").addEventListener("click", () => {
+    demoLindaStep++;
+    if (demoLindaStep === 1) {
+      // Add Linda + select + populate note
+      const newLinda = { ...LINDA_PROFILE, id: uid("c"), calls: [] };
+      state.contacts.unshift(newLinda);
+      demoLindaId = newLinda.id;
+      state.selectedId = newLinda.id;
+      save();
+      renderKPIs();
+      renderList();
+      renderDetail();
+      showToast(`<b>+ Linda Park</b> <span class="tdim">added from inquiry</span>`);
+    } else if (demoLindaStep === 2) {
+      // Log a call with the actual current timestamp
+      const linda = state.contacts.find(c => c.id === demoLindaId);
+      if (!linda) { demoLindaStep = 0; return; }
+      linda.calls = linda.calls || [];
+      linda.calls.unshift({
+        id: uid("ca"),
+        at: new Date().toISOString(),
+        note: "Initial outreach — walked through her project, confirmed weekly lawn + scheduled the backyard consult."
+      });
+      state.selectedId = demoLindaId;
+      save();
+      renderKPIs();
+      renderList();
+      renderDetail();
+      const t = new Date().toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+      showToast(`<b>Call logged</b> <span class="tdim">${t} · 12 min</span>`);
+    } else if (demoLindaStep === 3) {
+      // Set follow-up one week out
+      const linda = state.contacts.find(c => c.id === demoLindaId);
+      if (!linda) { demoLindaStep = 0; return; }
+      const d = new Date();
+      d.setDate(d.getDate() + 7);
+      const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      linda.followup = { date: iso, note: "Walk the backyard together — confirm patio scope" };
+      state.selectedId = demoLindaId;
+      save();
+      renderKPIs();
+      renderList();
+      renderDetail();
+      showToast(`<b>Follow-up set</b> <span class="tdim">+7 days</span>`);
+    } else {
+      const btn = $("#btn-demo-linda");
+      btn.disabled = true;
+      btn.textContent = "demo: intake complete";
+      showToast(`<b>Linda's intake complete</b> <span class="tdim">click Reset to re-run</span>`, "info");
+    }
+  });
+
+  // ---------- Search --------------------------------------------------
+  $("#search").addEventListener("input", () => renderList());
+
+  // KPI tiles act as filter buttons that swap the left list view.
+  $$(".rg-kpi--btn").forEach(btn => {
+    btn.addEventListener("click", () => setView(btn.getAttribute("data-view")));
+  });
+
+  // ---------- Initial render ------------------------------------------
+  function renderAll() {
+    renderKPIs();
+    renderList();
+    renderDetail();
+  }
+  // Make sure first-load seed is persisted so reload behavior is consistent.
+  if (!localStorage.getItem(STORAGE_KEY)) save();
+  renderAll();
+
+})();
+</script>
+</body>
+</html>

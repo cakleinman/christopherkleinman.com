@@ -1,0 +1,478 @@
+/* ============================================================
+   Rivera Grounds Co — Shared Tool Styles
+   ----------------------------------------------------------------
+   Every demo tool in /tools/ pulls in this file. Defines brand
+   tokens, header band, base typography, buttons, inputs, cards.
+   Tools layer their own tool-local CSS on top.
+   ============================================================ */
+
+/* ---------- Brand tokens ---------- */
+:root {
+  --rg-green:        #4a7c4e;
+  --rg-green-dk:     #2d4a30;
+  --rg-green-pale:   #e3ede4;
+  --rg-tan:          #d8c79a;
+  --rg-tan-dk:       #b8a574;
+  --rg-cream:        #f7f5f0;
+  --rg-cream-dk:     #efeae0;
+  --rg-ink:          #1f2a1f;
+  --rg-ink-dim:      #5a6f5d;
+  --rg-ink-faint:    #8a9b8c;
+  --rg-line:         rgba(74, 124, 78, 0.18);
+  --rg-line-strong:  rgba(74, 124, 78, 0.4);
+  --rg-warning:      #b8742d;
+  --rg-success:      #4a7c4e;
+
+  --rg-radius:       8px;
+  --rg-radius-lg:    14px;
+  --rg-shadow-sm:    0 1px 2px rgba(31, 42, 31, 0.06), 0 1px 3px rgba(31, 42, 31, 0.04);
+  --rg-shadow-md:    0 4px 12px rgba(31, 42, 31, 0.08), 0 2px 4px rgba(31, 42, 31, 0.04);
+  --rg-shadow-lg:    0 16px 40px rgba(31, 42, 31, 0.12), 0 4px 12px rgba(31, 42, 31, 0.06);
+
+  --rg-font-display: ui-serif, Georgia, "Times New Roman", serif;
+  --rg-font-body:    -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --rg-font-mono:    ui-monospace, "SF Mono", Menlo, Monaco, "Cascadia Code", monospace;
+}
+
+/* ---------- Reset / base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--rg-cream);
+  color: var(--rg-ink);
+  font-family: var(--rg-font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-image:
+    radial-gradient(rgba(74, 124, 78, 0.06) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* ---------- Page shell ---------- */
+.rg-shell {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- Header band ---------- */
+.rg-header {
+  background: var(--rg-green-dk);
+  color: var(--rg-cream);
+  padding: 14px 28px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  border-bottom: 3px solid var(--rg-tan);
+}
+.rg-mark {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--rg-font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 22px;
+  letter-spacing: 0.01em;
+  color: var(--rg-cream);
+  text-decoration: none;
+}
+.rg-mark::before {
+  content: "";
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--rg-tan);
+  box-shadow: 0 0 0 3px rgba(216, 199, 154, 0.25);
+}
+.rg-mark .ampersand { color: var(--rg-tan); }
+.rg-tagline {
+  font-size: 11px;
+  color: rgba(247, 245, 240, 0.65);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-left: auto;
+}
+.rg-tag-pill {
+  margin-left: 18px;
+  padding: 4px 10px;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--rg-tan);
+  border: 1px solid rgba(216, 199, 154, 0.3);
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+/* ---------- Page title strip ---------- */
+.rg-title-strip {
+  padding: 18px 28px;
+  background: rgba(255, 255, 255, 0.6);
+  border-bottom: 1px solid var(--rg-line);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.rg-title-strip h1 {
+  margin: 0;
+  font-family: var(--rg-font-display);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--rg-green-dk);
+}
+.rg-title-strip .rg-sub {
+  font-size: 13px;
+  color: var(--rg-ink-dim);
+}
+
+/* ---------- Buttons ---------- */
+.rg-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 16px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  border: 1px solid transparent;
+  border-radius: var(--rg-radius);
+  cursor: pointer;
+  transition: transform 80ms ease, box-shadow 120ms ease, background 120ms ease;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+}
+.rg-btn:active { transform: translateY(1px); }
+.rg-btn--primary {
+  background: var(--rg-green-dk);
+  color: var(--rg-cream);
+}
+.rg-btn--primary:hover {
+  background: var(--rg-green);
+  box-shadow: var(--rg-shadow-md);
+}
+.rg-btn--secondary {
+  background: var(--rg-cream);
+  color: var(--rg-green-dk);
+  border-color: var(--rg-line-strong);
+}
+.rg-btn--secondary:hover {
+  background: var(--rg-green-pale);
+  border-color: var(--rg-green);
+}
+.rg-btn--ghost {
+  background: transparent;
+  color: var(--rg-ink-dim);
+  border-color: transparent;
+}
+.rg-btn--ghost:hover {
+  color: var(--rg-green-dk);
+  background: rgba(74, 124, 78, 0.06);
+}
+.rg-btn--danger {
+  background: transparent;
+  color: var(--rg-warning);
+  border-color: rgba(184, 116, 45, 0.3);
+}
+.rg-btn--danger:hover {
+  background: rgba(184, 116, 45, 0.08);
+}
+.rg-btn--sm { padding: 6px 12px; font-size: 12px; }
+.rg-btn--lg { padding: 12px 22px; font-size: 14px; }
+.rg-btn--icon { padding: 8px; min-width: 32px; }
+
+/* ---------- Inputs ---------- */
+.rg-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.rg-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--rg-ink-dim);
+}
+.rg-input,
+.rg-select,
+.rg-textarea {
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--rg-ink);
+  background: #fff;
+  border: 1px solid var(--rg-line-strong);
+  border-radius: var(--rg-radius);
+  padding: 9px 12px;
+  line-height: 1.4;
+  transition: border-color 120ms, box-shadow 120ms;
+  width: 100%;
+}
+.rg-textarea {
+  resize: vertical;
+  min-height: 72px;
+}
+.rg-input:focus,
+.rg-select:focus,
+.rg-textarea:focus {
+  outline: none;
+  border-color: var(--rg-green);
+  box-shadow: 0 0 0 3px rgba(74, 124, 78, 0.12);
+}
+.rg-input::placeholder,
+.rg-textarea::placeholder {
+  color: var(--rg-ink-faint);
+}
+
+/* ---------- Cards / panels ---------- */
+.rg-card {
+  background: #fff;
+  border: 1px solid var(--rg-line);
+  border-radius: var(--rg-radius-lg);
+  box-shadow: var(--rg-shadow-sm);
+  overflow: hidden;
+}
+.rg-card__header {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--rg-line);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.rg-card__title {
+  font-family: var(--rg-font-display);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--rg-green-dk);
+  margin: 0;
+}
+.rg-card__body { padding: 16px 18px; }
+
+/* ---------- KPI tile ---------- */
+.rg-kpi {
+  background: #fff;
+  border: 1px solid var(--rg-line);
+  border-radius: var(--rg-radius);
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: var(--rg-shadow-sm);
+}
+.rg-kpi__label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--rg-ink-dim);
+  font-weight: 600;
+}
+.rg-kpi__value {
+  font-family: var(--rg-font-display);
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--rg-green-dk);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+.rg-kpi__delta {
+  font-size: 11px;
+  color: var(--rg-ink-faint);
+}
+
+/* ---------- Footer / utility ---------- */
+.rg-footer {
+  margin-top: auto;
+  padding: 10px 28px;
+  background: rgba(255, 255, 255, 0.5);
+  border-top: 1px solid var(--rg-line);
+  font-size: 11px;
+  color: var(--rg-ink-faint);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* ---------- Tag / pill ---------- */
+.rg-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  border-radius: 999px;
+  background: var(--rg-green-pale);
+  color: var(--rg-green-dk);
+  border: 1px solid var(--rg-line);
+}
+.rg-pill--tan {
+  background: rgba(216, 199, 154, 0.3);
+  color: var(--rg-tan-dk);
+  border-color: rgba(184, 165, 116, 0.4);
+}
+.rg-pill--warn {
+  background: rgba(184, 116, 45, 0.1);
+  color: var(--rg-warning);
+  border-color: rgba(184, 116, 45, 0.25);
+}
+
+/* ---------- Empty state ---------- */
+.rg-empty {
+  border: 2px dashed var(--rg-line-strong);
+  border-radius: var(--rg-radius-lg);
+  padding: 40px 32px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.5);
+  color: var(--rg-ink-dim);
+}
+.rg-empty h3 {
+  margin: 0 0 6px;
+  font-family: var(--rg-font-display);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--rg-green-dk);
+}
+.rg-empty p { margin: 0 0 16px; font-size: 13px; }
+.rg-empty.is-active {
+  border-color: var(--rg-green);
+  background: var(--rg-green-pale);
+}
+
+/* ---------- Helpers ---------- */
+.rg-hidden { display: none !important; }
+.rg-row { display: flex; gap: 12px; align-items: center; }
+.rg-row--end { justify-content: flex-end; }
+.rg-row--between { justify-content: space-between; }
+.rg-stack { display: flex; flex-direction: column; gap: 12px; }
+
+/* ---------- Scrollbar (subtle) ---------- */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--rg-line-strong);
+  border-radius: 999px;
+  border: 2px solid var(--rg-cream);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--rg-green); }
+
+/* ============================================================
+   "Live · running locally" pill — sits in the .rg-header band
+   alongside .rg-tag-pill. Reinforces "this is real software"
+   on every demo without needing to be said.
+   ============================================================ */
+.rg-live-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px 3px 8px;
+  border-radius: 999px;
+  background: rgba(74, 124, 78, 0.12);
+  border: 1px solid rgba(74, 124, 78, 0.32);
+  font-family: var(--rg-font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--rg-cream);
+  font-weight: 600;
+  user-select: none;
+}
+.rg-live-pill::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #6fcf73;
+  box-shadow: 0 0 8px rgba(111, 207, 115, 0.7);
+  animation: rg-live-pulse 1.6s ease-in-out infinite;
+}
+@keyframes rg-live-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.5; transform: scale(0.85); }
+}
+/* Dark-on-light variant — for tools whose header sits on a cream/light
+   background (e.g., Invoice's form-head). Uses dark green text + a
+   darker border so it pops against light surfaces. */
+.rg-live-pill--dark {
+  background: rgba(74, 124, 78, 0.10);
+  border-color: rgba(45, 74, 48, 0.45);
+  color: var(--rg-green-dk);
+}
+.rg-live-pill--dark::before {
+  background: var(--rg-success, #4a7c4e);
+  box-shadow: 0 0 6px rgba(74, 124, 78, 0.55);
+}
+
+/* ============================================================
+   Demo button — italic-lowercase ghost link.
+   Use for stage-only "demo: do a thing" buttons. Same voice as
+   the dashboard's `demo: another week` pattern.
+   ============================================================ */
+.rg-btn--demo {
+  background: none;
+  border: 0;
+  padding: 4px 8px;
+  font-family: var(--rg-font-body);
+  font-size: 11.5px;
+  font-style: italic;
+  color: var(--rg-ink-faint);
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  border-radius: 4px;
+  transition: color 140ms ease, background 140ms ease;
+}
+.rg-btn--demo:hover {
+  color: var(--rg-green-dk);
+  background: rgba(74, 124, 78, 0.06);
+}
+.rg-btn--demo:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  color: var(--rg-ink-faint);
+  background: none;
+  text-decoration: line-through dotted;
+}
+
+/* ============================================================
+   Toast — floating notification top-right of the tool viewport.
+   Same animation/positioning as dashboard's .add-toast.
+   ============================================================ */
+.rg-toast {
+  position: fixed;
+  top: 84px;
+  right: 24px;
+  background: #fff;
+  border: 1px solid var(--rg-line);
+  border-left: 3px solid var(--rg-success, #4a7c4e);
+  border-radius: 6px;
+  padding: 9px 14px 9px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--rg-ink);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.10);
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 220ms ease, transform 220ms ease;
+  z-index: 50;
+  pointer-events: none;
+  max-width: 320px;
+}
+.rg-toast.is-shown { opacity: 1; transform: translateY(0); }
+.rg-toast--warn { border-left-color: var(--rg-warning, #b8742d); }
+.rg-toast--info { border-left-color: var(--rg-ink-faint, #8a9b8c); }
+.rg-toast b { color: var(--rg-green-dk); font-weight: 700; }
+.rg-toast--warn b { color: var(--rg-warning, #b8742d); }
+.rg-toast .tdim { color: var(--rg-ink-dim); font-weight: 400; margin-left: 4px; }

@@ -1,0 +1,1607 @@
+<!doctype html>
+
+<!--
+  ============================================================
+  Rivera Grounds Co · CSV Dashboard — STARTER CODE
+  ============================================================
+
+  This is a single-file, self-contained version of the tool
+  demoed at the 10th Annual Veteran-Owned Business Conference
+  (May 2026) by Christopher Kleinman.
+
+  Talk: "Making Internal Business Tools With AI"
+  Site: https://christopherkleinman.com
+
+  Use this file as a jumping-off point for your own tool.
+  Feed it to your AI of choice (Claude, Cursor, Copilot,
+  Gemini, ChatGPT, etc.) and ask it to adapt the patterns to
+  your business — your customers, your fields, your workflow.
+
+  Original source file: tools/csv-dashboard.html
+  Brand tokens (Rivera Grounds Co colors, type, components)
+  are inlined from _shared.css in the <style> block below.
+  Replace them with your own brand and you have a starting
+  point that's already wired together.
+
+  External libraries are loaded from jsDelivr — swap to your
+  preferred CDN or vendor them locally for offline use.
+  ============================================================
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Rivera Grounds Co · Job Performance</title>
+<style>
+/* ===== Inlined from _shared.css =====
+   Brand tokens, components, and helpers from Rivera Grounds Co's
+   shared stylesheet. Replace with your own brand. */
+/* ============================================================
+   Rivera Grounds Co — Shared Tool Styles
+   ----------------------------------------------------------------
+   Every demo tool in /tools/ pulls in this file. Defines brand
+   tokens, header band, base typography, buttons, inputs, cards.
+   Tools layer their own tool-local CSS on top.
+   ============================================================ */
+
+/* ---------- Brand tokens ---------- */
+:root {
+  --rg-green:        #4a7c4e;
+  --rg-green-dk:     #2d4a30;
+  --rg-green-pale:   #e3ede4;
+  --rg-tan:          #d8c79a;
+  --rg-tan-dk:       #b8a574;
+  --rg-cream:        #f7f5f0;
+  --rg-cream-dk:     #efeae0;
+  --rg-ink:          #1f2a1f;
+  --rg-ink-dim:      #5a6f5d;
+  --rg-ink-faint:    #8a9b8c;
+  --rg-line:         rgba(74, 124, 78, 0.18);
+  --rg-line-strong:  rgba(74, 124, 78, 0.4);
+  --rg-warning:      #b8742d;
+  --rg-success:      #4a7c4e;
+
+  --rg-radius:       8px;
+  --rg-radius-lg:    14px;
+  --rg-shadow-sm:    0 1px 2px rgba(31, 42, 31, 0.06), 0 1px 3px rgba(31, 42, 31, 0.04);
+  --rg-shadow-md:    0 4px 12px rgba(31, 42, 31, 0.08), 0 2px 4px rgba(31, 42, 31, 0.04);
+  --rg-shadow-lg:    0 16px 40px rgba(31, 42, 31, 0.12), 0 4px 12px rgba(31, 42, 31, 0.06);
+
+  --rg-font-display: ui-serif, Georgia, "Times New Roman", serif;
+  --rg-font-body:    -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --rg-font-mono:    ui-monospace, "SF Mono", Menlo, Monaco, "Cascadia Code", monospace;
+}
+
+/* ---------- Reset / base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--rg-cream);
+  color: var(--rg-ink);
+  font-family: var(--rg-font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-image:
+    radial-gradient(rgba(74, 124, 78, 0.06) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* ---------- Page shell ---------- */
+.rg-shell {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- Header band ---------- */
+.rg-header {
+  background: var(--rg-green-dk);
+  color: var(--rg-cream);
+  padding: 14px 28px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  border-bottom: 3px solid var(--rg-tan);
+}
+.rg-mark {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--rg-font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 22px;
+  letter-spacing: 0.01em;
+  color: var(--rg-cream);
+  text-decoration: none;
+}
+.rg-mark::before {
+  content: "";
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--rg-tan);
+  box-shadow: 0 0 0 3px rgba(216, 199, 154, 0.25);
+}
+.rg-mark .ampersand { color: var(--rg-tan); }
+.rg-tagline {
+  font-size: 11px;
+  color: rgba(247, 245, 240, 0.65);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-left: auto;
+}
+.rg-tag-pill {
+  margin-left: 18px;
+  padding: 4px 10px;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--rg-tan);
+  border: 1px solid rgba(216, 199, 154, 0.3);
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+/* ---------- Page title strip ---------- */
+.rg-title-strip {
+  padding: 18px 28px;
+  background: rgba(255, 255, 255, 0.6);
+  border-bottom: 1px solid var(--rg-line);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.rg-title-strip h1 {
+  margin: 0;
+  font-family: var(--rg-font-display);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--rg-green-dk);
+}
+.rg-title-strip .rg-sub {
+  font-size: 13px;
+  color: var(--rg-ink-dim);
+}
+
+/* ---------- Buttons ---------- */
+.rg-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 16px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  border: 1px solid transparent;
+  border-radius: var(--rg-radius);
+  cursor: pointer;
+  transition: transform 80ms ease, box-shadow 120ms ease, background 120ms ease;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+}
+.rg-btn:active { transform: translateY(1px); }
+.rg-btn--primary {
+  background: var(--rg-green-dk);
+  color: var(--rg-cream);
+}
+.rg-btn--primary:hover {
+  background: var(--rg-green);
+  box-shadow: var(--rg-shadow-md);
+}
+.rg-btn--secondary {
+  background: var(--rg-cream);
+  color: var(--rg-green-dk);
+  border-color: var(--rg-line-strong);
+}
+.rg-btn--secondary:hover {
+  background: var(--rg-green-pale);
+  border-color: var(--rg-green);
+}
+.rg-btn--ghost {
+  background: transparent;
+  color: var(--rg-ink-dim);
+  border-color: transparent;
+}
+.rg-btn--ghost:hover {
+  color: var(--rg-green-dk);
+  background: rgba(74, 124, 78, 0.06);
+}
+.rg-btn--danger {
+  background: transparent;
+  color: var(--rg-warning);
+  border-color: rgba(184, 116, 45, 0.3);
+}
+.rg-btn--danger:hover {
+  background: rgba(184, 116, 45, 0.08);
+}
+.rg-btn--sm { padding: 6px 12px; font-size: 12px; }
+.rg-btn--lg { padding: 12px 22px; font-size: 14px; }
+.rg-btn--icon { padding: 8px; min-width: 32px; }
+
+/* ---------- Inputs ---------- */
+.rg-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.rg-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--rg-ink-dim);
+}
+.rg-input,
+.rg-select,
+.rg-textarea {
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--rg-ink);
+  background: #fff;
+  border: 1px solid var(--rg-line-strong);
+  border-radius: var(--rg-radius);
+  padding: 9px 12px;
+  line-height: 1.4;
+  transition: border-color 120ms, box-shadow 120ms;
+  width: 100%;
+}
+.rg-textarea {
+  resize: vertical;
+  min-height: 72px;
+}
+.rg-input:focus,
+.rg-select:focus,
+.rg-textarea:focus {
+  outline: none;
+  border-color: var(--rg-green);
+  box-shadow: 0 0 0 3px rgba(74, 124, 78, 0.12);
+}
+.rg-input::placeholder,
+.rg-textarea::placeholder {
+  color: var(--rg-ink-faint);
+}
+
+/* ---------- Cards / panels ---------- */
+.rg-card {
+  background: #fff;
+  border: 1px solid var(--rg-line);
+  border-radius: var(--rg-radius-lg);
+  box-shadow: var(--rg-shadow-sm);
+  overflow: hidden;
+}
+.rg-card__header {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--rg-line);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.rg-card__title {
+  font-family: var(--rg-font-display);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--rg-green-dk);
+  margin: 0;
+}
+.rg-card__body { padding: 16px 18px; }
+
+/* ---------- KPI tile ---------- */
+.rg-kpi {
+  background: #fff;
+  border: 1px solid var(--rg-line);
+  border-radius: var(--rg-radius);
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: var(--rg-shadow-sm);
+}
+.rg-kpi__label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--rg-ink-dim);
+  font-weight: 600;
+}
+.rg-kpi__value {
+  font-family: var(--rg-font-display);
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--rg-green-dk);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+.rg-kpi__delta {
+  font-size: 11px;
+  color: var(--rg-ink-faint);
+}
+
+/* ---------- Footer / utility ---------- */
+.rg-footer {
+  margin-top: auto;
+  padding: 10px 28px;
+  background: rgba(255, 255, 255, 0.5);
+  border-top: 1px solid var(--rg-line);
+  font-size: 11px;
+  color: var(--rg-ink-faint);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* ---------- Tag / pill ---------- */
+.rg-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  border-radius: 999px;
+  background: var(--rg-green-pale);
+  color: var(--rg-green-dk);
+  border: 1px solid var(--rg-line);
+}
+.rg-pill--tan {
+  background: rgba(216, 199, 154, 0.3);
+  color: var(--rg-tan-dk);
+  border-color: rgba(184, 165, 116, 0.4);
+}
+.rg-pill--warn {
+  background: rgba(184, 116, 45, 0.1);
+  color: var(--rg-warning);
+  border-color: rgba(184, 116, 45, 0.25);
+}
+
+/* ---------- Empty state ---------- */
+.rg-empty {
+  border: 2px dashed var(--rg-line-strong);
+  border-radius: var(--rg-radius-lg);
+  padding: 40px 32px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.5);
+  color: var(--rg-ink-dim);
+}
+.rg-empty h3 {
+  margin: 0 0 6px;
+  font-family: var(--rg-font-display);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--rg-green-dk);
+}
+.rg-empty p { margin: 0 0 16px; font-size: 13px; }
+.rg-empty.is-active {
+  border-color: var(--rg-green);
+  background: var(--rg-green-pale);
+}
+
+/* ---------- Helpers ---------- */
+.rg-hidden { display: none !important; }
+.rg-row { display: flex; gap: 12px; align-items: center; }
+.rg-row--end { justify-content: flex-end; }
+.rg-row--between { justify-content: space-between; }
+.rg-stack { display: flex; flex-direction: column; gap: 12px; }
+
+/* ---------- Scrollbar (subtle) ---------- */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--rg-line-strong);
+  border-radius: 999px;
+  border: 2px solid var(--rg-cream);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--rg-green); }
+
+/* ============================================================
+   "Live · running locally" pill — sits in the .rg-header band
+   alongside .rg-tag-pill. Reinforces "this is real software"
+   on every demo without needing to be said.
+   ============================================================ */
+.rg-live-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px 3px 8px;
+  border-radius: 999px;
+  background: rgba(74, 124, 78, 0.12);
+  border: 1px solid rgba(74, 124, 78, 0.32);
+  font-family: var(--rg-font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--rg-cream);
+  font-weight: 600;
+  user-select: none;
+}
+.rg-live-pill::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #6fcf73;
+  box-shadow: 0 0 8px rgba(111, 207, 115, 0.7);
+  animation: rg-live-pulse 1.6s ease-in-out infinite;
+}
+@keyframes rg-live-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.5; transform: scale(0.85); }
+}
+/* Dark-on-light variant — for tools whose header sits on a cream/light
+   background (e.g., Invoice's form-head). Uses dark green text + a
+   darker border so it pops against light surfaces. */
+.rg-live-pill--dark {
+  background: rgba(74, 124, 78, 0.10);
+  border-color: rgba(45, 74, 48, 0.45);
+  color: var(--rg-green-dk);
+}
+.rg-live-pill--dark::before {
+  background: var(--rg-success, #4a7c4e);
+  box-shadow: 0 0 6px rgba(74, 124, 78, 0.55);
+}
+
+/* ============================================================
+   Demo button — italic-lowercase ghost link.
+   Use for stage-only "demo: do a thing" buttons. Same voice as
+   the dashboard's `demo: another week` pattern.
+   ============================================================ */
+.rg-btn--demo {
+  background: none;
+  border: 0;
+  padding: 4px 8px;
+  font-family: var(--rg-font-body);
+  font-size: 11.5px;
+  font-style: italic;
+  color: var(--rg-ink-faint);
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  border-radius: 4px;
+  transition: color 140ms ease, background 140ms ease;
+}
+.rg-btn--demo:hover {
+  color: var(--rg-green-dk);
+  background: rgba(74, 124, 78, 0.06);
+}
+.rg-btn--demo:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  color: var(--rg-ink-faint);
+  background: none;
+  text-decoration: line-through dotted;
+}
+
+/* ============================================================
+   Toast — floating notification top-right of the tool viewport.
+   Same animation/positioning as dashboard's .add-toast.
+   ============================================================ */
+.rg-toast {
+  position: fixed;
+  top: 84px;
+  right: 24px;
+  background: #fff;
+  border: 1px solid var(--rg-line);
+  border-left: 3px solid var(--rg-success, #4a7c4e);
+  border-radius: 6px;
+  padding: 9px 14px 9px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--rg-ink);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.10);
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 220ms ease, transform 220ms ease;
+  z-index: 50;
+  pointer-events: none;
+  max-width: 320px;
+}
+.rg-toast.is-shown { opacity: 1; transform: translateY(0); }
+.rg-toast--warn { border-left-color: var(--rg-warning, #b8742d); }
+.rg-toast--info { border-left-color: var(--rg-ink-faint, #8a9b8c); }
+.rg-toast b { color: var(--rg-green-dk); font-weight: 700; }
+.rg-toast--warn b { color: var(--rg-warning, #b8742d); }
+.rg-toast .tdim { color: var(--rg-ink-dim); font-weight: 400; margin-left: 4px; }
+
+</style>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  /* ---------- Tool-local layout ---------- */
+  .rg-shell { background: transparent; }
+
+  .dash {
+    flex: 1;
+    padding: 14px 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+  }
+
+  /* Empty-state hero */
+  .dash__empty-wrap {
+    flex: 1;
+    display: grid;
+    place-items: center;
+    padding: 12px 0;
+  }
+  .rg-empty.dropzone {
+    width: min(640px, 100%);
+    padding: 28px 36px;
+    cursor: pointer;
+    user-select: none;
+    transition: border-color 140ms ease, background 140ms ease, transform 140ms ease;
+  }
+  .rg-empty.dropzone:hover { border-color: var(--rg-green); }
+  .rg-empty.dropzone .dz-icon {
+    width: 44px; height: 44px;
+    margin: 0 auto 10px;
+    border-radius: 50%;
+    background: var(--rg-green-pale);
+    display: grid; place-items: center;
+    color: var(--rg-green-dk);
+  }
+  .rg-empty.dropzone .dz-icon svg { width: 22px; height: 22px; }
+  .rg-empty.dropzone .dz-actions {
+    display: flex; gap: 10px; justify-content: center; margin-top: 4px;
+  }
+  .rg-empty.dropzone .dz-or {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--rg-ink-faint);
+    margin: 12px 0 10px;
+    display: flex; align-items: center; gap: 10px; justify-content: center;
+  }
+  .rg-empty.dropzone .dz-or::before,
+  .rg-empty.dropzone .dz-or::after {
+    content: ""; flex: 0 1 60px; height: 1px; background: var(--rg-line);
+  }
+
+  /* KPI row */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  .rg-kpi__delta--up   { color: var(--rg-success); font-weight: 600; }
+  .rg-kpi__delta--warn { color: var(--rg-warning); font-weight: 600; }
+
+  /* Charts row */
+  .charts-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .charts-split {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 12px;
+  }
+  .chart-box { position: relative; }
+  .chart-box .rg-card__body { padding: 12px 14px 14px; }
+  .chart-canvas-wrap {
+    position: relative;
+    height: 180px;
+  }
+  .chart-canvas-wrap.tall { height: 200px; }
+  .chart-canvas-wrap.short { height: 170px; }
+
+  /* Table */
+  .jobs-table-wrap { overflow: auto; max-height: 320px; }
+  table.jobs {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+    font-variant-numeric: tabular-nums;
+  }
+  table.jobs thead th {
+    position: sticky; top: 0; z-index: 1;
+    background: var(--rg-cream-dk);
+    color: var(--rg-green-dk);
+    font-weight: 600;
+    text-align: left;
+    padding: 8px 12px;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--rg-line-strong);
+    cursor: pointer;
+    white-space: nowrap;
+    user-select: none;
+  }
+  table.jobs thead th .sort-arrow {
+    display: inline-block;
+    margin-left: 4px;
+    color: var(--rg-ink-faint);
+    font-size: 10px;
+  }
+  table.jobs thead th.is-sorted .sort-arrow { color: var(--rg-green-dk); }
+  table.jobs tbody td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--rg-line);
+    color: var(--rg-ink);
+    white-space: nowrap;
+  }
+  table.jobs tbody tr:hover { background: rgba(74, 124, 78, 0.04); }
+  table.jobs td.num,
+  table.jobs thead th.num { text-align: right; }
+  table.jobs thead th.num .sort-arrow { margin-left: 4px; }
+  table.jobs td.cust { font-weight: 600; color: var(--rg-green-dk); white-space: normal; }
+
+  /* Header inline source pill */
+  .source-pill {
+    margin-left: 12px;
+    font-size: 11px;
+    color: var(--rg-ink-dim);
+    background: var(--rg-cream-dk);
+    border: 1px solid var(--rg-line);
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Inline "+ Add CSV" / demo controls in the title strip */
+  .add-controls {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: 8px;
+  }
+  .rg-btn--addcsv {
+    font-size: 12px;
+    padding: 5px 11px;
+    border-radius: 999px;
+  }
+  .rg-link--demo {
+    background: none;
+    border: 0;
+    padding: 4px 6px;
+    font-size: 11px;
+    color: var(--rg-ink-faint);
+    text-decoration: underline dotted;
+    text-underline-offset: 2px;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+  }
+  .rg-link--demo:hover { color: var(--rg-green-dk); }
+
+  /* Floating toast for "+N new jobs" */
+  .add-toast {
+    position: fixed;
+    top: 84px;
+    right: 24px;
+    background: #fff;
+    border: 1px solid var(--rg-line);
+    border-left: 3px solid var(--rg-success, #4a7c4e);
+    border-radius: 6px;
+    padding: 9px 14px 9px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--rg-ink);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.10);
+    opacity: 0;
+    transform: translateY(-6px);
+    transition: opacity 220ms ease, transform 220ms ease;
+    z-index: 50;
+    pointer-events: none;
+    max-width: 320px;
+  }
+  .add-toast.is-shown { opacity: 1; transform: translateY(0); }
+  .add-toast--warn { border-left-color: var(--rg-warning, #b8742d); }
+  .add-toast--info { border-left-color: var(--rg-ink-faint, #8a9b8c); }
+  .add-toast b { color: var(--rg-green-dk); font-weight: 700; }
+  .add-toast--warn b { color: var(--rg-warning, #b8742d); }
+  .add-toast .tdim { color: var(--rg-ink-dim); font-weight: 400; margin-left: 4px; }
+
+  /* Responsive: gracefully degrade if iframe shrinks */
+  @media (max-width: 900px) {
+    .kpi-row { grid-template-columns: repeat(2, 1fr); }
+    .charts-split { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="rg-shell">
+
+  <!-- ───── Header band ───── -->
+  <header class="rg-header">
+    <a class="rg-mark" href="#">Rivera Grounds <span class="ampersand">&amp;</span> Co</a>
+    <span class="rg-tag-pill">Veteran Owned</span>
+    <span class="rg-tagline">Landscape · Hardscape · Irrigation</span>
+    <span class="rg-live-pill" title="This is real software running in your browser, not a screenshot">Live · running locally</span>
+  </header>
+
+  <!-- ───── Title strip ───── -->
+  <div class="rg-title-strip">
+    <div>
+      <h1>Job Performance</h1>
+      <div class="rg-sub" id="subline">Drag a CSV to see this season at a glance</div>
+    </div>
+    <span id="sourcePill" class="source-pill rg-hidden">0 jobs</span>
+    <div id="addControls" class="add-controls rg-hidden">
+      <button id="addCsvBtn" class="rg-btn rg-btn--ghost rg-btn--addcsv" type="button" title="Drop or pick another CSV — duplicates are skipped automatically">
+        + Add another CSV
+      </button>
+      <button id="addDemoBtn" class="rg-link--demo" type="button" title="Loads a second sample CSV (mostly the same rows + 5 new May jobs)">
+        demo: another week
+      </button>
+    </div>
+    <div style="margin-left:auto;" class="rg-row">
+      <button id="resetBtn" class="rg-btn rg-btn--ghost rg-hidden" type="button">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+        Reset
+      </button>
+    </div>
+  </div>
+
+  <!-- Toast lives outside the title strip so it can float over content -->
+  <div id="addToast" class="add-toast" role="status" aria-live="polite" hidden></div>
+
+  <!-- ───── Body ───── -->
+  <main class="dash">
+
+    <!-- Empty state -->
+    <section id="emptyState" class="dash__empty-wrap">
+      <div id="dropzone" class="rg-empty dropzone" tabindex="0" role="button" aria-label="Drop CSV file here or click to browse">
+        <div class="dz-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </div>
+        <h3>Drag your jobs CSV here</h3>
+        <p>Or click anywhere in this box to browse</p>
+        <div class="dz-or">or</div>
+        <div class="dz-actions">
+          <button id="loadSampleBtn" class="rg-btn rg-btn--primary" type="button">Load sample data</button>
+        </div>
+        <input id="filePicker" type="file" accept=".csv,text/csv" class="rg-hidden" />
+      </div>
+    </section>
+
+    <!-- Active dashboard -->
+    <section id="activeState" class="rg-stack rg-hidden" style="gap:12px;">
+
+      <!-- KPI row -->
+      <div class="kpi-row">
+        <div class="rg-kpi">
+          <span class="rg-kpi__label">Total Revenue</span>
+          <span class="rg-kpi__value" id="kpiRevenue">$0</span>
+          <span class="rg-kpi__delta" id="kpiRevenueSub">—</span>
+        </div>
+        <div class="rg-kpi">
+          <span class="rg-kpi__label">Jobs Completed</span>
+          <span class="rg-kpi__value" id="kpiJobs">0</span>
+          <span class="rg-kpi__delta" id="kpiJobsSub">—</span>
+        </div>
+        <div class="rg-kpi">
+          <span class="rg-kpi__label">Avg Ticket</span>
+          <span class="rg-kpi__value" id="kpiAvg">$0</span>
+          <span class="rg-kpi__delta" id="kpiAvgSub">—</span>
+        </div>
+        <div class="rg-kpi">
+          <span class="rg-kpi__label">Outstanding A/R</span>
+          <span class="rg-kpi__value" id="kpiAR">$0</span>
+          <span class="rg-kpi__delta" id="kpiARSub">—</span>
+        </div>
+      </div>
+
+      <!-- Full-width line chart -->
+      <div class="charts-row">
+        <div class="rg-card chart-box">
+          <div class="rg-card__header">
+            <h3 class="rg-card__title">Revenue by month</h3>
+            <span class="rg-pill rg-pill--tan" id="lineRangeLabel">Last 6 months</span>
+          </div>
+          <div class="rg-card__body">
+            <div class="chart-canvas-wrap tall">
+              <canvas id="lineChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Side-by-side -->
+      <div class="charts-split">
+        <div class="rg-card chart-box">
+          <div class="rg-card__header">
+            <h3 class="rg-card__title">Revenue by service type</h3>
+          </div>
+          <div class="rg-card__body">
+            <div class="chart-canvas-wrap">
+              <canvas id="barChart"></canvas>
+            </div>
+          </div>
+        </div>
+        <div class="rg-card chart-box">
+          <div class="rg-card__header">
+            <h3 class="rg-card__title">Top 5 customers</h3>
+          </div>
+          <div class="rg-card__body">
+            <div class="chart-canvas-wrap short">
+              <canvas id="donutChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="rg-card">
+        <div class="rg-card__header">
+          <h3 class="rg-card__title">All jobs</h3>
+          <span style="font-size:12px;color:var(--rg-ink-dim);">Click any header to sort</span>
+        </div>
+        <div class="jobs-table-wrap">
+          <table class="jobs" id="jobsTable">
+            <thead>
+              <tr>
+                <th data-key="date">Date <span class="sort-arrow">↕</span></th>
+                <th data-key="customer">Customer <span class="sort-arrow">↕</span></th>
+                <th data-key="service">Service <span class="sort-arrow">↕</span></th>
+                <th data-key="hours" class="num">Hours <span class="sort-arrow">↕</span></th>
+                <th data-key="materials" class="num">Materials <span class="sort-arrow">↕</span></th>
+                <th data-key="total" class="num">Total <span class="sort-arrow">↕</span></th>
+                <th data-key="status">Status <span class="sort-arrow">↕</span></th>
+              </tr>
+            </thead>
+            <tbody id="jobsBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- ───── Footer ───── -->
+  <footer class="rg-footer">
+    <span>Built for Rivera Grounds Co · Made with AI · Demo</span>
+    <span>Tool 01 / Dashboard</span>
+  </footer>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  // ───────────── Brand palette for charts ─────────────
+  const C = {
+    green:     '#4a7c4e',
+    greenDk:   '#2d4a30',
+    greenPale: '#e3ede4',
+    tan:       '#d8c79a',
+    tanDk:     '#b8a574',
+    cream:     '#f7f5f0',
+    ink:       '#1f2a1f',
+    inkDim:    '#5a6f5d',
+    inkFaint:  '#8a9b8c',
+    line:      'rgba(74, 124, 78, 0.18)',
+    warn:      '#b8742d',
+  };
+  const SERVICE_COLORS = {
+    'Lawn Care':     C.green,
+    'Hardscaping':   C.greenDk,
+    'Irrigation':    C.tanDk,
+    'Consultation':  C.tan,
+  };
+  const FALLBACK_PALETTE = [C.green, C.greenDk, C.tanDk, C.tan, C.inkDim, C.greenPale];
+
+  // ───────────── Chart.js global defaults ─────────────
+  if (window.Chart) {
+    Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif';
+    Chart.defaults.font.size = 11;
+    Chart.defaults.color = C.inkDim;
+    Chart.defaults.borderColor = C.line;
+    Chart.defaults.animation.duration = 600;
+    Chart.defaults.animation.easing = 'easeOutQuart';
+  }
+
+  // ───────────── Formatters ─────────────
+  const fmtCurrency = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+  const fmtNumber = new Intl.NumberFormat('en-US');
+  const fmtMonthYr = (d) => d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+  const fmtMonthLong = (d) => d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  const fmtDateShort = (d) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' });
+
+  // ───────────── DOM refs ─────────────
+  const $ = (id) => document.getElementById(id);
+  const dropzone = $('dropzone');
+  const filePicker = $('filePicker');
+  const loadSampleBtn = $('loadSampleBtn');
+  const resetBtn = $('resetBtn');
+  const addCsvBtn = $('addCsvBtn');
+  const addDemoBtn = $('addDemoBtn');
+  const addControls = $('addControls');
+  const addToast = $('addToast');
+  const emptyState = $('emptyState');
+  const activeState = $('activeState');
+  const subline = $('subline');
+  const sourcePill = $('sourcePill');
+  const jobsBody = $('jobsBody');
+  const jobsTable = $('jobsTable');
+  const lineRangeLabel = $('lineRangeLabel');
+
+  // ───────────── State ─────────────
+  let rows = [];
+  let sortKey = 'date';
+  let sortDir = 'desc';
+  const charts = { line: null, bar: null, donut: null };
+  const seenKeys = new Set();         // composite-key dedupe across uploads
+  const fileSources = [];             // ordered list of file names ingested
+  let toastTimer = null;
+  let demoIdx = 0;                    // which weekly demo batch is next
+
+  // ───────────── Empty <-> Active ─────────────
+  const showActive = () => {
+    emptyState.classList.add('rg-hidden');
+    activeState.classList.remove('rg-hidden');
+    resetBtn.classList.remove('rg-hidden');
+    sourcePill.classList.remove('rg-hidden');
+    addControls.classList.remove('rg-hidden');
+  };
+  const showEmpty = () => {
+    emptyState.classList.remove('rg-hidden');
+    activeState.classList.add('rg-hidden');
+    resetBtn.classList.add('rg-hidden');
+    sourcePill.classList.add('rg-hidden');
+    addControls.classList.add('rg-hidden');
+    subline.textContent = 'Drag a CSV to see this season at a glance';
+    Object.values(charts).forEach((ch) => ch && ch.destroy());
+    charts.line = charts.bar = charts.donut = null;
+    rows = [];
+    seenKeys.clear();
+    fileSources.length = 0;
+    jobsBody.innerHTML = '';
+    hideToast();
+    // Reset the progressive demo button
+    demoIdx = 0;
+    if (addDemoBtn) {
+      addDemoBtn.disabled = false;
+      addDemoBtn.textContent = 'demo: another week';
+    }
+  };
+
+  // ───────────── Toast ─────────────
+  const showToast = (html, kind = 'success') => {
+    addToast.innerHTML = html;
+    addToast.className = `add-toast add-toast--${kind}`;
+    addToast.hidden = false;
+    // double-rAF so transition kicks in
+    requestAnimationFrame(() => requestAnimationFrame(() => addToast.classList.add('is-shown')));
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(hideToast, 4200);
+  };
+  const hideToast = () => {
+    addToast.classList.remove('is-shown');
+    setTimeout(() => { addToast.hidden = true; }, 240);
+  };
+
+  // ───────────── CSV parsing & normalization ─────────────
+  // Parse dates in either YYYY-MM-DD or M/D/YYYY using local time (so the
+  // composite dedupe key is stable across CSVs that use different formats)
+  const parseDate = (s) => {
+    s = String(s).trim();
+    if (!s) return null;
+    let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if (m) return new Date(parseInt(m[1], 10), parseInt(m[2], 10) - 1, parseInt(m[3], 10));
+    m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if (m) return new Date(parseInt(m[3], 10), parseInt(m[1], 10) - 1, parseInt(m[2], 10));
+    const d = new Date(s);
+    return isNaN(d) ? null : d;
+  };
+
+  const normalizeRow = (raw) => {
+    const lower = {};
+    Object.keys(raw).forEach((k) => { if (k != null) lower[k.trim().toLowerCase()] = raw[k]; });
+    const pick = (...keys) => {
+      for (const k of keys) {
+        const v = lower[k];
+        if (v !== undefined && v !== null && String(v).trim() !== '') return v;
+      }
+      return '';
+    };
+    const num = (v) => {
+      if (v === '' || v == null) return 0;
+      const n = parseFloat(String(v).replace(/[$,]/g, ''));
+      return Number.isFinite(n) ? n : 0;
+    };
+    return {
+      date:      parseDate(pick('date', 'job date', 'invoice date')),
+      customer:  String(pick('customer', 'client', 'name')).trim() || '—',
+      service:   String(pick('service', 'service type', 'type', 'category')).trim() || 'Other',
+      hours:     num(pick('hours', 'hrs', 'labor hours')),
+      materials: num(pick('materials', 'material', 'cost', 'parts')),
+      total:     num(pick('total', 'revenue', 'amount', 'invoice total')),
+      status:    String(pick('status', 'paid')).trim() || 'Unknown',
+    };
+  };
+
+  // Composite dedupe key — stable across re-exports of the same source.
+  // Date is encoded from local components so different date formats collapse to the same key.
+  const rowKey = (r) => {
+    if (!r.date) return null;
+    const y = r.date.getFullYear();
+    const m = String(r.date.getMonth() + 1).padStart(2, '0');
+    const d = String(r.date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}|${r.customer.toLowerCase()}|${r.service.toLowerCase()}|${r.total}`;
+  };
+
+  const ingestCsvText = (text, sourceLabel) => {
+    const result = Papa.parse(text, { header: true, skipEmptyLines: true, dynamicTyping: false });
+    const parsed = (result.data || []).map(normalizeRow).filter((r) => r.date);
+    const isFirstLoad = rows.length === 0;
+
+    if (!parsed.length) {
+      if (isFirstLoad) {
+        alert('Couldn’t find any rows in that CSV. Expected columns: date, customer, service, hours, materials, total, status.');
+      } else {
+        showToast(`<b>No usable rows</b> in ${escapeHtml(sourceLabel)}`, 'warn');
+      }
+      return;
+    }
+
+    let added = 0, dup = 0;
+    parsed.forEach((r) => {
+      const k = rowKey(r);
+      if (!k) return;
+      if (seenKeys.has(k)) { dup++; }
+      else { seenKeys.add(k); rows.push(r); added++; }
+    });
+    if (!fileSources.includes(sourceLabel)) fileSources.push(sourceLabel);
+
+    // Update header pill + subline
+    sourcePill.textContent = fileSources.length === 1
+      ? `${rows.length} jobs · ${fileSources[0]}`
+      : `${rows.length} jobs · ${fileSources.length} files`;
+    subline.textContent = `Showing ${rows.length} jobs from ${fmtDateShort(minDate(rows))} to ${fmtDateShort(maxDate(rows))}`;
+
+    showActive();
+    render();
+
+    // Toast — only on incremental adds, not the first load (the dashboard
+    // appearing IS the signal for first load)
+    if (!isFirstLoad) {
+      if (added > 0) {
+        const dupNote = dup > 0
+          ? `<span class="tdim">${dup} already in your data</span>`
+          : '';
+        showToast(`<b>+${added} new ${added === 1 ? 'job' : 'jobs'}</b> from ${escapeHtml(sourceLabel)} ${dupNote}`, 'success');
+      } else {
+        showToast(`<b>${escapeHtml(sourceLabel)}</b> — all ${dup} rows already in your data`, 'info');
+      }
+    }
+  };
+
+  const minDate = (rs) => rs.reduce((a, r) => (a == null || r.date < a) ? r.date : a, null);
+  const maxDate = (rs) => rs.reduce((a, r) => (a == null || r.date > a) ? r.date : a, null);
+
+  const handleFile = (file) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => ingestCsvText(String(e.target.result || ''), file.name);
+    reader.onerror = () => alert('Could not read that file.');
+    reader.readAsText(file);
+  };
+
+  // ───────────── Render dashboard ─────────────
+  const render = () => {
+    renderKpis();
+    renderLineChart();
+    renderBarChart();
+    renderDonutChart();
+    renderTable();
+  };
+
+  const renderKpis = () => {
+    const totalRev   = rows.reduce((a, r) => a + r.total, 0);
+    const jobs       = rows.length;
+    const avg        = jobs ? totalRev / jobs : 0;
+    const outstanding = rows.filter((r) => /outstanding|unpaid|due/i.test(r.status))
+                            .reduce((a, r) => a + r.total, 0);
+    const outstandingCount = rows.filter((r) => /outstanding|unpaid|due/i.test(r.status)).length;
+    const uniqueCustomers = new Set(rows.map((r) => r.customer)).size;
+    const months = uniqueMonthsSorted(rows).length;
+
+    $('kpiRevenue').textContent = fmtCurrency.format(totalRev);
+    $('kpiJobs').textContent    = fmtNumber.format(jobs);
+    $('kpiAvg').textContent     = fmtCurrency.format(Math.round(avg));
+    $('kpiAR').textContent      = fmtCurrency.format(Math.round(outstanding));
+
+    $('kpiRevenueSub').innerHTML = `<span class="rg-kpi__delta--up">across ${months} month${months === 1 ? '' : 's'}</span>`;
+    $('kpiJobsSub').textContent  = `${uniqueCustomers} unique customers`;
+    $('kpiAvgSub').textContent   = `per completed job`;
+    $('kpiARSub').innerHTML      = outstandingCount > 0
+      ? `<span class="rg-kpi__delta--warn">${outstandingCount} invoice${outstandingCount === 1 ? '' : 's'} unpaid</span>`
+      : `all paid up`;
+  };
+
+  const uniqueMonthsSorted = (rs) => {
+    const set = new Map();
+    rs.forEach((r) => {
+      const key = `${r.date.getFullYear()}-${String(r.date.getMonth() + 1).padStart(2, '0')}`;
+      if (!set.has(key)) set.set(key, new Date(r.date.getFullYear(), r.date.getMonth(), 1));
+    });
+    return [...set.values()].sort((a, b) => a - b);
+  };
+
+  const renderLineChart = () => {
+    const allMonths = uniqueMonthsSorted(rows);
+    const monthsToShow = allMonths.slice(-6);
+    lineRangeLabel.textContent = monthsToShow.length === allMonths.length
+      ? `All ${allMonths.length} month${allMonths.length === 1 ? '' : 's'}`
+      : `Last ${monthsToShow.length} months`;
+
+    const totalsByMonth = monthsToShow.map((m) =>
+      rows
+        .filter((r) => r.date.getFullYear() === m.getFullYear() && r.date.getMonth() === m.getMonth())
+        .reduce((a, r) => a + r.total, 0)
+    );
+
+    const labels = monthsToShow.map(fmtMonthYr);
+    const ctx = $('lineChart').getContext('2d');
+
+    const grad = ctx.createLinearGradient(0, 0, 0, 200);
+    grad.addColorStop(0, 'rgba(74, 124, 78, 0.28)');
+    grad.addColorStop(1, 'rgba(74, 124, 78, 0.0)');
+
+    if (charts.line) charts.line.destroy();
+    charts.line = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Revenue',
+          data: totalsByMonth,
+          borderColor: C.greenDk,
+          backgroundColor: grad,
+          borderWidth: 2.5,
+          fill: true,
+          tension: 0.35,
+          pointBackgroundColor: C.greenDk,
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: C.greenDk,
+            titleColor: C.cream,
+            bodyColor: C.cream,
+            padding: 10,
+            cornerRadius: 6,
+            displayColors: false,
+            callbacks: {
+              title: (items) => fmtMonthLong(monthsToShow[items[0].dataIndex]),
+              label: (ctx) => `Revenue: ${fmtCurrency.format(ctx.parsed.y)}`,
+            },
+          },
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            border: { color: C.line },
+            ticks: { color: C.inkDim, font: { size: 11 } },
+          },
+          y: {
+            beginAtZero: true,
+            grid: { color: C.line, drawBorder: false },
+            border: { display: false },
+            ticks: {
+              color: C.inkDim,
+              font: { size: 11 },
+              callback: (v) => fmtCurrency.format(v),
+            },
+          },
+        },
+      },
+    });
+  };
+
+  const renderBarChart = () => {
+    const byService = new Map();
+    rows.forEach((r) => byService.set(r.service, (byService.get(r.service) || 0) + r.total));
+    const known = ['Lawn Care', 'Hardscaping', 'Irrigation', 'Consultation'];
+    const orderedKeys = [
+      ...known.filter((k) => byService.has(k)),
+      ...[...byService.keys()].filter((k) => !known.includes(k))
+        .sort((a, b) => byService.get(b) - byService.get(a)),
+    ];
+    const labels = orderedKeys;
+    const data = orderedKeys.map((k) => byService.get(k));
+    const colors = orderedKeys.map((k, i) => SERVICE_COLORS[k] || FALLBACK_PALETTE[i % FALLBACK_PALETTE.length]);
+
+    if (charts.bar) charts.bar.destroy();
+    charts.bar = new Chart($('barChart').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Revenue',
+          data,
+          backgroundColor: colors,
+          borderRadius: 6,
+          borderSkipped: false,
+          maxBarThickness: 56,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: C.greenDk,
+            titleColor: C.cream,
+            bodyColor: C.cream,
+            padding: 10,
+            cornerRadius: 6,
+            displayColors: false,
+            callbacks: {
+              label: (ctx) => `Revenue: ${fmtCurrency.format(ctx.parsed.y)}`,
+            },
+          },
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            border: { color: C.line },
+            ticks: { color: C.inkDim, font: { size: 11 } },
+          },
+          y: {
+            beginAtZero: true,
+            grid: { color: C.line, drawBorder: false },
+            border: { display: false },
+            ticks: {
+              color: C.inkDim,
+              font: { size: 11 },
+              callback: (v) => fmtCurrency.format(v),
+            },
+          },
+        },
+      },
+    });
+  };
+
+  const renderDonutChart = () => {
+    const byCustomer = new Map();
+    rows.forEach((r) => byCustomer.set(r.customer, (byCustomer.get(r.customer) || 0) + r.total));
+    const sorted = [...byCustomer.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5);
+    const labels = sorted.map((s) => s[0]);
+    const data = sorted.map((s) => s[1]);
+    const palette = [C.greenDk, C.green, C.tanDk, C.tan, C.inkFaint];
+
+    if (charts.donut) charts.donut.destroy();
+    charts.donut = new Chart($('donutChart').getContext('2d'), {
+      type: 'doughnut',
+      data: {
+        labels,
+        datasets: [{
+          data,
+          backgroundColor: palette.slice(0, sorted.length),
+          borderColor: '#fff',
+          borderWidth: 2,
+          hoverOffset: 6,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '62%',
+        layout: { padding: { left: 4, right: 4 } },
+        plugins: {
+          legend: {
+            position: 'right',
+            labels: {
+              color: C.ink,
+              font: { size: 11 },
+              boxWidth: 10,
+              boxHeight: 10,
+              padding: 8,
+              usePointStyle: true,
+              pointStyle: 'circle',
+              generateLabels: (chart) => {
+                const ds = chart.data.datasets[0];
+                const total = ds.data.reduce((a, b) => a + b, 0);
+                return chart.data.labels.map((label, i) => {
+                  const v = ds.data[i];
+                  const pct = total ? Math.round((v / total) * 100) : 0;
+                  return {
+                    text: `${truncate(label, 18)}  ${pct}%`,
+                    fillStyle: ds.backgroundColor[i],
+                    strokeStyle: ds.backgroundColor[i],
+                    pointStyle: 'circle',
+                    index: i,
+                  };
+                });
+              },
+            },
+          },
+          tooltip: {
+            backgroundColor: C.greenDk,
+            titleColor: C.cream,
+            bodyColor: C.cream,
+            padding: 10,
+            cornerRadius: 6,
+            callbacks: {
+              label: (ctx) => ` ${ctx.label}: ${fmtCurrency.format(ctx.parsed)}`,
+            },
+          },
+        },
+      },
+    });
+  };
+
+  const truncate = (s, n) => (s.length > n ? s.slice(0, n - 1) + '…' : s);
+
+  // ───────────── Table ─────────────
+  const renderTable = () => {
+    const sorted = [...rows].sort((a, b) => {
+      const av = a[sortKey];
+      const bv = b[sortKey];
+      let cmp;
+      if (av instanceof Date && bv instanceof Date) cmp = av - bv;
+      else if (typeof av === 'number' && typeof bv === 'number') cmp = av - bv;
+      else cmp = String(av).localeCompare(String(bv));
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+    jobsBody.innerHTML = sorted.map((r) => {
+      const isOutstanding = /outstanding|unpaid|due/i.test(r.status);
+      const pillCls = isOutstanding ? 'rg-pill rg-pill--warn' : 'rg-pill';
+      return `
+        <tr>
+          <td>${fmtDateShort(r.date)}</td>
+          <td class="cust">${escapeHtml(r.customer)}</td>
+          <td>${escapeHtml(r.service)}</td>
+          <td class="num">${r.hours.toFixed(1)}</td>
+          <td class="num">${fmtCurrency.format(Math.round(r.materials))}</td>
+          <td class="num"><strong>${fmtCurrency.format(Math.round(r.total))}</strong></td>
+          <td><span class="${pillCls}">${escapeHtml(r.status)}</span></td>
+        </tr>`;
+    }).join('');
+
+    jobsTable.querySelectorAll('thead th').forEach((th) => {
+      const key = th.dataset.key;
+      const arrow = th.querySelector('.sort-arrow');
+      th.classList.toggle('is-sorted', key === sortKey);
+      if (arrow) arrow.textContent = key === sortKey ? (sortDir === 'asc' ? '▲' : '▼') : '↕';
+    });
+  };
+
+  const escapeHtml = (s) => String(s).replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  }[c]));
+
+  // ───────────── Wire up events ─────────────
+  // Drag & drop
+  ['dragenter', 'dragover'].forEach((evt) => {
+    dropzone.addEventListener(evt, (e) => {
+      e.preventDefault(); e.stopPropagation();
+      dropzone.classList.add('is-active');
+    });
+  });
+  ['dragleave', 'drop'].forEach((evt) => {
+    dropzone.addEventListener(evt, (e) => {
+      e.preventDefault(); e.stopPropagation();
+      if (evt === 'dragleave' && dropzone.contains(e.relatedTarget)) return;
+      dropzone.classList.remove('is-active');
+    });
+  });
+  dropzone.addEventListener('drop', (e) => {
+    const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (file) handleFile(file);
+  });
+  // Don't let a stray drop on the rest of the document navigate away
+  ['dragover', 'drop'].forEach((evt) => {
+    window.addEventListener(evt, (e) => { e.preventDefault(); }, false);
+  });
+
+  // Click to browse
+  dropzone.addEventListener('click', (e) => {
+    if (e.target.closest('button')) return;
+    filePicker.click();
+  });
+  dropzone.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      filePicker.click();
+    }
+  });
+  filePicker.addEventListener('change', (e) => {
+    const f = e.target.files && e.target.files[0];
+    if (f) handleFile(f);
+    filePicker.value = '';
+  });
+
+  // Sample data
+  loadSampleBtn.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    try {
+      const resp = await fetch('../samples/rivera-jobs.csv');
+      if (!resp.ok) throw new Error('fetch failed: ' + resp.status);
+      const text = await resp.text();
+      ingestCsvText(text, 'rivera-jobs.csv');
+    } catch (err) {
+      console.warn('Sample fetch failed, using inline fallback.', err);
+      ingestCsvText(INLINE_SAMPLE_CSV, 'rivera-jobs.csv');
+    }
+  });
+
+  // "+ Add another CSV" — open the same file picker; ingestCsvText will dedupe
+  addCsvBtn.addEventListener('click', () => filePicker.click());
+
+  // "demo: another week" — progressive: each click loads the next weekly export.
+  // Every batch overlaps with the prior one (so dedupe story keeps landing) plus
+  // adds 3–4 truly new jobs. After 5 batches, button disables until Reset.
+  addDemoBtn.addEventListener('click', async () => {
+    if (demoIdx >= DEMO_BATCHES.length) {
+      showToast(`<b>Out of demo data</b> <span class="tdim">click Reset to start over</span>`, 'info');
+      return;
+    }
+    const batch = DEMO_BATCHES[demoIdx];
+    demoIdx++;
+    try {
+      const resp = await fetch(batch.fetchPath);
+      if (!resp.ok) throw new Error('fetch failed: ' + resp.status);
+      const text = await resp.text();
+      ingestCsvText(text, batch.name);
+    } catch (err) {
+      console.warn(`${batch.name} fetch failed, using inline fallback.`, err);
+      ingestCsvText(batch.csv, batch.name);
+    }
+    // Update label to hint how many demo weeks remain
+    const left = DEMO_BATCHES.length - demoIdx;
+    if (left > 0) {
+      addDemoBtn.textContent = `demo: another week (${left} left)`;
+    } else {
+      addDemoBtn.textContent = 'demo: out of weeks';
+      addDemoBtn.disabled = true;
+    }
+  });
+
+  // Reset
+  resetBtn.addEventListener('click', () => showEmpty());
+
+  // Sortable headers
+  jobsTable.querySelectorAll('thead th').forEach((th) => {
+    th.addEventListener('click', () => {
+      const key = th.dataset.key;
+      if (!key) return;
+      if (sortKey === key) {
+        sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+      } else {
+        sortKey = key;
+        sortDir = (key === 'date' || key === 'total' || key === 'hours' || key === 'materials') ? 'desc' : 'asc';
+      }
+      renderTable();
+    });
+  });
+
+  // ───────────── Inline sample (fallback if fetch is blocked, e.g. file://) ─────────────
+  const INLINE_SAMPLE_CSV = `date,customer,service,hours,materials,total,status
+2025-11-04,The Pemberton Estate,Hardscaping,12.5,2840.00,4215.00,Paid
+2025-11-08,Walgrove HOA,Lawn Care,4.0,85.00,425.00,Paid
+2025-11-12,Marcus Reilly,Irrigation,6.5,720.00,1490.00,Paid
+2025-11-15,Walgrove HOA,Lawn Care,4.0,85.00,425.00,Paid
+2025-11-18,Sandra Yu,Lawn Care,2.5,40.00,225.00,Paid
+2025-11-22,Walgrove HOA,Lawn Care,4.0,85.00,425.00,Paid
+2025-11-26,Cedar Ridge Apartments,Lawn Care,8.0,160.00,840.00,Paid
+2025-12-02,The Pemberton Estate,Lawn Care,5.0,95.00,520.00,Paid
+2025-12-09,Bartlett Family,Hardscaping,18.0,3960.00,5640.00,Paid
+2025-12-13,Walgrove HOA,Lawn Care,4.0,85.00,425.00,Paid
+2025-12-15,Marcus Reilly,Lawn Care,2.5,40.00,225.00,Paid
+2025-12-19,Sandra Yu,Consultation,1.5,0.00,180.00,Paid
+2026-01-08,Walgrove HOA,Lawn Care,4.0,85.00,425.00,Paid
+2026-01-14,Cedar Ridge Apartments,Lawn Care,8.0,160.00,840.00,Paid
+2026-01-22,Bartlett Family,Irrigation,9.5,1180.00,2225.00,Paid
+2026-01-28,The Pemberton Estate,Lawn Care,5.0,95.00,520.00,Paid
+2026-02-04,Walgrove HOA,Lawn Care,4.0,85.00,425.00,Paid
+2026-02-09,Sandra Yu,Lawn Care,2.5,40.00,225.00,Paid
+2026-02-15,Cedar Ridge Apartments,Lawn Care,8.0,160.00,840.00,Paid
+2026-02-22,Marcus Reilly,Hardscaping,16.0,3420.00,4980.00,Paid
+2026-03-03,The Pemberton Estate,Hardscaping,22.0,4180.00,6480.00,Paid
+2026-03-07,Walgrove HOA,Lawn Care,4.0,85.00,425.00,Paid
+2026-03-12,Bartlett Family,Lawn Care,3.5,55.00,290.00,Paid
+2026-03-19,Cedar Ridge Apartments,Lawn Care,8.0,160.00,840.00,Paid
+2026-03-25,Sandra Yu,Lawn Care,2.5,40.00,225.00,Outstanding
+2026-04-02,Walgrove HOA,Lawn Care,4.0,85.00,425.00,Paid
+2026-04-09,Marcus Reilly,Irrigation,5.5,640.00,1310.00,Paid
+2026-04-15,The Pemberton Estate,Lawn Care,5.0,95.00,520.00,Outstanding
+2026-04-21,Bartlett Family,Hardscaping,14.5,2960.00,4480.00,Outstanding
+2026-04-28,Cedar Ridge Apartments,Lawn Care,8.0,160.00,840.00,Paid
+`;
+
+  // ───────────── Inline weekly demo CSVs (fallbacks if fetch is blocked, e.g. file://) ─────────────
+  // Each batch mirrors the previous week's "new" rows (so dedupe always has something
+  // to catch) and adds 3–4 truly new jobs to demonstrate progressive ingest.
+  const INLINE_WEEK2_CSV = `date,customer,service,hours,materials,total,status
+2026-03-19,Cedar Ridge Apartments,Lawn Care,8.0,160.00,840.00,Paid
+2026-03-25,Sandra Yu,Lawn Care,2.5,40.00,225.00,Outstanding
+2026-04-02,Walgrove HOA,Lawn Care,4.0,85.00,425.00,Paid
+2026-04-09,Marcus Reilly,Irrigation,5.5,640.00,1310.00,Paid
+2026-04-15,The Pemberton Estate,Lawn Care,5.0,95.00,520.00,Outstanding
+2026-04-21,Bartlett Family,Hardscaping,14.5,2960.00,4480.00,Outstanding
+2026-04-28,Cedar Ridge Apartments,Lawn Care,8.0,160.00,840.00,Paid
+2026-05-04,Linda Park,Lawn Care,3.5,55.00,295.00,Paid
+2026-05-04,Walgrove HOA,Lawn Care,4.0,85.00,425.00,Paid
+2026-05-06,The Pemberton Estate,Hardscaping,9.0,1420.00,2680.00,Paid
+2026-05-07,Marcus Reilly,Lawn Care,2.5,40.00,225.00,Paid
+2026-05-09,Bartlett Family,Irrigation,7.5,890.00,1745.00,Outstanding
+2026-05-11,Sandra Yu,Consultation,1.0,0.00,150.00,Paid
+`;
+
+  const INLINE_WEEK3_CSV = `date,customer,service,hours,materials,total,status
+2026-05-04,Walgrove HOA,Lawn Care,4.0,85.00,425.00,Paid
+2026-05-06,The Pemberton Estate,Hardscaping,9.0,1420.00,2680.00,Paid
+2026-05-07,Marcus Reilly,Lawn Care,2.5,40.00,225.00,Paid
+2026-05-09,Bartlett Family,Irrigation,7.5,890.00,1745.00,Outstanding
+2026-05-11,Sandra Yu,Consultation,1.0,0.00,150.00,Paid
+2026-05-13,Cedar Ridge Apartments,Lawn Care,8.0,160.00,840.00,Paid
+2026-05-14,Walgrove HOA,Lawn Care,4.0,85.00,425.00,Paid
+2026-05-16,The Pemberton Estate,Lawn Care,5.0,95.00,520.00,Paid
+2026-05-18,Marcus Reilly,Hardscaping,11.5,2120.00,3340.00,Paid
+`;
+
+  const INLINE_WEEK4_CSV = `date,customer,service,hours,materials,total,status
+2026-05-13,Cedar Ridge Apartments,Lawn Care,8.0,160.00,840.00,Paid
+2026-05-14,Walgrove HOA,Lawn Care,4.0,85.00,425.00,Paid
+2026-05-16,The Pemberton Estate,Lawn Care,5.0,95.00,520.00,Paid
+2026-05-18,Marcus Reilly,Hardscaping,11.5,2120.00,3340.00,Paid
+2026-05-20,Sandra Yu,Lawn Care,2.5,40.00,225.00,Paid
+2026-05-22,Bartlett Family,Irrigation,6.5,820.00,1680.00,Paid
+2026-05-23,Walgrove HOA,Lawn Care,4.0,85.00,425.00,Paid
+2026-05-25,The Pemberton Estate,Hardscaping,16.0,3240.00,4920.00,Outstanding
+`;
+
+  const INLINE_WEEK5_CSV = `date,customer,service,hours,materials,total,status
+2026-05-20,Sandra Yu,Lawn Care,2.5,40.00,225.00,Paid
+2026-05-22,Bartlett Family,Irrigation,6.5,820.00,1680.00,Paid
+2026-05-23,Walgrove HOA,Lawn Care,4.0,85.00,425.00,Paid
+2026-05-25,The Pemberton Estate,Hardscaping,16.0,3240.00,4920.00,Outstanding
+2026-05-27,Cedar Ridge Apartments,Lawn Care,8.0,160.00,840.00,Paid
+2026-05-29,Marcus Reilly,Irrigation,4.5,520.00,980.00,Paid
+2026-06-01,Walgrove HOA,Lawn Care,4.0,85.00,425.00,Paid
+2026-06-03,Bartlett Family,Hardscaping,18.0,3680.00,5340.00,Outstanding
+`;
+
+  const INLINE_WEEK6_CSV = `date,customer,service,hours,materials,total,status
+2026-05-27,Cedar Ridge Apartments,Lawn Care,8.0,160.00,840.00,Paid
+2026-05-29,Marcus Reilly,Irrigation,4.5,520.00,980.00,Paid
+2026-06-01,Walgrove HOA,Lawn Care,4.0,85.00,425.00,Paid
+2026-06-03,Bartlett Family,Hardscaping,18.0,3680.00,5340.00,Outstanding
+2026-06-04,Sandra Yu,Lawn Care,2.5,40.00,225.00,Paid
+2026-06-06,The Pemberton Estate,Lawn Care,5.0,95.00,520.00,Paid
+2026-06-08,Marcus Reilly,Hardscaping,13.0,2480.00,3760.00,Paid
+2026-06-10,Walgrove HOA,Lawn Care,4.0,85.00,425.00,Paid
+`;
+
+  // Registry of weekly batches the demo button cycles through, in order
+  const DEMO_BATCHES = [
+    { name: 'rivera-jobs-week2.csv', csv: INLINE_WEEK2_CSV, fetchPath: '../samples/rivera-jobs-week2.csv' },
+    { name: 'rivera-jobs-week3.csv', csv: INLINE_WEEK3_CSV, fetchPath: '../samples/rivera-jobs-week3.csv' },
+    { name: 'rivera-jobs-week4.csv', csv: INLINE_WEEK4_CSV, fetchPath: '../samples/rivera-jobs-week4.csv' },
+    { name: 'rivera-jobs-week5.csv', csv: INLINE_WEEK5_CSV, fetchPath: '../samples/rivera-jobs-week5.csv' },
+    { name: 'rivera-jobs-week6.csv', csv: INLINE_WEEK6_CSV, fetchPath: '../samples/rivera-jobs-week6.csv' },
+  ];
+
+  // Initial state
+  showEmpty();
+})();
+</script>
+</body>
+</html>

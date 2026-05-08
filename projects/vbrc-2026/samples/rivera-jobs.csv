@@ -1,0 +1,31 @@
+date,customer,service,hours,materials,total,status
+2025-11-04,The Pemberton Estate,Hardscaping,12.5,2840.00,4215.00,Paid
+2025-11-08,Walgrove HOA,Lawn Care,4.0,85.00,425.00,Paid
+2025-11-12,Marcus Reilly,Irrigation,6.5,720.00,1490.00,Paid
+2025-11-15,Walgrove HOA,Lawn Care,4.0,85.00,425.00,Paid
+2025-11-18,Sandra Yu,Lawn Care,2.5,40.00,225.00,Paid
+2025-11-22,Walgrove HOA,Lawn Care,4.0,85.00,425.00,Paid
+2025-11-26,Cedar Ridge Apartments,Lawn Care,8.0,160.00,840.00,Paid
+2025-12-02,The Pemberton Estate,Lawn Care,5.0,95.00,520.00,Paid
+2025-12-09,Bartlett Family,Hardscaping,18.0,3960.00,5640.00,Paid
+2025-12-13,Walgrove HOA,Lawn Care,4.0,85.00,425.00,Paid
+2025-12-15,Marcus Reilly,Lawn Care,2.5,40.00,225.00,Paid
+2025-12-19,Sandra Yu,Consultation,1.5,0.00,180.00,Paid
+2026-01-08,Walgrove HOA,Lawn Care,4.0,85.00,425.00,Paid
+2026-01-14,Cedar Ridge Apartments,Lawn Care,8.0,160.00,840.00,Paid
+2026-01-22,Bartlett Family,Irrigation,9.5,1180.00,2225.00,Paid
+2026-01-28,The Pemberton Estate,Lawn Care,5.0,95.00,520.00,Paid
+2026-02-04,Walgrove HOA,Lawn Care,4.0,85.00,425.00,Paid
+2026-02-09,Sandra Yu,Lawn Care,2.5,40.00,225.00,Paid
+2026-02-15,Cedar Ridge Apartments,Lawn Care,8.0,160.00,840.00,Paid
+2026-02-22,Marcus Reilly,Hardscaping,16.0,3420.00,4980.00,Paid
+2026-03-03,The Pemberton Estate,Hardscaping,22.0,4180.00,6480.00,Paid
+2026-03-07,Walgrove HOA,Lawn Care,4.0,85.00,425.00,Paid
+2026-03-12,Bartlett Family,Lawn Care,3.5,55.00,290.00,Paid
+2026-03-19,Cedar Ridge Apartments,Lawn Care,8.0,160.00,840.00,Paid
+2026-03-25,Sandra Yu,Lawn Care,2.5,40.00,225.00,Outstanding
+2026-04-02,Walgrove HOA,Lawn Care,4.0,85.00,425.00,Paid
+2026-04-09,Marcus Reilly,Irrigation,5.5,640.00,1310.00,Paid
+2026-04-15,The Pemberton Estate,Lawn Care,5.0,95.00,520.00,Outstanding
+2026-04-21,Bartlett Family,Hardscaping,14.5,2960.00,4480.00,Outstanding
+2026-04-28,Cedar Ridge Apartments,Lawn Care,8.0,160.00,840.00,Paid

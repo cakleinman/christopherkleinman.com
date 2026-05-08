@@ -226,8 +226,8 @@ a:focus:not(:focus-visible) {
   user-select: none;
 }
 
-/* OPORD scroll progress bar */
-.opord-bar {
+/* Scroll progress bar */
+.scroll-progress {
   position: fixed;
   left: 0;
   top: 0;
@@ -237,66 +237,21 @@ a:focus:not(:focus-visible) {
   background: var(--border);
   display: flex;
   flex-direction: column;
-  transition: width 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.opord-bar:hover {
-  width: 5px;
-}
-
-.opord-segment {
+.scroll-progress-segment {
   flex: 1;
   position: relative;
   overflow: hidden;
 }
 
-.opord-segment::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: var(--accent);
-  transform: scaleY(0);
-  transform-origin: top;
-  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.opord-segment.filled::after {
-  transform: scaleY(1);
-}
-
-.opord-segment.partial::after {
-  transform-origin: top;
-}
-
-/* Segment labels on hover */
-.opord-label {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-family: var(--font-mono);
-  font-size: 0.55rem;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text-quaternary);
-  white-space: nowrap;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-  pointer-events: none;
-}
-
-.opord-bar:hover .opord-label {
-  opacity: 1;
-}
-
 /* Tick marks between segments */
-.opord-segment + .opord-segment {
+.scroll-progress-segment + .scroll-progress-segment {
   border-top: 1px solid var(--bg);
 }
 
 @media (max-width: 768px) {
-  .opord-bar { display: none; }
+  .scroll-progress { display: none; }
 }
 
 .section-title {
@@ -1499,7 +1454,7 @@ a:focus:not(:focus-visible) {
   /* Hide chrome, navigation, decoration, and interactive controls */
   .nav,
   .nav-mobile,
-  .opord-bar,
+  .scroll-progress,
   .theme-toggle,
   .nav-hamburger,
   .hero-cta,
@@ -1622,4 +1577,190 @@ a:focus:not(:focus-visible) {
     margin-bottom: 6pt !important;
     page-break-inside: avoid;
   }
+
+  /* Don't print the talk promo */
+  .talk-promo { display: none !important; }
+}
+
+/* ============================================
+   TALK PROMO — VBRC 2026
+   Featured banner section pinned to the top of the page above
+   the hero. Surfaces the deck and 5 starter-code downloads.
+   Removable: delete this section + the corresponding HTML block.
+   ============================================ */
+.talk-promo {
+  position: relative;
+  background: var(--bg-alt);
+  border-bottom: 1px solid var(--border);
+  padding: var(--space-16) 0 var(--space-12);
+  margin-top: var(--nav-h);
+  overflow: hidden;
+}
+.talk-promo::before {
+  /* Soft accent glow, matching the site's hero treatment */
+  content: '';
+  position: absolute;
+  top: -240px;
+  right: -180px;
+  width: 720px;
+  height: 720px;
+  background: radial-gradient(closest-side, rgba(58, 101, 217, 0.10), transparent);
+  pointer-events: none;
+  z-index: 0;
+}
+[data-theme="dark"] .talk-promo::before {
+  background: radial-gradient(closest-side, rgba(79, 123, 247, 0.12), transparent);
+}
+.talk-promo > .container {
+  position: relative;
+  z-index: 1;
+}
+
+.talk-promo__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+  margin-bottom: var(--space-5);
+}
+.talk-promo__eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  font-weight: 500;
+}
+.talk-promo__title {
+  font-size: clamp(2rem, 4.5vw, 3.2rem);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
+  margin-bottom: var(--space-4);
+  max-width: 880px;
+}
+.talk-promo__title .accent { color: var(--accent); }
+.talk-promo__sub {
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: var(--text-secondary);
+  max-width: 720px;
+  margin-bottom: var(--space-8);
+}
+
+.talk-promo__cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+  margin-bottom: var(--space-10);
+}
+.talk-promo__cta-row .btn { font-size: 0.95rem; padding: 14px 22px; }
+.talk-promo__hint {
+  font-size: 0.85rem;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  letter-spacing: 0.02em;
+}
+
+.talk-promo__downloads-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+  padding-top: var(--space-6);
+  border-top: 1px dashed var(--border);
+}
+.talk-promo__downloads-label .label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+.talk-promo__downloads-label .desc {
+  font-size: 0.85rem;
+  color: var(--text-tertiary);
+}
+.talk-promo__downloads {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-3);
+}
+.talk-dl {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  color: var(--text-primary);
+  transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  position: relative;
+  overflow: hidden;
+}
+.talk-dl::before {
+  /* Category accent bar, like the project cards */
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--accent);
+  opacity: 0.7;
+  transition: opacity 0.15s ease;
+}
+.talk-dl:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  background: var(--bg-surface);
+}
+.talk-dl:hover::before { opacity: 1; }
+.talk-dl__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px; height: 32px;
+  border-radius: var(--radius-sm);
+  background: rgba(58, 101, 217, 0.08);
+  color: var(--accent);
+  flex-shrink: 0;
+}
+[data-theme="dark"] .talk-dl__icon { background: rgba(79, 123, 247, 0.12); }
+.talk-dl__icon svg { width: 16px; height: 16px; }
+.talk-dl__body { flex: 1; min-width: 0; }
+.talk-dl__name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  display: block;
+  margin-bottom: 2px;
+}
+.talk-dl__meta {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-tertiary);
+  letter-spacing: 0.02em;
+}
+.talk-dl__arrow {
+  color: var(--text-quaternary);
+  flex-shrink: 0;
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+.talk-dl:hover .talk-dl__arrow {
+  color: var(--accent);
+  transform: translate(2px, -2px);
+}
+
+@media (max-width: 640px) {
+  .talk-promo { padding: var(--space-12) 0 var(--space-10); }
+  .talk-promo__cta-row { flex-direction: column; align-items: stretch; }
+  .talk-promo__cta-row .btn { justify-content: center; }
+  .talk-promo__downloads { grid-template-columns: 1fr; }
+  .talk-promo__downloads-label { flex-direction: column; align-items: flex-start; gap: var(--space-2); }
 }

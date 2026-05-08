@@ -1,0 +1,838 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>OPOSSUMS ARE S-TIER</title>
+  <link rel="stylesheet" href="vendor/reveal.css" />
+  <style>
+    :root {
+      --black: #07070a;
+      --ink:   #0e0e14;
+      --white: #ffffff;
+      --green: #2bff00;
+      --amber: #ffb000;
+      --cyan:  #00e5ff;
+      --red:   #ff2a2a;
+      --pink:  #ff6bda;
+      --beat-ms: 488ms; /* 123 BPM, detected from Villain Season.mp3 */
+      --bar-ms: 1952ms; /* 4 beats */
+      --ticker-h: 44px;
+      --font-head: "Impact", "Haettenschweiler", "Arial Narrow Bold", "Helvetica Neue", Arial, sans-serif;
+      --font-body: "Helvetica Neue", Arial, sans-serif;
+      --font-mono: "SFMono-Regular", "Menlo", "Consolas", monospace;
+    }
+
+    html, body { background: var(--black); color: var(--white); margin: 0; padding: 0; height: 100%; overflow: hidden; }
+
+    .reveal {
+      font-family: var(--font-body);
+      letter-spacing: 0.02em;
+      color: var(--white);
+      position: absolute !important;
+      top: 0; left: 0; right: 0;
+      bottom: var(--ticker-h);
+      width: auto !important;
+      height: auto !important;
+    }
+
+    .reveal h1, .reveal h2, .reveal h3 {
+      font-family: var(--font-head);
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      margin: 0;
+      color: var(--white);
+      text-shadow: 0 14px 40px rgba(0,0,0,0.75);
+      line-height: 0.92;
+    }
+
+    .reveal h1 { font-size: 6.4em; }
+    .reveal h2 { font-size: 4.4em; }
+    .reveal h3 { font-size: 2.4em; }
+
+    .reveal p { font-size: 1.5em; color: var(--white); text-shadow: 0 8px 26px rgba(0,0,0,0.7); }
+
+    /* ---------- color accents ---------- */
+    .accent-green { color: var(--green); }
+    .accent-amber { color: var(--amber); }
+    .accent-cyan  { color: var(--cyan); }
+    .accent-red   { color: var(--red); }
+    .accent-pink  { color: var(--pink); }
+
+    /* gradient fills for big numbers */
+    .grad-green { background: linear-gradient(180deg, #d4ffc9 0%, var(--green) 60%, #0fbf00 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .grad-amber { background: linear-gradient(180deg, #fff1cc 0%, var(--amber) 55%, #b56b00 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .grad-cyan  { background: linear-gradient(180deg, #d6fbff 0%, var(--cyan) 55%, #006a7a 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .grad-red   { background: linear-gradient(180deg, #ffd1d1 0%, var(--red) 55%, #800000 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .grad-pink  { background: linear-gradient(180deg, #ffd5f1 0%, var(--pink) 55%, #a03a85 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+    /* ---------- text effects ---------- */
+    .stroke {
+      -webkit-text-stroke: 3px var(--white);
+      text-stroke: 3px var(--white);
+      color: transparent;
+      paint-order: stroke fill;
+    }
+    .stroke-green { -webkit-text-stroke-color: var(--green); }
+    .stroke-amber { -webkit-text-stroke-color: var(--amber); }
+    .stroke-cyan  { -webkit-text-stroke-color: var(--cyan); }
+    .stroke-red   { -webkit-text-stroke-color: var(--red); }
+    .stroke-pink  { -webkit-text-stroke-color: var(--pink); }
+
+    /* ---------- glitch ---------- */
+    .glitch { position: relative; display: inline-block; }
+    .glitch::before, .glitch::after {
+      content: attr(data-text);
+      position: absolute; inset: 0;
+      pointer-events: none;
+    }
+    .glitch::before {
+      color: var(--cyan);
+      animation: glitch-a 1.6s steps(8, end) infinite;
+      clip-path: polygon(0 0, 100% 0, 100% 38%, 0 38%);
+      transform: translate(-3px, -2px);
+      mix-blend-mode: screen;
+    }
+    .glitch::after {
+      color: var(--red);
+      animation: glitch-b 1.6s steps(8, end) infinite reverse;
+      clip-path: polygon(0 62%, 100% 62%, 100% 100%, 0 100%);
+      transform: translate(3px, 2px);
+      mix-blend-mode: screen;
+    }
+    @keyframes glitch-a { 0%,90%,100% { transform: translate(-3px,-2px); } 30% { transform: translate(-6px,-1px); } 60% { transform: translate(-2px,-3px); } }
+    @keyframes glitch-b { 0%,90%,100% { transform: translate(3px,2px); }   30% { transform: translate(6px,1px); }    60% { transform: translate(2px,3px); } }
+
+    /* ---------- beat-driven pulse ---------- */
+    /* Drives a subtle 1-beat scale pulse on .pulse elements. */
+    .pulse { animation: beat-pulse var(--beat-ms) ease-out infinite; transform-origin: center; }
+    @keyframes beat-pulse {
+      0%   { transform: scale(1.00); filter: brightness(1.00); }
+      8%   { transform: scale(1.04); filter: brightness(1.18); }
+      40%  { transform: scale(1.00); filter: brightness(1.00); }
+      100% { transform: scale(1.00); filter: brightness(1.00); }
+    }
+
+    /* full-screen radial flash that fires on every major musical pop */
+    .flash-overlay {
+      position: fixed; inset: 0; z-index: 70;
+      pointer-events: none;
+      opacity: 0;
+      mix-blend-mode: screen;
+      background: radial-gradient(ellipse at 50% 50%, rgba(255,255,255,0.7) 0%, transparent 60%);
+      will-change: opacity;
+    }
+
+    /* whole-deck low-amplitude vignette pulse, on the bar */
+    .vignette {
+      position: fixed; inset: 0; pointer-events: none; z-index: 50;
+      box-shadow: inset 0 0 240px rgba(0,0,0,0.85);
+      animation: vignette-pulse var(--bar-ms) ease-in-out infinite;
+    }
+    @keyframes vignette-pulse {
+      0%, 100% { box-shadow: inset 0 0 240px rgba(0,0,0,0.85); }
+      6%       { box-shadow: inset 0 0 320px rgba(43,255,0,0.15), inset 0 0 240px rgba(0,0,0,0.85); }
+      12%      { box-shadow: inset 0 0 240px rgba(0,0,0,0.85); }
+    }
+
+    /* ---------- background layers ---------- */
+    .slides section {
+      position: relative;
+      height: 100%;
+      padding: 0;
+      background: var(--black);
+      overflow: hidden;
+    }
+
+    .bg {
+      position: absolute; inset: -40px;
+      background-size: cover; background-position: center;
+      background-color: var(--black);
+      filter: contrast(1.10) saturate(1.10) brightness(0.55);
+      transform: scale(1.18);
+      z-index: 0;
+    }
+
+    /* slow ken-burns timed to ~8 bars so it feels musical, not random */
+    .bg-ken { animation: ken var(--bar-ms) linear; animation-duration: calc(var(--bar-ms) * 8); animation-iteration-count: infinite; animation-direction: alternate; animation-timing-function: ease-in-out; }
+    @keyframes ken {
+      0%   { transform: scale(1.18) translate3d(-1.2%, 0.5%, 0); }
+      100% { transform: scale(1.26) translate3d(1.2%, -1.5%, 0); }
+    }
+
+    .overlay {
+      position: absolute; inset: -40px;
+      background: linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.78) 85%);
+      z-index: 1;
+    }
+
+    /* scanline / grid overlay above image, below content */
+    .scan {
+      position: absolute; inset: 0; z-index: 1;
+      background:
+        repeating-linear-gradient(180deg, rgba(255,255,255,0.018) 0 1px, transparent 1px 3px),
+        radial-gradient(ellipse at 50% 50%, transparent 40%, rgba(0,0,0,0.55) 100%);
+      mix-blend-mode: screen;
+      pointer-events: none;
+    }
+
+    /* corner registration ticks — gives every slide a "broadcast" feel */
+    .ticks { position: absolute; inset: 24px; z-index: 3; pointer-events: none; }
+    .ticks::before, .ticks::after,
+    .ticks > span::before, .ticks > span::after {
+      content: ""; position: absolute; width: 22px; height: 22px;
+      border: 2px solid var(--white); opacity: 0.55;
+    }
+    .ticks::before        { top: 0; left: 0; border-right: 0; border-bottom: 0; }
+    .ticks::after         { top: 0; right: 0; border-left: 0; border-bottom: 0; }
+    .ticks > span::before { bottom: 0; left: 0; border-right: 0; border-top: 0; position: absolute; }
+    .ticks > span::after  { bottom: 0; right: 0; border-left: 0; border-top: 0; position: absolute; }
+
+    /* slide index badge */
+    .slug {
+      position: absolute; top: 28px; left: 50%; transform: translateX(-50%);
+      z-index: 4;
+      font-family: var(--font-mono);
+      font-size: 0.85em; letter-spacing: 0.4em;
+      color: rgba(255,255,255,0.6);
+      text-transform: uppercase;
+    }
+    .slug .dot { display: inline-block; width: 8px; height: 8px; background: var(--green); border-radius: 50%; margin: 0 10px 2px; vertical-align: middle; animation: beat-pulse var(--beat-ms) ease-out infinite; }
+
+    /* ---------- panel layouts ---------- */
+    .panel {
+      position: relative; z-index: 2;
+      width: 100%; height: 100%;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: flex-start;
+      padding: 64px 96px 64px;
+      text-align: left;
+    }
+    .center { align-items: center; text-align: center; }
+    .bottom { justify-content: flex-end; padding-bottom: 64px; }
+
+    .stacked { display: flex; flex-direction: column; gap: 6px; }
+    .big-stack { line-height: 0.88; }
+
+    .subtext {
+      font-size: 1.15em; margin-top: 18px; letter-spacing: 0.06em;
+      color: rgba(255,255,255,0.85);
+      max-width: 70ch;
+    }
+    .subtext.mono { font-family: var(--font-mono); font-size: 0.95em; letter-spacing: 0.16em; opacity: 0.75; }
+
+    .tag {
+      font-family: var(--font-mono);
+      font-size: 0.85em; letter-spacing: 0.4em;
+      text-transform: uppercase; opacity: 0.7; margin-bottom: 18px;
+    }
+
+    /* counter */
+    .counter { font-variant-numeric: tabular-nums; }
+
+    /* word cascade list */
+    .stacked-words { display: flex; flex-direction: column; gap: 6px; margin-top: 18px; }
+    .word {
+      font-family: var(--font-head); font-size: 2.4em; letter-spacing: 0.06em;
+      line-height: 1; padding-left: 0.4em;
+      border-left: 6px solid var(--green);
+    }
+    .word:nth-child(2n) { border-color: var(--cyan); }
+    .word:nth-child(3n) { border-color: var(--amber); }
+
+    /* split panel for myth vs reality */
+    .split-panel { position: relative; z-index: 2; width: 100%; height: 100%; display: flex; }
+    .split-left, .split-right {
+      flex: 1; display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      padding: 60px 40px; gap: 14px;
+    }
+    .split-left  { background: linear-gradient(135deg, rgba(255,42,42,0.32) 0%, rgba(0,0,0,0.55) 100%); }
+    .split-right { background: linear-gradient(135deg, rgba(0,0,0,0.55) 0%, rgba(43,255,0,0.32) 100%); }
+    .split-divider {
+      position: absolute; top: 8%; bottom: 8%; left: 50%; width: 2px;
+      background: linear-gradient(180deg, transparent, rgba(255,255,255,0.6), transparent);
+      z-index: 3;
+    }
+    .split-label {
+      font-family: var(--font-head); font-size: 1.6em; letter-spacing: 0.3em;
+      margin-bottom: 18px; opacity: 0.95;
+    }
+    .myth-item, .reality-item {
+      font-family: var(--font-head);
+      font-size: 2.2em; letter-spacing: 0.04em; text-align: center;
+    }
+    .myth-item   { text-decoration: line-through; text-decoration-thickness: 4px; opacity: 0.7; color: #ffd0d0; }
+    .reality-item{ color: #d8ffce; }
+
+    /* stats grid */
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr);
+      gap: 36px; width: 100%; max-width: 1000px;
+    }
+    .stat-item {
+      text-align: center;
+      border: 1px solid rgba(255,255,255,0.12);
+      padding: 28px 18px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0));
+    }
+    .stat-number {
+      font-family: var(--font-head); font-size: 5em; line-height: 1; margin-bottom: 6px;
+    }
+    .stat-label  {
+      font-family: var(--font-mono); font-size: 1em; letter-spacing: 0.25em; opacity: 0.85;
+      text-transform: uppercase;
+    }
+
+    /* CTA box */
+    .cta-text {
+      font-family: var(--font-head); font-size: 2.6em; letter-spacing: 0.1em;
+      margin-top: 30px; padding: 18px 44px;
+      border: 4px solid var(--green);
+      animation: cta-pulse var(--bar-ms) ease-in-out infinite;
+    }
+    @keyframes cta-pulse {
+      0%, 100% { box-shadow: 0 0 0 rgba(43,255,0,0.0), inset 0 0 0 rgba(43,255,0,0); transform: scale(1); }
+      50%      { box-shadow: 0 0 60px rgba(43,255,0,0.55), inset 0 0 24px rgba(43,255,0,0.15); transform: scale(1.02); }
+    }
+
+    /* ---------- fragment animations (snappy, well under one beat) ---------- */
+    .fragment.fly-in   { opacity: 0; transform: translateX(-80px) scale(0.96); }
+    .fragment.fly-in.visible { opacity: 1; transform: translateX(0) scale(1); transition: transform 320ms cubic-bezier(0.2,0.7,0.2,1), opacity 240ms ease; }
+
+    .fragment.snap     { opacity: 0; transform: scale(0.7); }
+    .fragment.snap.visible { opacity: 1; transform: scale(1); transition: transform 260ms cubic-bezier(0.2,0.9,0.2,1.2), opacity 180ms ease; }
+
+    .fragment.pop      { opacity: 0; transform: translateY(40px) scale(0.96); }
+    .fragment.pop.visible { opacity: 1; transform: translateY(0) scale(1); transition: transform 320ms cubic-bezier(0.2,0.8,0.2,1), opacity 220ms ease; }
+
+    .fragment.strike   { opacity: 0; transform: translateX(20px); }
+    .fragment.strike.visible { opacity: 1; transform: translateX(0); transition: transform 260ms cubic-bezier(0.2,0.7,0.2,1), opacity 200ms ease; }
+
+    .fragment.sweep    { opacity: 0; clip-path: inset(0 100% 0 0); }
+    .fragment.sweep.visible { opacity: 1; clip-path: inset(0 0 0 0); transition: clip-path 360ms cubic-bezier(0.2,0.8,0.2,1), opacity 200ms ease; }
+
+    /* ---------- marquee ticker ---------- */
+    .ticker {
+      position: fixed; left: 0; right: 0; bottom: 0;
+      height: var(--ticker-h); z-index: 60;
+      background: rgba(0,0,0,0.88);
+      border-top: 1px solid rgba(255,255,255,0.14);
+      overflow: hidden;
+      font-family: var(--font-mono);
+      font-size: 0.85em; letter-spacing: 0.18em;
+      color: rgba(255,255,255,0.85);
+      text-transform: uppercase;
+      display: flex; align-items: center;
+    }
+    .ticker .track {
+      display: inline-block; white-space: nowrap;
+      padding-left: 100%;
+      animation: ticker-scroll 60s linear infinite;
+      line-height: var(--ticker-h);
+    }
+    .ticker .track span { padding: 0 36px; }
+    .ticker .track span::before { content: "◆"; color: var(--green); margin-right: 10px; }
+    @keyframes ticker-scroll {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-100%); }
+    }
+
+    /* ---------- start prompt ---------- */
+    .start-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,0.88);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+    }
+    .start-overlay .inner {
+      text-align: center; font-family: var(--font-head);
+      letter-spacing: 0.12em;
+    }
+    .start-overlay .big {
+      font-size: 4em; color: var(--green); animation: beat-pulse var(--beat-ms) ease-out infinite;
+    }
+    .start-overlay .sub {
+      font-family: var(--font-mono); font-size: 0.95em; letter-spacing: 0.4em;
+      color: rgba(255,255,255,0.75); margin-top: 18px;
+    }
+
+    @media (max-width: 900px) {
+      .panel { padding: 0 36px; }
+      .bottom { padding-bottom: 60px; }
+      .reveal h1 { font-size: 3.6em; }
+      .reveal h2 { font-size: 2.6em; }
+      .word { font-size: 1.8em; }
+      .split-panel { flex-direction: column; }
+      .split-divider { display: none; }
+      .stats-grid { grid-template-columns: 1fr; gap: 18px; }
+      .stat-number { font-size: 3.4em; }
+      .ticker { height: 28px; font-size: 0.75em; }
+    }
+  </style>
+</head>
+<body>
+  <audio id="ambient-audio" preload="auto">
+    <source src="Villain Season.mp3" type="audio/mpeg">
+  </audio>
+
+  <div class="vignette"></div>
+  <div class="flash-overlay" id="flash"></div>
+
+  <div class="ticker" aria-hidden="true">
+    <div class="track">
+      <span>VIRGINIA OPOSSUM · DIDELPHIS VIRGINIANA</span>
+      <span>NORTH AMERICA'S ONLY MARSUPIAL NORTH OF MEXICO</span>
+      <span>50 TEETH — MOST OF ANY LAND MAMMAL IN N.A.</span>
+      <span>BODY TEMP ~94°F — HOSTILE TO MOST VIRUSES</span>
+      <span>LTNF PEPTIDE NEUTRALIZES SNAKE VENOM</span>
+      <span>LOW-COMPETENCE HOST FOR LYME-CARRYING TICKS</span>
+      <span>INVOLUNTARY DEATH-FEIGN UP TO ~4 HOURS</span>
+      <span>13 TEATS · UP TO 13 JOEYS PER LITTER</span>
+      <span>DIDELPHIDAE LINEAGE: 65–70 MILLION YEARS</span>
+    </div>
+  </div>
+
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- 1 · TITLE -->
+      <section data-transition="zoom" data-hold="1">
+        <div class="bg bg-ken" style="background-image: linear-gradient(135deg, #0a1f12, #07070a);"></div>
+        <div class="overlay" style="background: radial-gradient(ellipse at 50% 60%, rgba(43,255,0,0.18), rgba(0,0,0,0.85) 70%);"></div>
+        <div class="scan"></div>
+        <div class="ticks"><span></span></div>
+        <div class="slug">FILE 00 <span class="dot"></span> A CASE FOR THE OPOSSUM</div>
+        <div class="panel center">
+          <h1 class="big-stack fragment snap">OPOSSUMS</h1>
+          <h1 class="big-stack fragment snap stroke stroke-green">ARE</h1>
+          <h1 class="big-stack fragment snap accent-green glitch pulse" data-text="S-TIER">S-TIER</h1>
+        </div>
+      </section>
+
+      <!-- 2 · HERO -->
+      <section data-transition="fade" data-hold="3">
+        <div class="bg bg-ken" style="background-image: url('Pictures/O1.jpg');"></div>
+        <div class="overlay"></div>
+        <div class="scan"></div>
+        <div class="ticks"><span></span></div>
+        <div class="slug">FILE 01 <span class="dot"></span> SUBJECT</div>
+        <div class="panel bottom">
+          <div class="tag fragment pop">SUBJECT</div>
+          <h2 class="fragment fly-in">VIRGINIA OPOSSUM</h2>
+          <p class="subtext fragment pop accent-green">Didelphis virginiana &nbsp;·&nbsp; harmless &nbsp;·&nbsp; ancient &nbsp;·&nbsp; useful</p>
+        </div>
+      </section>
+
+      <!-- 3 · DEEP TIME -->
+      <section data-transition="slide" data-hold="2">
+        <div class="bg bg-ken" style="background-image: url('Pictures/O3.webp');"></div>
+        <div class="overlay"></div>
+        <div class="scan"></div>
+        <div class="ticks"><span></span></div>
+        <div class="slug">FILE 02 <span class="dot"></span> DEEP TIME</div>
+        <div class="panel center">
+          <h1 class="big-stack fragment snap counter grad-amber" data-count="70">70+</h1>
+          <h1 class="big-stack fragment snap">MILLION YEARS</h1>
+          <p class="subtext fragment pop">Time-tested pedigree. Outlasted the dinosaurs.</p>
+        </div>
+      </section>
+
+      <!-- 4 · ONLY MARSUPIAL -->
+      <section data-transition="slide" data-hold="2">
+        <div class="bg bg-ken" style="background-image: url('Pictures/O2.jpg');"></div>
+        <div class="overlay"></div>
+        <div class="scan"></div>
+        <div class="ticks"><span></span></div>
+        <div class="slug">FILE 03 <span class="dot"></span> RANGE</div>
+        <div class="panel">
+          <h1 class="big-stack fragment fly-in">ONLY</h1>
+          <h1 class="big-stack fragment fly-in stroke stroke-cyan">MARSUPIAL</h1>
+          <h1 class="big-stack fragment fly-in accent-cyan">NORTH OF MEXICO</h1>
+          <p class="subtext fragment pop">Range expanding north as winters warm.</p>
+        </div>
+      </section>
+
+      <!-- 5 · 50 TEETH -->
+      <section data-transition="zoom" data-hold="2">
+        <div class="bg bg-ken" style="background-image: url('Pictures/O6.jpg');"></div>
+        <div class="overlay"></div>
+        <div class="scan"></div>
+        <div class="ticks"><span></span></div>
+        <div class="slug">FILE 04 <span class="dot"></span> DENTITION</div>
+        <div class="panel">
+          <h1 class="big-stack fragment snap counter grad-amber pulse" data-count="50">50</h1>
+          <h1 class="big-stack fragment fly-in stroke stroke-amber">TEETH</h1>
+          <p class="subtext fragment pop">More than any other land mammal in North America.</p>
+        </div>
+      </section>
+
+      <!-- 6 · BODY TEMP / RABIES (combined) -->
+      <section data-transition="slide" data-hold="3">
+        <div class="bg bg-ken" style="background-image: url('Pictures/O10.webp');"></div>
+        <div class="overlay"></div>
+        <div class="scan"></div>
+        <div class="ticks"><span></span></div>
+        <div class="slug">FILE 05 <span class="dot"></span> THERMAL PROFILE</div>
+        <div class="panel center">
+          <h1 class="big-stack fragment snap counter grad-cyan pulse" data-count="94">94°</h1>
+          <h1 class="big-stack fragment snap">BODY TEMP</h1>
+          <h2 class="fragment pop accent-cyan glitch" data-text="RABIES? UNLIKELY.">RABIES? UNLIKELY.</h2>
+          <p class="subtext fragment pop">Too cold for the virus to thrive. Cases in opossums are vanishingly rare.</p>
+        </div>
+      </section>
+
+      <!-- 7 · VENOM RESISTANT -->
+      <section data-transition="slide" data-hold="2">
+        <div class="bg bg-ken" style="background-image: url('Pictures/O5.webp');"></div>
+        <div class="overlay"></div>
+        <div class="scan"></div>
+        <div class="ticks"><span></span></div>
+        <div class="slug">FILE 06 <span class="dot"></span> CHEMISTRY</div>
+        <div class="panel">
+          <h1 class="big-stack fragment fly-in stroke stroke-red">VENOM</h1>
+          <h1 class="big-stack fragment fly-in accent-red">RESISTANT</h1>
+          <p class="subtext fragment pop"><strong>LTNF</strong> peptide neutralizes pit-viper venom. Eats copperheads.</p>
+        </div>
+      </section>
+
+      <!-- 8 · PLAYS DEAD -->
+      <section data-transition="zoom" data-hold="3">
+        <div class="bg bg-ken" style="background-image: url('Pictures/O8.jpeg');"></div>
+        <div class="overlay"></div>
+        <div class="scan"></div>
+        <div class="ticks"><span></span></div>
+        <div class="slug">FILE 07 <span class="dot"></span> THANATOSIS</div>
+        <div class="panel">
+          <h1 class="big-stack fragment snap">PLAYS</h1>
+          <h1 class="big-stack fragment snap accent-amber stroke stroke-amber">DEAD</h1>
+          <p class="subtext fragment pop">Involuntary stress reflex — drool, foul smell, frozen body. Can last up to ~4 hours.</p>
+        </div>
+      </section>
+
+      <!-- 9 · PREHENSILE TAIL — cascade fires through the breakdown, last word lands on DROP #2 -->
+      <section data-transition="slide" data-hold="1">
+        <div class="bg bg-ken" style="background-image: url('Pictures/O7.jpg');"></div>
+        <div class="overlay"></div>
+        <div class="scan"></div>
+        <div class="ticks"><span></span></div>
+        <div class="slug">FILE 08 <span class="dot"></span> APPENDAGE</div>
+        <div class="panel">
+          <h1 class="big-stack fragment fly-in">PREHENSILE</h1>
+          <h1 class="big-stack fragment fly-in accent-green">TAIL</h1>
+          <div class="stacked-words">
+            <div class="word fragment sweep">GRIPS</div>
+            <div class="word fragment sweep">CLIMBS</div>
+            <div class="word fragment sweep">BALANCES</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 10 · MYTH vs REALITY -->
+      <section data-transition="fade" data-hold="2">
+        <div class="bg bg-ken" style="background-image: url('Pictures/O9.jpg');"></div>
+        <div class="overlay" style="background: rgba(0,0,0,0.78);"></div>
+        <div class="scan"></div>
+        <div class="ticks"><span></span></div>
+        <div class="slug">FILE 09 <span class="dot"></span> MYTH / REALITY</div>
+        <div class="split-panel">
+          <div class="split-left">
+            <div class="split-label accent-red fragment pop" data-fragment-index="0">MYTH</div>
+            <div class="myth-item fragment strike" data-fragment-index="1">"DIRTY"</div>
+            <div class="myth-item fragment strike" data-fragment-index="2">"RABID"</div>
+            <div class="myth-item fragment strike" data-fragment-index="3">"MEAN"</div>
+          </div>
+          <div class="split-divider"></div>
+          <div class="split-right">
+            <div class="split-label accent-green fragment pop" data-fragment-index="0">REALITY</div>
+            <div class="reality-item fragment sweep" data-fragment-index="1">GROOM LIKE CATS</div>
+            <div class="reality-item fragment sweep" data-fragment-index="2">94° COLD-PROOF</div>
+            <div class="reality-item fragment sweep" data-fragment-index="3">BLUFF &amp; BAIL</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 11 · EATS EVERYTHING -->
+      <section data-transition="slide" data-hold="1">
+        <div class="bg bg-ken" style="background-image: url('Pictures/O7.jpg');"></div>
+        <div class="overlay"></div>
+        <div class="scan"></div>
+        <div class="ticks"><span></span></div>
+        <div class="slug">FILE 10 <span class="dot"></span> DIET</div>
+        <div class="panel">
+          <h1 class="big-stack fragment fly-in">EATS</h1>
+          <h1 class="big-stack fragment fly-in accent-green glitch" data-text="EVERYTHING">EVERYTHING</h1>
+          <div class="stacked-words">
+            <div class="word fragment sweep">BUGS · SLUGS</div>
+            <div class="word fragment sweep">RODENTS</div>
+            <div class="word fragment sweep">CARRION</div>
+            <div class="word fragment sweep">SNAKES &amp; FRUIT</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 12 · LYME / TICKS (defensible) -->
+      <section data-transition="zoom" data-hold="3">
+        <div class="bg bg-ken" style="background-image: url('Pictures/O8.jpeg');"></div>
+        <div class="overlay"></div>
+        <div class="scan"></div>
+        <div class="ticks"><span></span></div>
+        <div class="slug">FILE 11 <span class="dot"></span> LYME ECOLOGY</div>
+        <div class="panel">
+          <h1 class="big-stack fragment snap accent-green">LYME</h1>
+          <h1 class="big-stack fragment snap stroke stroke-green">DEAD-END</h1>
+          <p class="subtext fragment pop"><strong>Low-competence host</strong> — ticks that bite them rarely catch Lyme.</p>
+        </div>
+      </section>
+
+      <!-- 13 · STATS RECAP -->
+      <section data-transition="zoom" data-hold="2">
+        <div class="bg bg-ken" style="background-image: url('Pictures/O3.webp');"></div>
+        <div class="overlay" style="background: rgba(0,0,0,0.82);"></div>
+        <div class="scan"></div>
+        <div class="ticks"><span></span></div>
+        <div class="slug">FILE 12 <span class="dot"></span> SHEET</div>
+        <div class="panel center">
+          <h2 class="fragment pop" style="margin-bottom: 30px;">SPEC SHEET</h2>
+          <div class="stats-grid">
+            <div class="stat-item fragment pop">
+              <div class="stat-number grad-amber counter" data-count="70">70M</div>
+              <div class="stat-label">YEARS · LINEAGE</div>
+            </div>
+            <div class="stat-item fragment pop">
+              <div class="stat-number grad-cyan counter" data-count="50">50</div>
+              <div class="stat-label">TEETH</div>
+            </div>
+            <div class="stat-item fragment pop">
+              <div class="stat-number grad-pink counter" data-count="13">13</div>
+              <div class="stat-label">JOEYS · MAX</div>
+            </div>
+            <div class="stat-item fragment pop">
+              <div class="stat-number grad-green counter" data-count="94">94°</div>
+              <div class="stat-label">BODY TEMP</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 14 · DYNASTY (resolves short-life vs survivor) -->
+      <section data-transition="slide" data-hold="3">
+        <div class="bg bg-ken" style="background-image: url('Pictures/O11.jpg');"></div>
+        <div class="overlay"></div>
+        <div class="scan"></div>
+        <div class="ticks"><span></span></div>
+        <div class="slug">FILE 13 <span class="dot"></span> DYNASTY</div>
+        <div class="panel">
+          <h2 class="fragment fly-in">INDIVIDUAL <span class="accent-amber">2–4 YRS</span></h2>
+          <h2 class="fragment fly-in">SPECIES <span class="accent-green">70 MILLION</span></h2>
+          <p class="subtext fragment pop">Short lives. Ancient blueprint. The franchise just keeps shipping.</p>
+        </div>
+      </section>
+
+      <!-- 15 · CTA -->
+      <section data-transition="zoom" data-hold="4">
+        <div class="bg bg-ken" style="background-image: url('Pictures/O12.jpg');"></div>
+        <div class="overlay"></div>
+        <div class="scan"></div>
+        <div class="ticks"><span></span></div>
+        <div class="slug">FILE 14 <span class="dot"></span> VERDICT</div>
+        <div class="panel center">
+          <h1 class="big-stack fragment snap">RESPECT</h1>
+          <h1 class="big-stack fragment snap accent-green">THE</h1>
+          <h1 class="big-stack fragment snap glitch pulse" data-text="OPOSSUM">OPOSSUM</h1>
+          <div class="cta-text fragment pop accent-green">THEY'RE ON YOUR SIDE</div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <div class="start-overlay" id="start-overlay">
+    <div class="inner">
+      <div class="big glitch" data-text="PRESS ANY KEY">PRESS ANY KEY</div>
+      <div class="sub">CLICK · KEY · TAP TO BEGIN</div>
+    </div>
+  </div>
+
+  <script src="vendor/reveal.js"></script>
+  <script>
+    const deck = new Reveal({
+      hash: true,
+      transition: 'slide',
+      backgroundTransition: 'fade',
+      transitionSpeed: 'fast',
+      slideNumber: false,
+      controls: false,
+      progress: true,
+      width: 1280, height: 720, margin: 0.02,
+    });
+    deck.initialize();
+
+    // ---------- BEAT-SYNCED AUTO-ADVANCE ----------
+    // Beat times (s) detected via librosa from "Villain Season.mp3" (123 BPM).
+    // Three "intro beats" are prepended at musically-aligned positions during the
+    // 8-second pre-drop buildup, so the title's three lines pop during the intro
+    // rather than after it. The kick drop at 8.057s is also added as the first
+    // downbeat — that's what advances slide 1 → slide 2 on the drop.
+    const BEATS = [1.713,4.153,7.081,8.057,8.568,9.079,9.567,10.054,10.565,11.053,11.564,12.051,12.562,13.050,13.560,14.048,14.559,15.070,15.581,16.068,16.556,17.067,17.554,18.065,18.576,19.064,19.551,20.039,20.550,21.060,21.548,22.059,22.547,23.057,23.568,24.056,24.567,25.054,25.542,26.053,26.564,27.051,27.562,28.050,28.561,29.048,29.559,30.070,30.557,31.068,31.556,32.067,32.578,33.065,33.553,34.064,34.575,35.062,35.550,36.061,36.571,37.059,37.547,38.058,38.568,39.056,39.567,40.054,40.565,41.053,41.540,42.075,42.562,43.073,43.561,44.048,44.559,45.047,45.558,46.068,46.556,47.044,47.578,48.065,48.576,49.064,49.551,50.039,50.503,51.061,51.572,52.059,52.570,53.058,53.568,54.056,54.520,55.055,55.565,56.053,56.564,57.051,57.562,58.050,58.514,59.048,59.559,60.047,60.534,61.068,61.556,62.020,62.555,63.042,63.553,64.064,64.575,65.062,65.550,66.061,66.572,67.059,67.570,68.058,68.569,69.056,69.544,70.055,70.565,71.053,71.564,72.052,72.562,73.050,73.561,74.072,74.559,75.070,75.558,76.045,76.556,77.067,77.555,78.065,78.553,79.018,79.459,79.900,80.387,80.875,81.363,81.827,82.315,82.779,83.244,83.708,84.172,84.614,85.055,85.542,86.100,86.610,87.075,87.586,88.050,88.561,89.072,89.559,90.093,90.581,91.069,91.556,92.067,92.601,93.066,93.553,94.087,94.598,95.062,95.573,96.061,96.549,97.059,97.617,98.104,98.638,99.103,99.590,100.101,100.612,101.100,101.587,102.075,102.586,103.073,103.584,104.049,104.536,105.047,105.558,106.046,106.533,107.044,107.555,108.066,108.577,109.064,109.575,110.063,110.550,111.038,111.549,112.060,112.570,113.058,113.569,114.056,114.521,115.032,115.566,116.053,116.541,117.052,117.563];
+    // Synthetic downbeats inserted at musical pops so slide changes can land
+    // on them: 8.057 = DROP #1, 47.044 = DROP #2. The 58.050 biggest-hit and
+    // 102.075 final-drop are not slide-change anchors — they fire as flashes
+    // while a slide is mid-flight.
+    const DOWNBEATS = [8.057,9.567,11.564,13.560,15.581,17.554,19.551,21.548,23.568,25.542,27.562,29.559,31.556,33.553,35.550,37.547,39.567,41.540,43.561,45.558,47.044,47.578,49.551,51.572,53.568,55.565,57.562,59.559,61.556,63.553,65.550,67.570,69.544,71.564,73.561,75.558,77.555,79.459,81.363,83.244,85.055,87.075,89.072,91.069,93.066,95.062,97.059,99.103,101.100,103.073,105.047,107.044,109.064,111.038,113.058,115.032,117.052];
+
+    // Major musical "pops" — flash overlay fires when audio crosses these times.
+    // Strengths from librosa onset analysis; only top hits (>~11) and the drops are listed.
+    const POPS = [
+      { t: 8.057,   intensity: 0.7, color: 'green' },  // DROP #1
+      { t: 21.548,  intensity: 0.6, color: 'cyan'  },  // big accent
+      { t: 25.542,  intensity: 0.5, color: 'amber' },
+      { t: 28.050,  intensity: 0.5, color: 'amber' },
+      { t: 37.547,  intensity: 0.5, color: 'amber' },
+      { t: 47.044,  intensity: 1.0, color: 'red'   },  // DROP #2
+      { t: 50.039,  intensity: 0.6, color: 'red'   },
+      { t: 54.056,  intensity: 0.4, color: 'pink'  },
+      { t: 58.050,  intensity: 1.0, color: 'green' },  // BIGGEST hit
+      { t: 102.075, intensity: 0.9, color: 'amber' },  // DROP #4
+    ];
+    const SYNC_OFFSET = -0.04; // small lead so visuals land on the beat
+
+    const audio = document.getElementById('ambient-audio');
+    audio.volume = 0.55;
+
+    let started = false;
+    let beatI = 0;
+    let downbeatI = 0;
+    let popI = 0;
+    let downbeatsHeldOnSlide = 0; // how many downbeats have ticked since current slide became fragment-empty
+
+    const FLASH_COLORS = {
+      white: 'rgba(255,255,255,0.85)',
+      green: 'rgba(43,255,0,0.55)',
+      cyan:  'rgba(0,229,255,0.55)',
+      amber: 'rgba(255,176,0,0.55)',
+      red:   'rgba(255,42,42,0.55)',
+      pink:  'rgba(255,107,218,0.55)',
+    };
+    const flashEl = document.getElementById('flash');
+    function flash(intensity, color) {
+      const c = FLASH_COLORS[color] || FLASH_COLORS.white;
+      flashEl.style.transition = 'none';
+      flashEl.style.background = `radial-gradient(ellipse at 50% 50%, ${c} 0%, transparent 60%)`;
+      flashEl.style.opacity = String(intensity);
+      // force reflow then fade out
+      void flashEl.offsetHeight;
+      flashEl.style.transition = 'opacity 380ms ease-out';
+      flashEl.style.opacity = '0';
+    }
+
+    function remainingFragments() {
+      return document.querySelectorAll('.present .fragment:not(.visible)').length;
+    }
+    function currentSlideHold() {
+      const s = document.querySelector('.slides section.present');
+      return parseInt(s?.dataset?.hold || '1', 10); // default: advance on first downbeat after frags exhausted
+    }
+
+    function tick() {
+      const t = audio.currentTime + SYNC_OFFSET;
+
+      while (beatI < BEATS.length && BEATS[beatI] <= t) {
+        if (remainingFragments() > 0) deck.nextFragment();
+        beatI++;
+      }
+
+      while (downbeatI < DOWNBEATS.length && DOWNBEATS[downbeatI] <= t) {
+        if (remainingFragments() === 0) {
+          downbeatsHeldOnSlide++;
+          if (downbeatsHeldOnSlide >= currentSlideHold() && !deck.isLastSlide()) {
+            deck.next();
+          }
+        }
+        downbeatI++;
+      }
+
+      while (popI < POPS.length && POPS[popI].t <= t) {
+        flash(POPS[popI].intensity, POPS[popI].color);
+        popI++;
+      }
+
+      requestAnimationFrame(tick);
+    }
+
+    let lastSlideEnteredAt = null;
+    const BASE_VOLUME = 0.55;
+
+    deck.on('slidechanged', () => {
+      downbeatsHeldOnSlide = 0;
+      if (deck.isLastSlide()) lastSlideEnteredAt = audio.currentTime;
+      if (!started) return;
+      const t = audio.currentTime;
+      while (beatI < BEATS.length && BEATS[beatI] <= t) beatI++;
+      while (downbeatI < DOWNBEATS.length && DOWNBEATS[downbeatI] <= t) downbeatI++;
+      while (popI < POPS.length && POPS[popI].t <= t) popI++;
+    });
+
+    function start() {
+      if (started) return;
+      started = true;
+      const overlay = document.getElementById('start-overlay');
+      overlay.style.transition = 'opacity 400ms ease';
+      overlay.style.opacity = '0';
+      setTimeout(() => overlay.remove(), 450);
+      audio.currentTime = 0;
+      audio.volume = BASE_VOLUME;
+      audio.play().catch(()=>{});
+      audio.addEventListener('timeupdate', updateFade);
+      requestAnimationFrame(tick);
+    }
+
+    // Music plays through DROP #4 at 102.07s and fades only across the actual
+    // outro tail — the deck dwells on its final slide while the song lands.
+    function updateFade() {
+      const t = audio.currentTime;
+      const fadeStart = 117.5;
+      const fadeEnd   = 122.0;
+      let k = 0;
+      if (t > fadeStart) k = Math.min(1, (t - fadeStart) / (fadeEnd - fadeStart));
+      audio.volume = BASE_VOLUME * (1 - k);
+      if (k >= 1) audio.pause();
+    }
+
+    document.addEventListener('click', start);
+    document.addEventListener('keydown', start);
+
+    // ---------- COUNTER ANIMATION ----------
+    function animateCounter(el, target, duration = 900) {
+      const t0 = performance.now();
+      const suffix = el.textContent.replace(/[\d,.]/g, '');
+      function frame(now) {
+        const p = Math.min((now - t0) / duration, 1);
+        const eased = 1 - Math.pow(1 - p, 3);
+        const cur = Math.floor(target * eased);
+        el.textContent = (target >= 1000 ? Math.round(cur/1000) + 'K' : cur.toLocaleString()) + suffix;
+        if (p < 1) requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+    }
+    deck.on('fragmentshown', (e) => {
+      const f = e.fragment;
+      if (f.classList.contains('counter') && f.dataset.count) {
+        animateCounter(f, parseInt(f.dataset.count, 10));
+      }
+      f.querySelectorAll?.('.counter[data-count]').forEach(c => animateCounter(c, parseInt(c.dataset.count, 10)));
+    });
+
+    // ---------- SUBTLE PARALLAX ON BACKGROUNDS ----------
+    document.addEventListener('mousemove', (e) => {
+      const x = (e.clientX / window.innerWidth - 0.5) * 12;
+      const y = (e.clientY / window.innerHeight - 0.5) * 12;
+      document.querySelectorAll('.present .bg').forEach(el => {
+        el.style.setProperty('--px', x + 'px');
+        el.style.setProperty('--py', y + 'px');
+        el.style.translate = `${x}px ${y}px`;
+      });
+    });
+  </script>
+</body>
+</html>

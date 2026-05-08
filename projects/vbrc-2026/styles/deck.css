@@ -1,0 +1,2017 @@
+/* ============================================================
+   VBRC 2026 — Making Internal Business Tools With AI
+   ----------------------------------------------------------------
+   Visual system: navy ground, gold accent, holographic motion,
+   engineering grid, with extra layered atmosphere for stage impact.
+   ============================================================ */
+
+/* ---------- 1. Fonts ---------- */
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url("../vendor/fonts/ibm-plex-mono-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 600;
+  font-display: block;
+  src: url("../vendor/fonts/ibm-plex-mono-600.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Space Grotesk";
+  font-style: normal;
+  font-weight: 700;
+  font-display: block;
+  src: url("../vendor/fonts/space-grotesk-700.woff2") format("woff2");
+}
+
+/* ---------- 2. Design tokens ---------- */
+:root {
+  /* Color */
+  --bg:           #0a2540;
+  --bg-deeper:    #061a30;
+  --bg-deepest:   #03101e;
+  --ink:          #e8f1ff;
+  --ink-dim:      rgba(232, 241, 255, 0.7);
+  --ink-faint:    rgba(232, 241, 255, 0.4);
+  --ink-ghost:    rgba(232, 241, 255, 0.18);
+  --grid-major:   rgba(232, 241, 255, 0.10);
+  --grid-minor:   rgba(232, 241, 255, 0.04);
+  --gold:         #ffd166;
+  --gold-bright:  #ffe49a;
+  --gold-glow:    rgba(255, 209, 102, 0.45);
+  --cyan:         #6ee7ff;
+  --cyan-glow:    rgba(110, 231, 255, 0.3);
+  --green:        #7fffa8;
+  --magenta:      #ff7be0;
+  --red:          #ff6b6b;
+
+  /* Rivera Grounds Co accent (used in tool demos) */
+  --rg-green:     #4a7c4e;
+  --rg-green-dk:  #2d4a30;
+  --rg-tan:       #d8c79a;
+
+  /* Type */
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-mono:    "IBM Plex Mono", "JetBrains Mono", monospace;
+
+  /* Animation */
+  --ease:    cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-back: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --d-fast:  200ms;
+  --d-base:  400ms;
+  --d-slow:  700ms;
+}
+
+/* "Projector" mode toggle (P key) — bumps gold sat + lightens navy */
+.deck--projector {
+  --bg:        #0e2d4a;
+  --gold:      #ffdb7a;
+  --gold-glow: rgba(255, 219, 122, 0.55);
+}
+
+/* ---------- 3. Reset ---------- */
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #000;
+  color: var(--ink);
+  font-family: var(--font-display);
+  overflow: hidden;
+  height: 100%;
+  width: 100%;
+}
+
+/* ---------- 4. Deck shell + scaling ---------- */
+.deck {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+/* The 1920×1080 stage. Scaled with CSS variable set by JS to fit viewport. */
+.stage {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 1920px;
+  height: 1080px;
+  transform: translate(-50%, -50%) scale(var(--scale, 1));
+  transform-origin: center center;
+}
+
+/* ============================================================
+   5. BACKGROUND ATMOSPHERE
+   ----------------------------------------------------------------
+   Three layers, all live OUTSIDE the slide stack so motion is
+   continuous regardless of slide changes:
+     - holographic conic wash (slow rotate)
+     - vignette + noise overlay
+     - engineering grid
+     - drifting particle field (gold dust)
+   ============================================================ */
+.bg-stage {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+/* Layer 1: holographic wash */
+.bg-stage::before {
+  content: "";
+  position: absolute;
+  inset: -30%;
+  background: conic-gradient(
+    from 0deg at 50% 50%,
+    rgba(120, 200, 255, 0.18),
+    rgba(255, 210, 120, 0.12),
+    rgba(180, 140, 255, 0.18),
+    rgba(120, 255, 220, 0.12),
+    rgba(120, 200, 255, 0.18)
+  );
+  filter: blur(80px);
+  animation: holo 32s linear infinite;
+  will-change: transform;
+}
+@keyframes holo {
+  to { transform: rotate(360deg); }
+}
+
+/* Layer 2: engineering grid (major 80px, minor 16px) */
+.bg-stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--grid-major) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-major) 1px, transparent 1px),
+    linear-gradient(var(--grid-minor) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-minor) 1px, transparent 1px);
+  background-size: 80px 80px, 80px 80px, 16px 16px, 16px 16px;
+  mask-image: radial-gradient(ellipse at center, #000 30%, transparent 90%);
+  -webkit-mask-image: radial-gradient(ellipse at center, #000 30%, transparent 90%);
+}
+
+/* Layer 3: vignette */
+.bg-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background:
+    radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.55) 100%);
+}
+
+/* Layer 4: drifting gold-dust particles (CSS-only) */
+.bg-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+.bg-particles span {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--gold);
+  opacity: 0;
+  filter: blur(0.5px) drop-shadow(0 0 6px var(--gold-glow));
+  animation: drift linear infinite;
+}
+@keyframes drift {
+  0%   { transform: translateY(0) translateX(0);   opacity: 0; }
+  10%  { opacity: 0.7; }
+  90%  { opacity: 0.7; }
+  100% { transform: translateY(-1200px) translateX(60px); opacity: 0; }
+}
+
+/* ---------- 6. Slide stack ---------- */
+/* Scoped to .stage > .slide so we don't accidentally match Reveal.js's
+   internal .reveal-viewport, which gets a "slide" class added in embedded
+   mode and would otherwise inherit opacity:0 + pointer-events:none. */
+.stage > .slide {
+  position: absolute;
+  inset: 0;
+  width: 1920px;
+  height: 1080px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 380ms var(--ease);
+  z-index: 2;
+}
+.stage > .slide.is-active {
+  opacity: 1;
+  pointer-events: auto;
+  z-index: 3;
+}
+.stage > .slide.is-leaving {
+  opacity: 0;
+  z-index: 2;
+}
+
+/* ---------- 7. Slide chrome ---------- */
+.corner {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border: 1.2px solid var(--ink);
+  z-index: 5;
+}
+.corner.tl { top: 28px;    left: 28px;    border-right: none; border-bottom: none; }
+.corner.tr { top: 28px;    right: 28px;   border-left: none;  border-bottom: none; }
+.corner.bl { bottom: 28px; left: 28px;    border-right: none; border-top: none;    }
+.corner.br { bottom: 28px; right: 28px;   border-left: none;  border-top: none;    }
+
+.meta-row {
+  position: absolute;
+  left: 80px;
+  right: 80px;
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 18px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+.meta-row.meta-top { top: 56px; }
+.meta-row.meta-bot {
+  bottom: 56px;
+  border-top: 1px dashed var(--ink-ghost);
+  padding-top: 14px;
+  font-size: 16px;
+  color: var(--ink-faint);
+}
+
+.fig-label {
+  position: absolute;
+  left: 80px;
+  top: 140px;
+  font-family: var(--font-mono);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  opacity: 0.9;
+}
+
+/* HEADLINE */
+.headline {
+  position: absolute;
+  left: 80px;
+  right: 80px;
+  top: 200px;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 130px;
+  line-height: 0.92;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  max-width: 1700px;
+}
+.headline .gold { color: var(--gold); }
+.headline .cyan { color: var(--cyan); }
+.headline.headline--xl { font-size: 200px; }
+.headline.headline--lg { font-size: 160px; }
+.headline.headline--md { font-size: 100px; }
+.headline.headline--sm { font-size: 72px; }
+
+.subhead {
+  position: absolute;
+  left: 80px;
+  right: 80px;
+  font-family: var(--font-mono);
+  font-size: 36px;
+  color: var(--gold);
+  letter-spacing: 0.01em;
+  line-height: 1.4;
+}
+
+.content {
+  position: absolute;
+  left: 80px;
+  right: 80px;
+  top: 520px;
+  bottom: 140px;
+}
+.content--low { top: 620px; }
+.content--high { top: 420px; }
+
+/* ---------- 8. Wireframe nodes ---------- */
+.wnode {
+  display: inline-block;
+  border: 1.2px solid var(--ink);
+  background: rgba(10, 37, 64, 0.85);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  text-align: center;
+  position: relative;
+  vertical-align: top;
+}
+.wnode b {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: -0.01em;
+}
+.wnode span {
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-dim);
+}
+.wnode--sm { padding: 14px 22px; min-width: 140px; }
+.wnode--sm b    { font-size: 24px; margin-bottom: 4px; }
+.wnode--sm span { font-size: 16px; }
+.wnode--md { padding: 22px 32px; min-width: 220px; }
+.wnode--md b    { font-size: 32px; margin-bottom: 6px; }
+.wnode--md span { font-size: 20px; }
+.wnode--lg { padding: 32px 44px; min-width: 320px; }
+.wnode--lg b    { font-size: 44px; margin-bottom: 8px; }
+.wnode--lg span { font-size: 22px; }
+.wnode--xl { padding: 44px 60px; min-width: 440px; }
+.wnode--xl b    { font-size: 64px; margin-bottom: 12px; }
+.wnode--xl span { font-size: 26px; }
+
+.wnode.plain b { color: var(--ink); }
+.wnode.primary {
+  border-color: var(--gold);
+  box-shadow: 0 0 30px var(--gold-glow), inset 0 0 20px rgba(255, 209, 102, 0.05);
+}
+.wnode.primary b { color: var(--gold); }
+
+.wnode.pulse::before {
+  content: "";
+  position: absolute;
+  inset: -1.2px;
+  border: 1.2px solid var(--gold);
+  pointer-events: none;
+  animation: pulseBox 2.4s ease-out infinite;
+}
+@keyframes pulseBox {
+  0%   { opacity: 0.9; transform: scale(1); }
+  100% { opacity: 0;   transform: scale(1.18); }
+}
+
+/* ---------- 9. Arrows ---------- */
+.arrow-wrap {
+  position: relative;
+  display: inline-block;
+  vertical-align: middle;
+}
+.arrow-h { height: 36px; }
+.arrow-v { width: 36px; }
+.arrow-wrap svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.ants {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.2;
+  stroke-dasharray: 6 4;
+  animation: march 1.2s linear infinite;
+}
+@keyframes march { to { stroke-dashoffset: -20; } }
+.arrow-head { fill: var(--ink); }
+.flow-dot {
+  fill: var(--gold);
+  filter: drop-shadow(0 0 6px var(--gold));
+}
+
+/* ---------- 10. Terminal mockup ---------- */
+.terminal {
+  display: block;
+  background: var(--bg-deeper);
+  border: 1.5px solid var(--ink-faint);
+  font-family: var(--font-mono);
+  font-size: 36px;
+  line-height: 1.55;
+  color: var(--ink);
+  position: relative;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+  border-radius: 6px;
+}
+.terminal__chrome {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 28px;
+  border-bottom: 1px solid var(--ink-ghost);
+  background: rgba(255, 255, 255, 0.02);
+}
+.terminal__chrome i {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  display: block;
+}
+.terminal__chrome i:nth-child(1) { background: #ff5f57; }
+.terminal__chrome i:nth-child(2) { background: #febc2e; }
+.terminal__chrome i:nth-child(3) { background: #28c840; }
+.terminal__chrome span {
+  margin-left: auto;
+  font-size: 18px;
+  color: var(--ink-faint);
+  letter-spacing: 0.05em;
+}
+.terminal__body {
+  padding: 32px 44px;
+  min-height: 240px;
+  position: relative;
+}
+.terminal__prompt { color: var(--cyan); display: block; margin-bottom: 18px; }
+.terminal__stream { color: var(--ink); display: block; white-space: pre-wrap; }
+.terminal__stream .gold  { color: var(--gold); }
+.terminal__stream .ok    { color: var(--green); }
+.terminal__stream .err   { color: var(--red); }
+.terminal__stream .dim   { color: var(--ink-faint); }
+.terminal__stream .flash { text-shadow: 0 0 12px var(--gold-glow); }
+.terminal__static {
+  color: var(--ink-dim);
+  display: none;
+}
+.deck--no-typed .terminal__static { display: block; }
+.typed-cursor {
+  display: inline-block;
+  color: var(--ink);
+  animation: blink 1s steps(1) infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+/* ============================================================
+   11. DEVICE FRAME — used to embed live demos as if running on
+   a real laptop/browser. The frame itself is decorative; the
+   inner area holds an iframe or the tool markup directly.
+   ============================================================ */
+.device {
+  position: absolute;
+  inset: 480px 80px 200px 80px;
+  background: linear-gradient(180deg, #0c2c50 0%, #061a30 100%);
+  border: 1.5px solid var(--ink-faint);
+  border-radius: 14px;
+  box-shadow:
+    0 50px 120px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+    0 -8px 40px rgba(110, 231, 255, 0.08) inset;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.device__chrome {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 22px;
+  border-bottom: 1px solid var(--ink-ghost);
+  background: rgba(255, 255, 255, 0.02);
+  flex-shrink: 0;
+}
+.device__chrome i {
+  width: 14px; height: 14px; border-radius: 50%;
+}
+.device__chrome i:nth-child(1) { background: #ff5f57; }
+.device__chrome i:nth-child(2) { background: #febc2e; }
+.device__chrome i:nth-child(3) { background: #28c840; }
+.device__url {
+  flex: 1;
+  margin: 0 22px;
+  height: 32px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--ink-ghost);
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  font-family: var(--font-mono);
+  font-size: 16px;
+  color: var(--ink-dim);
+  letter-spacing: 0.02em;
+  max-width: 720px;
+}
+.device__url::before {
+  content: "🔒";
+  font-size: 12px;
+  margin-right: 10px;
+  filter: grayscale(0.8);
+}
+.device__body {
+  flex: 1;
+  background: #fff;
+  position: relative;
+  overflow: hidden;
+}
+.device__body iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* Glow ring around the active device — pulses subtly */
+.device::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 14px;
+  pointer-events: none;
+  box-shadow: 0 0 60px var(--gold-glow);
+  opacity: 0.4;
+  animation: deviceGlow 4s ease-in-out infinite;
+}
+@keyframes deviceGlow {
+  0%, 100% { opacity: 0.25; }
+  50%      { opacity: 0.55; }
+}
+
+/* ============================================================
+   12. SLIDE-SPECIFIC LAYOUTS
+   ============================================================ */
+
+/* Cold open: full-bleed Opossums embed */
+.cold-open {
+  position: absolute;
+  inset: 0;
+  background: #000;
+}
+.cold-open iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+
+/* Title slide */
+.title-stage {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 120px 80px;
+}
+.title-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 40px;
+  position: relative;
+}
+.title-eyebrow::before,
+.title-eyebrow::after {
+  content: "";
+  display: inline-block;
+  width: 80px;
+  height: 1px;
+  background: var(--gold);
+  vertical-align: middle;
+  margin: 0 24px;
+  opacity: 0.6;
+}
+.title-headline {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 180px;
+  line-height: 0.94;
+  letter-spacing: -0.04em;
+  margin: 0 0 40px;
+  background: linear-gradient(180deg, #fff 0%, #b8d4ff 60%, #6e9ace 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.title-headline .gold {
+  background: linear-gradient(180deg, var(--gold-bright) 0%, var(--gold) 50%, #c79a3a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.title-sub {
+  font-family: var(--font-mono);
+  font-size: 32px;
+  color: var(--ink-dim);
+  letter-spacing: 0.05em;
+  margin-bottom: 64px;
+}
+.title-byline {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  color: var(--ink-faint);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+}
+
+/* Anecdote slide (the Christmas Powerpoint Night line) */
+.anecdote {
+  position: absolute;
+  inset: 200px 120px 140px 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 48px;
+}
+.anecdote-quote {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 96px;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.anecdote-quote .gold { color: var(--gold); }
+.anecdote-attribution {
+  font-family: var(--font-mono);
+  font-size: 26px;
+  color: var(--ink-faint);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+/* Two-mode comparison: chat vs build */
+.split-stage {
+  position: absolute;
+  inset: 480px 80px 120px 80px;
+  display: grid;
+  grid-template-columns: 1fr 60px 1fr;
+  gap: 0;
+  align-items: stretch;
+}
+.split-card {
+  border: 1.2px solid var(--ink-ghost);
+  background: rgba(10, 37, 64, 0.55);
+  padding: 44px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+.split-card.is-cold {
+  opacity: 0.55;
+}
+.split-card.is-hero {
+  border-color: var(--gold);
+  box-shadow:
+    0 0 40px var(--gold-glow),
+    inset 0 0 60px rgba(255, 209, 102, 0.04);
+}
+.split-card.is-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at top right, rgba(255, 209, 102, 0.12), transparent 60%);
+  pointer-events: none;
+}
+.split-tag {
+  font-family: var(--font-mono);
+  font-size: 20px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  margin-bottom: 16px;
+}
+.split-card.is-hero .split-tag { color: var(--gold); }
+.split-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 72px;
+  line-height: 0.98;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin-bottom: 28px;
+}
+.split-body {
+  font-family: var(--font-mono);
+  font-size: 28px;
+  line-height: 1.5;
+  color: var(--ink-dim);
+}
+.split-mid {
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-size: 56px;
+  font-weight: 700;
+  color: var(--ink-dim);
+  letter-spacing: -0.02em;
+}
+
+/* Subscriptions stack — the "you only use 5%" framing slide */
+.subs-stack {
+  position: absolute;
+  inset: 500px 80px 120px 80px;
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap: 60px;
+}
+.subs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-self: stretch;
+  justify-content: center;
+}
+.sub-row {
+  display: grid;
+  grid-template-columns: 220px 1fr 130px;
+  align-items: center;
+  gap: 28px;
+  font-family: var(--font-mono);
+  font-size: 26px;
+  color: var(--ink);
+  padding: 14px 24px;
+  border: 1px dashed var(--ink-ghost);
+  background: rgba(10, 37, 64, 0.5);
+}
+.sub-row .name {
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+}
+.sub-row .price {
+  text-align: right;
+  color: var(--gold);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  font-size: 28px;
+  white-space: nowrap;
+}
+.sub-row .feature {
+  color: var(--ink-faint);
+  font-size: 19px;
+  font-style: italic;
+  line-height: 1.35;
+}
+.sub-row .feature em {
+  color: var(--ink-dim);
+  font-style: italic;
+}
+.subs-tally {
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding: 0 0 0 40px;
+  border-left: 1px dashed var(--ink-ghost);
+}
+.subs-tally-num {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 200px;
+  color: var(--gold);
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  text-shadow: 0 0 60px var(--gold-glow);
+}
+.subs-tally-label {
+  font-family: var(--font-mono);
+  font-size: 24px;
+  color: var(--ink-dim);
+  letter-spacing: 0.04em;
+  line-height: 1.4;
+}
+.subs-tally-label.is-question {
+  color: var(--gold);
+  font-style: italic;
+}
+
+/* Demo caption (under each device) */
+.demo-caption {
+  position: absolute;
+  left: 80px;
+  right: 80px;
+  bottom: 110px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 20px;
+  color: var(--ink-faint);
+  letter-spacing: 0.05em;
+}
+.demo-caption .replaces {
+  color: var(--gold);
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+.demo-caption .build-time {
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-dim);
+}
+.demo-caption .build-time::before {
+  content: "BUILT IN ";
+  color: var(--gold);
+  font-weight: 600;
+  margin-right: 6px;
+}
+
+/* ============================================================
+   DEMO INTRO SLIDE — title card before each demo.
+   No device. Just headline, "replaces" line, build time.
+   ============================================================ */
+.slide--demo-intro .demo-intro-stage {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  text-align: left;
+  padding: 0 120px;
+}
+.slide--demo-intro .demo-intro-card {
+  max-width: 1500px;
+  display: flex;
+  flex-direction: column;
+  gap: 56px;
+}
+.slide--demo-intro .demo-intro-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  font-family: var(--font-mono);
+  font-size: 22px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.slide--demo-intro .demo-intro-eyebrow::before {
+  content: "";
+  width: 64px;
+  height: 1px;
+  background: var(--gold);
+  opacity: 0.6;
+}
+.slide--demo-intro .demo-intro-headline {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 160px;
+  line-height: 0.92;
+  letter-spacing: -0.03em;
+  margin: 0;
+  color: var(--ink);
+}
+.slide--demo-intro .demo-intro-headline .gold { color: var(--gold); }
+.slide--demo-intro .demo-intro-meta {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 40px;
+  align-items: end;
+  padding-top: 32px;
+  border-top: 1px dashed var(--ink-ghost);
+  font-family: var(--font-mono);
+  font-size: 24px;
+  color: var(--ink-dim);
+  letter-spacing: 0.04em;
+}
+.slide--demo-intro .demo-intro-meta .replaces {
+  color: var(--gold);
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-size: 22px;
+}
+.slide--demo-intro .demo-intro-meta .built {
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.slide--demo-intro .demo-intro-meta .built::before {
+  content: "BUILT IN ";
+  color: var(--gold);
+  font-weight: 600;
+  font-size: 18px;
+  letter-spacing: 0.18em;
+  margin-right: 8px;
+}
+.slide--demo-intro .demo-intro-meta .next-hint {
+  grid-column: 1 / -1;
+  margin-top: 18px;
+  font-size: 16px;
+  color: var(--ink-faint);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+/* ============================================================
+   TOOL SLIDE — pure demo, no chrome, no atmosphere.
+   The iframe fills the entire slide; everything else hides.
+   ============================================================ */
+.slide--tool {
+  background: #0a1628;
+}
+.slide--tool .tool-stage {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+.slide--tool .tool-stage iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+  background: #fff;
+}
+/* Tiny corner labels — sit at the BOTTOM so they don't fight with the
+   tool's own header band at the top. */
+.slide--tool .tool-tag {
+  position: absolute;
+  bottom: 14px;
+  left: 18px;
+  z-index: 5;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.32em;
+  color: rgba(255, 255, 255, 0.55);
+  text-transform: uppercase;
+  pointer-events: none;
+  background: rgba(10, 22, 40, 0.65);
+  padding: 4px 10px;
+  border-radius: 4px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.slide--tool .tool-tag-r {
+  position: absolute;
+  bottom: 14px;
+  right: 18px;
+  z-index: 5;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.32em;
+  color: rgba(255, 255, 255, 0.45);
+  text-transform: uppercase;
+  pointer-events: none;
+  background: rgba(10, 22, 40, 0.65);
+  padding: 4px 10px;
+  border-radius: 4px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* ============================================================
+   Per-tool callouts — float over the iframe pointing at the
+   1-2 things the audience needs to notice. Pacing fix: presenter
+   doesn't have to narrate every button.
+   ============================================================ */
+.slide--tool .tool-callouts {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;   /* never block iframe clicks */
+  z-index: 8;             /* above iframe, below tool-tag */
+}
+.callout {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 18px 11px 12px;
+  background: rgba(8, 22, 41, 0.92);
+  border: 1.5px solid var(--gold);
+  border-radius: 999px;
+  font-family: var(--font-display);
+  font-size: 17px;
+  color: var(--cream);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5),
+              0 0 0 4px rgba(255, 220, 100, 0.06);
+  white-space: nowrap;
+  letter-spacing: 0.005em;
+  opacity: 0;
+  transform: translateY(8px);
+  animation: callout-in 700ms cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+}
+.callout__num {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--gold);
+  color: #0a1628;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0;
+  box-shadow: 0 0 18px rgba(255, 220, 100, 0.35);
+}
+.callout__label {
+  font-style: italic;
+  font-weight: 500;
+}
+.callout__label em {
+  font-style: normal;
+  color: var(--gold);
+  font-weight: 600;
+}
+@keyframes callout-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Position presets — placed near where the relevant UI sits
+   inside the iframe. Animate-in delay creates a 1-2 cadence. */
+.callout--tl  { top: 88px;  left: 28px;  animation-delay: 360ms; }
+.callout--tr  { top: 88px;  right: 28px; animation-delay: 480ms; }
+.callout--ml  { top: 50%;   left: 28px;  transform: translateY(calc(-50% + 8px)); animation-delay: 360ms; }
+.callout--mr  { top: 50%;   right: 28px; transform: translateY(calc(-50% + 8px)); animation-delay: 480ms; }
+.callout--bl  { bottom: 70px; left: 28px;  animation-delay: 600ms; }
+.callout--br  { bottom: 70px; right: 28px; animation-delay: 720ms; }
+.callout--ml.is-shown,
+.callout--mr.is-shown { transform: translateY(-50%); }
+
+/* When the animation completes, lock translateY at 0 (or -50% for mid). */
+.callout--ml,
+.callout--mr {
+  animation-name: callout-in-mid;
+}
+@keyframes callout-in-mid {
+  from { opacity: 0; transform: translateY(calc(-50% + 8px)); }
+  to   { opacity: 1; transform: translateY(-50%); }
+}
+
+/* Subtle directional line drawn from the callout's inside edge inward,
+   to gesture toward the UI region. CSS-only, decorative. */
+.callout::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 32px;
+  height: 1.5px;
+  background: linear-gradient(to var(--callout-arrow-dir, right),
+              var(--gold) 0%, var(--gold) 60%, transparent 100%);
+  transform: translateY(-50%);
+}
+.callout--tl::after,
+.callout--ml::after,
+.callout--bl::after { right: -36px; --callout-arrow-dir: right; }
+.callout--tr::after,
+.callout--mr::after,
+.callout--br::after { left: -36px;  --callout-arrow-dir: left; }
+.callout--tr::after,
+.callout--mr::after,
+.callout--br::after {
+  background: linear-gradient(to left,
+              var(--gold) 0%, var(--gold) 60%, transparent 100%);
+}
+
+/* Hide background atmosphere when a tool slide is active.
+   The background-stage layers live OUTSIDE .slide so we use sibling
+   class on .deck (set by JS) to suppress them only on tool slides. */
+.deck--on-tool .bg-particles,
+.deck--on-tool .bg-vignette {
+  opacity: 0;
+  transition: opacity 200ms var(--ease);
+}
+.deck--on-tool .bg-stage::before {
+  opacity: 0.25;
+  transition: opacity 200ms var(--ease);
+}
+.deck--on-tool .bg-stage::after {
+  opacity: 0;
+  transition: opacity 200ms var(--ease);
+}
+
+/* Single-use software interlude */
+.singleuse-stage {
+  position: absolute;
+  inset: 500px 120px 140px 120px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: stretch;
+}
+.singleuse-card {
+  border: 1.2px solid var(--ink-ghost);
+  background: rgba(10, 37, 64, 0.5);
+  padding: 44px 50px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.singleuse-tag {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 18px;
+}
+.singleuse-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 60px;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin-bottom: 28px;
+}
+.singleuse-body {
+  font-family: var(--font-mono);
+  font-size: 24px;
+  line-height: 1.5;
+  color: var(--ink-dim);
+}
+
+/* Closing slide */
+.close-stage {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+.close-headline {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 220px;
+  line-height: 0.94;
+  letter-spacing: -0.04em;
+  background: linear-gradient(180deg, #fff 0%, var(--gold-bright) 60%, var(--gold) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 0;
+}
+.close-sub {
+  margin-top: 56px;
+  font-family: var(--font-mono);
+  font-size: 32px;
+  color: var(--ink-dim);
+  letter-spacing: 0.1em;
+}
+
+/* QR + share slide */
+.share-stage {
+  position: absolute;
+  inset: 200px 80px 140px 80px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+.qr-frame {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: 40px;
+  justify-self: center;
+}
+.qr-frame .qr-bracket {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--gold);
+}
+.qr-frame .qr-bracket.tl { top: 0; left: 0; border-right: none; border-bottom: none; }
+.qr-frame .qr-bracket.tr { top: 0; right: 0; border-left: none; border-bottom: none; }
+.qr-frame .qr-bracket.bl { bottom: 0; left: 0; border-right: none; border-top: none; }
+.qr-frame .qr-bracket.br { bottom: 0; right: 0; border-left: none; border-top: none; }
+.qr-img {
+  width: 480px; height: 480px;
+  background: #fff;
+  padding: 24px;
+}
+.share-info {
+  font-family: var(--font-display);
+}
+.share-info .lead {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 24px;
+}
+.share-info h2 {
+  margin: 0 0 24px;
+  font-size: 84px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.share-info .url {
+  font-family: var(--font-mono);
+  font-size: 32px;
+  color: var(--cyan);
+  word-break: break-all;
+}
+
+/* Boundary / caveat slide — three cards with cautionary feel */
+.caveat-stack {
+  position: absolute;
+  inset: 460px 80px 220px 80px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+.caveat-card {
+  border: 1.2px solid var(--ink-ghost);
+  background: rgba(10, 37, 64, 0.55);
+  padding: 30px 32px 28px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow: hidden;
+}
+.caveat-card::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, var(--gold) 0%, transparent 100%);
+  opacity: 0.6;
+}
+.caveat-num {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  letter-spacing: 0.3em;
+  color: var(--gold);
+  font-weight: 600;
+}
+.caveat-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 38px;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.caveat-body {
+  font-family: var(--font-mono);
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--ink-dim);
+  margin: 0;
+}
+.caveat-body em {
+  color: var(--gold);
+  font-style: normal;
+  font-weight: 600;
+}
+.caveat-aside {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-faint);
+  margin: 14px 0 0;
+  padding-top: 12px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.12);
+  font-style: italic;
+}
+.caveat-aside em {
+  color: var(--gold);
+  font-style: normal;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 11px;
+}
+.caveat-summary {
+  position: absolute;
+  left: 80px;
+  right: 80px;
+  bottom: 110px;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 600;
+  color: var(--ink-dim);
+  letter-spacing: -0.005em;
+  padding: 18px 32px;
+  border-top: 1px dashed var(--ink-ghost);
+}
+.caveat-summary strong {
+  color: var(--gold);
+  font-weight: 700;
+}
+
+/* Privacy / how-to slide */
+.howto-stack {
+  position: absolute;
+  inset: 500px 120px 120px 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  justify-content: center;
+}
+.howto-row {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 32px;
+  align-items: center;
+  padding: 18px 32px;
+  border: 1.2px solid var(--ink-ghost);
+  background: rgba(10, 37, 64, 0.55);
+}
+.howto-num {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 48px;
+  color: var(--gold);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.howto-text {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  color: var(--ink);
+  line-height: 1.5;
+}
+.howto-text strong { color: var(--gold); font-weight: 600; }
+.howto-text .dim {
+  display: block;
+  color: var(--ink-faint);
+  margin-top: 4px;
+  font-size: 18px;
+}
+
+/* ---------- 13. Black-out overlay (B key) ---------- */
+.deck--black::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: #000;
+  z-index: 9999;
+}
+
+/* ---------- 13b. Cinematic blackout transition ----------
+   Used by deckAPI.blackoutTransition() to bridge between sequences with
+   a "fade to black, hold, fade back up" sequence. Driven by the
+   --blackout-fade-ms variable which the JS sets per-phase.
+*/
+.deck::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: #000;
+  z-index: 9000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--blackout-fade-ms, 800ms) var(--ease);
+}
+.deck--blackout::before {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ============================================================
+   BRIDGE SLIDE (s16, the anecdote)
+   --------------------------------------------------------------
+   Quiet "lights up" moment after the cold-open blackout. No deck
+   chrome, dimmed atmosphere, bespoke entrance animation, and a
+   subtle ambient glow behind the text so the slide doesn't feel
+   flat after the cinematic cold open.
+   ============================================================ */
+.slide--bridge {
+  background: var(--bg);
+  position: absolute;
+  overflow: hidden;
+}
+
+/* Soft radial glow drifting behind the text — establishes depth without
+   competing with the words. Independent layer that fades + breathes. */
+.slide--bridge .bridge-glow {
+  position: absolute;
+  inset: -10%;
+  background:
+    radial-gradient(ellipse at 30% 50%, rgba(255, 209, 102, 0.10), transparent 55%),
+    radial-gradient(ellipse at 70% 60%, rgba(110, 231, 255, 0.06), transparent 60%);
+  filter: blur(40px);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+.slide--bridge.is-active .bridge-glow {
+  animation: bridgeGlowIn 1600ms var(--ease) 200ms forwards,
+             bridgeGlowDrift 18s ease-in-out 2s infinite;
+}
+@keyframes bridgeGlowIn {
+  to { opacity: 1; }
+}
+@keyframes bridgeGlowDrift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(2%, -2%) scale(1.05); }
+}
+
+/* Lift the anecdote above the glow */
+.slide--bridge .anecdote {
+  position: relative;
+  z-index: 1;
+}
+
+/* Line-by-line entrance — each line slides up + fades in with a delay
+   that gives the audience time to read it. */
+.slide--bridge .anecdote-quote .line {
+  display: block;
+  opacity: 0;
+  transform: translateY(18px);
+  filter: blur(4px);
+}
+.slide--bridge.is-active .anecdote-quote .line {
+  animation: bridgeLineIn 1100ms var(--ease) forwards;
+}
+.slide--bridge.is-active .anecdote-quote .line:nth-child(1) { animation-delay: 600ms; }
+.slide--bridge.is-active .anecdote-quote .line:nth-child(2) { animation-delay: 1200ms; }
+.slide--bridge.is-active .anecdote-quote .line:nth-child(3) { animation-delay: 2100ms; }
+.slide--bridge.is-active .anecdote-quote .line:nth-child(4) { animation-delay: 2900ms; }
+@keyframes bridgeLineIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+/* Pulsing gold highlight — for "the tools for the job", the punchline */
+.slide--bridge .pulse-gold {
+  display: inline-block;
+  position: relative;
+  text-shadow: 0 0 0 transparent;
+  animation: bridgePulse 2.6s ease-in-out 4500ms infinite;
+}
+@keyframes bridgePulse {
+  0%, 100% {
+    text-shadow: 0 0 0 transparent;
+    transform: translateZ(0) scale(1);
+  }
+  50% {
+    text-shadow:
+      0 0 24px var(--gold-glow),
+      0 0 56px rgba(255, 209, 102, 0.22),
+      0 0 96px rgba(255, 209, 102, 0.08);
+    transform: translateZ(0) scale(1.015);
+  }
+}
+
+/* Keep the deck's atmosphere dimmed while we're on the bridge slide so
+   the lights-up after the blackout feels gentle rather than jolting. */
+.deck--on-bridge .bg-stage,
+.deck--on-bridge .bg-particles,
+.deck--on-bridge .bg-vignette {
+  opacity: 0;
+  transition: opacity 800ms var(--ease);
+}
+
+/* ---------- 14. Elapsed-time indicator (T key) ---------- */
+.timer {
+  position: fixed;
+  bottom: 8px;
+  right: 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.18);
+  z-index: 10;
+  letter-spacing: 0.1em;
+  display: none;
+  pointer-events: none;
+}
+.deck--timer .timer { display: block; }
+
+/* ---------- 15. Source-view easter egg (S key) ---------- */
+.deck--source .source-overlay {
+  display: block;
+}
+.source-overlay {
+  display: none;
+  position: fixed;
+  inset: 40px;
+  background: rgba(3, 16, 30, 0.96);
+  border: 1px solid var(--gold);
+  z-index: 9998;
+  padding: 40px;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--cyan);
+  overflow: auto;
+  box-shadow: 0 0 80px var(--gold-glow);
+}
+.source-overlay pre {
+  white-space: pre-wrap;
+  margin: 0;
+  line-height: 1.5;
+}
+
+
+/* ============================================================
+   COLD OPEN — Opossums sequence
+   --------------------------------------------------------------
+   Migrated from the standalone Opossums file. Class names all
+   prefixed with `cold-` to avoid collisions with deck classes.
+   Variables namespaced under `--cold-*`.
+   Top-level overlays (#cold-flash, #cold-ticker, #cold-vignette,
+   #cold-start-overlay, #cold-audio) are siblings of .stage inside
+   .deck. They display only when .deck has class .deck--cold-open.
+   ============================================================ */
+
+/* Scope cold-open variables to the deck while in cold-open mode */
+.deck.deck--cold-open {
+  --cold-black: #07070a;
+  --cold-ink:   #0e0e14;
+  --cold-white: #ffffff;
+  --cold-green: #2bff00;
+  --cold-amber: #ffb000;
+  --cold-cyan:  #00e5ff;
+  --cold-red:   #ff2a2a;
+  --cold-pink:  #ff6bda;
+  --beat-ms: 488ms;
+  --bar-ms: 1952ms;
+  --ticker-h: 44px;
+  --font-head: "Impact", "Haettenschweiler", "Arial Narrow Bold", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "SFMono-Regular", "Menlo", "Consolas", monospace;
+}
+
+/* Suppress the deck's atmosphere on cold-open mode (mirrors deck--on-tool) */
+.deck--cold-open .bg-stage,
+.deck--cold-open .bg-particles,
+.deck--cold-open .bg-vignette {
+  opacity: 0;
+  transition: opacity 250ms var(--ease);
+}
+
+/* Hide overlays unless we're in cold-open mode. Each element keeps its
+   own display value when shown — explicitly listed so we don't accidentally
+   set #cold-start-overlay to `block` (its centering relies on flex). */
+#cold-vignette,
+#cold-flash,
+#cold-ticker,
+#cold-start-overlay {
+  display: none;
+}
+.deck--cold-open #cold-vignette  { display: block; }
+.deck--cold-open #cold-flash     { display: block; }
+.deck--cold-open #cold-ticker    { display: flex; }
+.deck--cold-open #cold-start-overlay { display: flex; }
+#cold-audio { display: none; } /* always hidden visually */
+
+/* ----- Slide-cold base ----- */
+.slide--cold {
+  background: var(--cold-black);
+  color: var(--cold-white);
+  font-family: var(--font-body);
+  letter-spacing: 0.02em;
+  position: absolute;
+  inset: 0;
+  width: 1920px;
+  height: 1080px;
+  overflow: hidden;
+}
+
+.slide--cold h1, .slide--cold h2, .slide--cold h3 {
+  font-family: var(--font-head);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  margin: 0;
+  color: var(--cold-white);
+  text-shadow: 0 14px 40px rgba(0,0,0,0.75);
+  line-height: 0.92;
+}
+.slide--cold h1 { font-size: 8em; }
+.slide--cold h2 { font-size: 5.5em; }
+.slide--cold h3 { font-size: 3em; }
+.slide--cold p  { font-size: 1.9em; color: var(--cold-white); text-shadow: 0 8px 26px rgba(0,0,0,0.7); }
+
+/* Default fragment hidden state */
+.slide--cold .cold-fragment:not(.visible) { opacity: 0; visibility: hidden; }
+
+
+/* ============================================================
+   Opossums cold-open — original styles, inlined globally.
+   .opossum-host wraps the cold-open content inside slide 1.
+   ============================================================ */
+
+/* Slot the host into slide 1 and give it a positioning context. */
+
+:root {
+      --cold-black: #07070a;
+      --cold-ink:   #0e0e14;
+      --cold-white: #ffffff;
+      --cold-green: #2bff00;
+      --cold-amber: #ffb000;
+      --cold-cyan:  #00e5ff;
+      --cold-red:   #ff2a2a;
+      --cold-pink:  #ff6bda;
+      --beat-ms: 488ms; /* 123 BPM, detected from Villain Season.mp3 */
+      --bar-ms: 1952ms; /* 4 beats */
+      --ticker-h: 44px;
+      --font-head: "Impact", "Haettenschweiler", "Arial Narrow Bold", "Helvetica Neue", Arial, sans-serif;
+      --font-body: "Helvetica Neue", Arial, sans-serif;
+      --font-mono: "SFMono-Regular", "Menlo", "Consolas", monospace;
+    }
+
+    /* deck owns html/body */
+
+    
+
+    .reveal h1, .reveal h2, .reveal h3 {
+      font-family: var(--font-head);
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      margin: 0;
+      color: var(--cold-white);
+      text-shadow: 0 14px 40px rgba(0,0,0,0.75);
+      line-height: 0.92;
+    }
+
+    .reveal h1 { font-size: 6.4em; }
+    .reveal h2 { font-size: 4.4em; }
+    .reveal h3 { font-size: 2.4em; }
+
+    .reveal p { font-size: 1.5em; color: var(--cold-white); text-shadow: 0 8px 26px rgba(0,0,0,0.7); }
+
+    /* ---------- color accents ---------- */
+    .cold-accent--green { color: var(--cold-green); }
+    .cold-accent--amber { color: var(--cold-amber); }
+    .cold-accent--cyan  { color: var(--cold-cyan); }
+    .cold-accent--red   { color: var(--cold-red); }
+    .cold-accent--pink  { color: var(--cold-pink); }
+
+    /* gradient fills for big numbers */
+    .cold-grad--green { background: linear-gradient(180deg, #d4ffc9 0%, var(--cold-green) 60%, #0fbf00 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .cold-grad--amber { background: linear-gradient(180deg, #fff1cc 0%, var(--cold-amber) 55%, #b56b00 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .cold-grad--cyan  { background: linear-gradient(180deg, #d6fbff 0%, var(--cold-cyan) 55%, #006a7a 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .cold-grad--red   { background: linear-gradient(180deg, #ffd1d1 0%, var(--cold-red) 55%, #800000 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .cold-grad--pink  { background: linear-gradient(180deg, #ffd5f1 0%, var(--cold-pink) 55%, #a03a85 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+    /* ---------- text effects ---------- */
+    .cold-stroke {
+      -webkit-text-stroke: 3px var(--cold-white);
+      text-stroke: 3px var(--cold-white);
+      color: transparent;
+      paint-order: stroke fill;
+    }
+    .cold-stroke--green { -webkit-text-stroke-color: var(--cold-green); }
+    .cold-stroke--amber { -webkit-text-stroke-color: var(--cold-amber); }
+    .cold-stroke--cyan  { -webkit-text-stroke-color: var(--cold-cyan); }
+    .cold-stroke--red   { -webkit-text-stroke-color: var(--cold-red); }
+    .cold-stroke--pink  { -webkit-text-stroke-color: var(--cold-pink); }
+
+    /* ---------- glitch ---------- */
+    .cold-glitch { position: relative; display: inline-block; }
+    .cold-glitch::before, .cold-glitch::after {
+      content: attr(data-text);
+      position: absolute; inset: 0;
+      pointer-events: none;
+    }
+    .cold-glitch::before {
+      color: var(--cold-cyan);
+      animation: glitch-a 1.6s steps(8, end) infinite;
+      clip-path: polygon(0 0, 100% 0, 100% 38%, 0 38%);
+      transform: translate(-3px, -2px);
+      mix-blend-mode: screen;
+    }
+    .cold-glitch::after {
+      color: var(--cold-red);
+      animation: glitch-b 1.6s steps(8, end) infinite reverse;
+      clip-path: polygon(0 62%, 100% 62%, 100% 100%, 0 100%);
+      transform: translate(3px, 2px);
+      mix-blend-mode: screen;
+    }
+    @keyframes glitch-a { 0%,90%,100% { transform: translate(-3px,-2px); } 30% { transform: translate(-6px,-1px); } 60% { transform: translate(-2px,-3px); } }
+    @keyframes glitch-b { 0%,90%,100% { transform: translate(3px,2px); }   30% { transform: translate(6px,1px); }    60% { transform: translate(2px,3px); } }
+
+    /* ---------- beat-driven pulse ---------- */
+    /* Drives a subtle 1-beat scale pulse on .cold-pulse elements. */
+    .cold-pulse { animation: beat-pulse var(--beat-ms) ease-out infinite; transform-origin: center; }
+    @keyframes beat-pulse {
+      0%   { transform: scale(1.00); filter: brightness(1.00); }
+      8%   { transform: scale(1.04); filter: brightness(1.18); }
+      40%  { transform: scale(1.00); filter: brightness(1.00); }
+      100% { transform: scale(1.00); filter: brightness(1.00); }
+    }
+
+    /* full-screen radial flash that fires on every major musical pop */
+    .cold-flash-overlay {
+      position: fixed; inset: 0; z-index: 70;
+      pointer-events: none;
+      opacity: 0;
+      mix-blend-mode: screen;
+      background: radial-gradient(ellipse at 50% 50%, rgba(255,255,255,0.7) 0%, transparent 60%);
+      will-change: opacity;
+    }
+
+    /* whole-deck low-amplitude vignette pulse, on the bar */
+    .cold-vignette {
+      position: fixed; inset: 0; pointer-events: none; z-index: 50;
+      box-shadow: inset 0 0 240px rgba(0,0,0,0.85);
+      animation: vignette-pulse var(--bar-ms) ease-in-out infinite;
+    }
+    @keyframes vignette-pulse {
+      0%, 100% { box-shadow: inset 0 0 240px rgba(0,0,0,0.85); }
+      6%       { box-shadow: inset 0 0 320px rgba(43,255,0,0.15), inset 0 0 240px rgba(0,0,0,0.85); }
+      12%      { box-shadow: inset 0 0 240px rgba(0,0,0,0.85); }
+    }
+
+    /* ---------- background layers ---------- */
+    .slide--cold {
+      position: relative;
+      height: 100%;
+      padding: 0;
+      background: var(--cold-black);
+      overflow: hidden;
+    }
+
+    .cold-bg {
+      position: absolute; inset: -40px;
+      background-size: cover; background-position: center;
+      background-color: var(--cold-black);
+      filter: contrast(1.10) saturate(1.10) brightness(0.55);
+      transform: scale(1.18);
+      z-index: 0;
+    }
+
+    /* slow ken-burns timed to ~8 bars so it feels musical, not random */
+    .cold-bg--ken { animation: ken var(--bar-ms) linear; animation-duration: calc(var(--bar-ms) * 8); animation-iteration-count: infinite; animation-direction: alternate; animation-timing-function: ease-in-out; }
+    @keyframes ken {
+      0%   { transform: scale(1.18) translate3d(-1.2%, 0.5%, 0); }
+      100% { transform: scale(1.26) translate3d(1.2%, -1.5%, 0); }
+    }
+
+    .cold-overlay {
+      position: absolute; inset: -40px;
+      background: linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.78) 85%);
+      z-index: 1;
+    }
+
+    /* scanline / grid overlay above image, below content */
+    .cold-scan {
+      position: absolute; inset: 0; z-index: 1;
+      background:
+        repeating-linear-gradient(180deg, rgba(255,255,255,0.018) 0 1px, transparent 1px 3px),
+        radial-gradient(ellipse at 50% 50%, transparent 40%, rgba(0,0,0,0.55) 100%);
+      mix-blend-mode: screen;
+      pointer-events: none;
+    }
+
+    /* corner registration ticks — gives every slide a "broadcast" feel */
+    .cold-ticks { position: absolute; inset: 24px; z-index: 3; pointer-events: none; }
+    .cold-ticks::before, .cold-ticks::after,
+    .cold-ticks > span::before, .cold-ticks > span::after {
+      content: ""; position: absolute; width: 22px; height: 22px;
+      border: 2px solid var(--cold-white); opacity: 0.55;
+    }
+    .cold-ticks::before        { top: 0; left: 0; border-right: 0; border-bottom: 0; }
+    .cold-ticks::after         { top: 0; right: 0; border-left: 0; border-bottom: 0; }
+    .cold-ticks > span::before { bottom: 0; left: 0; border-right: 0; border-top: 0; position: absolute; }
+    .cold-ticks > span::after  { bottom: 0; right: 0; border-left: 0; border-top: 0; position: absolute; }
+
+    /* slide index badge */
+    .cold-slug {
+      position: absolute; top: 28px; left: 50%; transform: translateX(-50%);
+      z-index: 4;
+      font-family: var(--font-mono);
+      font-size: 0.85em; letter-spacing: 0.4em;
+      color: rgba(255,255,255,0.6);
+      text-transform: uppercase;
+    }
+    .cold-slug .cold-dot { display: inline-block; width: 8px; height: 8px; background: var(--cold-green); border-radius: 50%; margin: 0 10px 2px; vertical-align: middle; animation: beat-pulse var(--beat-ms) ease-out infinite; }
+
+    /* ---------- panel layouts ---------- */
+    .cold-panel {
+      position: relative; z-index: 2;
+      width: 100%; height: 100%;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: flex-start;
+      padding: 64px 96px 64px;
+      text-align: left;
+    }
+    .cold-panel--center { align-items: center; text-align: center; }
+    .cold-panel--bottom { justify-content: flex-end; padding-bottom: 64px; }
+
+    .cold-stacked { display: flex; flex-direction: column; gap: 6px; }
+    .cold-stack { line-height: 0.88; }
+
+    .cold-subtext {
+      font-size: 1.15em; margin-top: 18px; letter-spacing: 0.06em;
+      color: rgba(255,255,255,0.85);
+      max-width: 70ch;
+    }
+    .cold-subtext.mono { font-family: var(--font-mono); font-size: 0.95em; letter-spacing: 0.16em; opacity: 0.75; }
+
+    .cold-tag {
+      font-family: var(--font-mono);
+      font-size: 0.85em; letter-spacing: 0.4em;
+      text-transform: uppercase; opacity: 0.7; margin-bottom: 18px;
+    }
+
+    /* counter */
+    .cold-counter { font-variant-numeric: tabular-nums; }
+
+    /* word cascade list */
+    .cold-stacked-words { display: flex; flex-direction: column; gap: 6px; margin-top: 18px; }
+    .cold-word {
+      font-family: var(--font-head); font-size: 2.4em; letter-spacing: 0.06em;
+      line-height: 1; padding-left: 0.4em;
+      border-left: 6px solid var(--cold-green);
+    }
+    .cold-word:nth-child(2n) { border-color: var(--cold-cyan); }
+    .cold-word:nth-child(3n) { border-color: var(--cold-amber); }
+
+    /* split panel for myth vs reality */
+    .cold-split-panel { position: relative; z-index: 2; width: 100%; height: 100%; display: flex; }
+    .cold-split-left, .cold-split-right {
+      flex: 1; display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      padding: 60px 40px; gap: 14px;
+    }
+    .cold-split-left  { background: linear-gradient(135deg, rgba(255,42,42,0.32) 0%, rgba(0,0,0,0.55) 100%); }
+    .cold-split-right { background: linear-gradient(135deg, rgba(0,0,0,0.55) 0%, rgba(43,255,0,0.32) 100%); }
+    .cold-split-divider {
+      position: absolute; top: 8%; bottom: 8%; left: 50%; width: 2px;
+      background: linear-gradient(180deg, transparent, rgba(255,255,255,0.6), transparent);
+      z-index: 3;
+    }
+    .cold-split-label {
+      font-family: var(--font-head); font-size: 1.6em; letter-spacing: 0.3em;
+      margin-bottom: 18px; opacity: 0.95;
+    }
+    .cold-myth-item, .cold-reality-item {
+      font-family: var(--font-head);
+      font-size: 2.2em; letter-spacing: 0.04em; text-align: center;
+    }
+    .cold-myth-item   { text-decoration: line-through; text-decoration-thickness: 4px; opacity: 0.7; color: #ffd0d0; }
+    .cold-reality-item{ color: #d8ffce; }
+
+    /* stats grid */
+    .cold-stats-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr);
+      gap: 36px; width: 100%; max-width: 1000px;
+    }
+    .cold-stat-item {
+      text-align: center;
+      border: 1px solid rgba(255,255,255,0.12);
+      padding: 28px 18px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0));
+    }
+    .cold-stat-number {
+      font-family: var(--font-head); font-size: 5em; line-height: 1; margin-bottom: 6px;
+    }
+    .cold-stat-label  {
+      font-family: var(--font-mono); font-size: 1em; letter-spacing: 0.25em; opacity: 0.85;
+      text-transform: uppercase;
+    }
+
+    /* CTA box */
+    .cold-cta-text {
+      font-family: var(--font-head); font-size: 2.6em; letter-spacing: 0.1em;
+      margin-top: 30px; padding: 18px 44px;
+      border: 4px solid var(--cold-green);
+      animation: cta-pulse var(--bar-ms) ease-in-out infinite;
+    }
+    @keyframes cta-pulse {
+      0%, 100% { box-shadow: 0 0 0 rgba(43,255,0,0.0), inset 0 0 0 rgba(43,255,0,0); transform: scale(1); }
+      50%      { box-shadow: 0 0 60px rgba(43,255,0,0.55), inset 0 0 24px rgba(43,255,0,0.15); transform: scale(1.02); }
+    }
+
+    /* ---------- fragment animations (snappy, well under one beat) ---------- */
+    .cold-fragment.cold-fragment--fly-in   { opacity: 0; transform: translateX(-80px) scale(0.96); }
+    .cold-fragment.cold-fragment--fly-in.visible { opacity: 1; transform: translateX(0) scale(1); transition: transform 320ms cubic-bezier(0.2,0.7,0.2,1), opacity 240ms ease; }
+
+    .cold-fragment.cold-fragment--snap     { opacity: 0; transform: scale(0.7); }
+    .cold-fragment.cold-fragment--snap.visible { opacity: 1; transform: scale(1); transition: transform 260ms cubic-bezier(0.2,0.9,0.2,1.2), opacity 180ms ease; }
+
+    .cold-fragment.cold-fragment--pop      { opacity: 0; transform: translateY(40px) scale(0.96); }
+    .cold-fragment.cold-fragment--pop.visible { opacity: 1; transform: translateY(0) scale(1); transition: transform 320ms cubic-bezier(0.2,0.8,0.2,1), opacity 220ms ease; }
+
+    .cold-fragment.cold-fragment--strike   { opacity: 0; transform: translateX(20px); }
+    .cold-fragment.cold-fragment--strike.visible { opacity: 1; transform: translateX(0); transition: transform 260ms cubic-bezier(0.2,0.7,0.2,1), opacity 200ms ease; }
+
+    .cold-fragment.cold-fragment--sweep    { opacity: 0; clip-path: inset(0 100% 0 0); }
+    .cold-fragment.cold-fragment--sweep.visible { opacity: 1; clip-path: inset(0 0 0 0); transition: clip-path 360ms cubic-bezier(0.2,0.8,0.2,1), opacity 200ms ease; }
+
+    /* ---------- marquee ticker ---------- */
+    .cold-ticker {
+      position: fixed; left: 0; right: 0; bottom: 0;
+      height: var(--ticker-h); z-index: 60;
+      background: rgba(0,0,0,0.88);
+      border-top: 1px solid rgba(255,255,255,0.14);
+      overflow: hidden;
+      font-family: var(--font-mono);
+      font-size: 0.85em; letter-spacing: 0.18em;
+      color: rgba(255,255,255,0.85);
+      text-transform: uppercase;
+      display: flex; align-items: center;
+    }
+    .cold-ticker .track {
+      display: inline-block; white-space: nowrap;
+      padding-left: 100%;
+      animation: ticker-scroll 60s linear infinite;
+      line-height: var(--ticker-h);
+    }
+    .cold-ticker .track span { padding: 0 36px; }
+    .cold-ticker .track span::before { content: "◆"; color: var(--cold-green); margin-right: 10px; }
+    @keyframes ticker-scroll {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-100%); }
+    }
+
+    /* ---------- start prompt ---------- */
+    .cold-start-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      background: #000;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+    }
+    .cold-start-overlay .inner {
+      text-align: center; font-family: var(--font-head);
+      letter-spacing: 0.12em;
+    }
+    .cold-start-overlay .big {
+      font-size: 4em; color: var(--cold-green); animation: beat-pulse var(--beat-ms) ease-out infinite;
+    }
+    .cold-start-overlay .sub {
+      font-family: var(--font-mono); font-size: 0.95em; letter-spacing: 0.4em;
+      color: rgba(255,255,255,0.75); margin-top: 18px;
+    }
+
+    @media (max-width: 900px) {
+      .cold-panel { padding: 0 36px; }
+      .cold-panel--bottom { padding-bottom: 60px; }
+      .reveal h1 { font-size: 3.6em; }
+      .reveal h2 { font-size: 2.6em; }
+      .cold-word { font-size: 1.8em; }
+      .cold-split-panel { flex-direction: column; }
+      .cold-split-divider { display: none; }
+      .cold-stats-grid { grid-template-columns: 1fr; gap: 18px; }
+      .cold-stat-number { font-size: 3.4em; }
+      .cold-ticker { height: 28px; font-size: 0.75em; }
+    }
+
+/* ============================================================
+   Stage reset — discrete bottom-right button that wipes all
+   tool localStorage + reloads every iframe so demos start clean
+   between rehearsals. Low opacity by default so audiences don't
+   read it as "part of the deck."
+   ============================================================ */
+.stage-reset {
+  position: fixed;
+  bottom: 14px;
+  right: 14px;
+  z-index: 9999;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px 7px 10px;
+  border-radius: 999px;
+  background: rgba(8, 22, 41, 0.85);
+  border: 1px solid rgba(255, 220, 100, 0.35);
+  color: rgba(255, 220, 100, 0.85);
+  font-family: var(--font-mono, ui-monospace, "SF Mono", Menlo, monospace);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 600;
+  cursor: pointer;
+  opacity: 0.18;
+  transition: opacity 180ms ease, background 180ms ease, transform 180ms ease;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.stage-reset:hover {
+  opacity: 0.95;
+  background: rgba(8, 22, 41, 0.95);
+  transform: translateY(-1px);
+}
+.stage-reset:active { transform: translateY(0); }
+.stage-reset svg { stroke: currentColor; }
+
+.stage-reset-toast {
+  position: fixed;
+  bottom: 56px;
+  right: 14px;
+  z-index: 9998;
+  background: rgba(8, 22, 41, 0.95);
+  border: 1px solid rgba(255, 220, 100, 0.55);
+  border-left: 3px solid var(--gold, #ffdc64);
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-family: var(--font-mono, ui-monospace, "SF Mono", Menlo, monospace);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  color: rgba(255, 248, 220, 0.95);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+.stage-reset-toast.is-shown { opacity: 1; transform: translateY(0); }
+
+

@@ -1,0 +1,1821 @@
+<!doctype html>
+
+<!--
+  ============================================================
+  Rivera Grounds Co · Inquiry Form — STARTER CODE
+  ============================================================
+
+  This is a single-file, self-contained version of the tool
+  demoed at the 10th Annual Veteran-Owned Business Conference
+  (May 2026) by Christopher Kleinman.
+
+  Talk: "Making Internal Business Tools With AI"
+  Site: https://christopherkleinman.com
+
+  Use this file as a jumping-off point for your own tool.
+  Feed it to your AI of choice (Claude, Cursor, Copilot,
+  Gemini, ChatGPT, etc.) and ask it to adapt the patterns to
+  your business — your customers, your fields, your workflow.
+
+  Original source file: tools/inquiry.html
+  Brand tokens (Rivera Grounds Co colors, type, components)
+  are inlined from _shared.css in the <style> block below.
+  Replace them with your own brand and you have a starting
+  point that's already wired together.
+
+  External libraries are loaded from jsDelivr — swap to your
+  preferred CDN or vendor them locally for offline use.
+  ============================================================
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Rivera Grounds Co — Request a Quote</title>
+<style>
+/* ===== Inlined from _shared.css =====
+   Brand tokens, components, and helpers from Rivera Grounds Co's
+   shared stylesheet. Replace with your own brand. */
+/* ============================================================
+   Rivera Grounds Co — Shared Tool Styles
+   ----------------------------------------------------------------
+   Every demo tool in /tools/ pulls in this file. Defines brand
+   tokens, header band, base typography, buttons, inputs, cards.
+   Tools layer their own tool-local CSS on top.
+   ============================================================ */
+
+/* ---------- Brand tokens ---------- */
+:root {
+  --rg-green:        #4a7c4e;
+  --rg-green-dk:     #2d4a30;
+  --rg-green-pale:   #e3ede4;
+  --rg-tan:          #d8c79a;
+  --rg-tan-dk:       #b8a574;
+  --rg-cream:        #f7f5f0;
+  --rg-cream-dk:     #efeae0;
+  --rg-ink:          #1f2a1f;
+  --rg-ink-dim:      #5a6f5d;
+  --rg-ink-faint:    #8a9b8c;
+  --rg-line:         rgba(74, 124, 78, 0.18);
+  --rg-line-strong:  rgba(74, 124, 78, 0.4);
+  --rg-warning:      #b8742d;
+  --rg-success:      #4a7c4e;
+
+  --rg-radius:       8px;
+  --rg-radius-lg:    14px;
+  --rg-shadow-sm:    0 1px 2px rgba(31, 42, 31, 0.06), 0 1px 3px rgba(31, 42, 31, 0.04);
+  --rg-shadow-md:    0 4px 12px rgba(31, 42, 31, 0.08), 0 2px 4px rgba(31, 42, 31, 0.04);
+  --rg-shadow-lg:    0 16px 40px rgba(31, 42, 31, 0.12), 0 4px 12px rgba(31, 42, 31, 0.06);
+
+  --rg-font-display: ui-serif, Georgia, "Times New Roman", serif;
+  --rg-font-body:    -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --rg-font-mono:    ui-monospace, "SF Mono", Menlo, Monaco, "Cascadia Code", monospace;
+}
+
+/* ---------- Reset / base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--rg-cream);
+  color: var(--rg-ink);
+  font-family: var(--rg-font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-image:
+    radial-gradient(rgba(74, 124, 78, 0.06) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* ---------- Page shell ---------- */
+.rg-shell {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- Header band ---------- */
+.rg-header {
+  background: var(--rg-green-dk);
+  color: var(--rg-cream);
+  padding: 14px 28px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  border-bottom: 3px solid var(--rg-tan);
+}
+.rg-mark {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--rg-font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 22px;
+  letter-spacing: 0.01em;
+  color: var(--rg-cream);
+  text-decoration: none;
+}
+.rg-mark::before {
+  content: "";
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--rg-tan);
+  box-shadow: 0 0 0 3px rgba(216, 199, 154, 0.25);
+}
+.rg-mark .ampersand { color: var(--rg-tan); }
+.rg-tagline {
+  font-size: 11px;
+  color: rgba(247, 245, 240, 0.65);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-left: auto;
+}
+.rg-tag-pill {
+  margin-left: 18px;
+  padding: 4px 10px;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--rg-tan);
+  border: 1px solid rgba(216, 199, 154, 0.3);
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+/* ---------- Page title strip ---------- */
+.rg-title-strip {
+  padding: 18px 28px;
+  background: rgba(255, 255, 255, 0.6);
+  border-bottom: 1px solid var(--rg-line);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.rg-title-strip h1 {
+  margin: 0;
+  font-family: var(--rg-font-display);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--rg-green-dk);
+}
+.rg-title-strip .rg-sub {
+  font-size: 13px;
+  color: var(--rg-ink-dim);
+}
+
+/* ---------- Buttons ---------- */
+.rg-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 16px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  border: 1px solid transparent;
+  border-radius: var(--rg-radius);
+  cursor: pointer;
+  transition: transform 80ms ease, box-shadow 120ms ease, background 120ms ease;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+}
+.rg-btn:active { transform: translateY(1px); }
+.rg-btn--primary {
+  background: var(--rg-green-dk);
+  color: var(--rg-cream);
+}
+.rg-btn--primary:hover {
+  background: var(--rg-green);
+  box-shadow: var(--rg-shadow-md);
+}
+.rg-btn--secondary {
+  background: var(--rg-cream);
+  color: var(--rg-green-dk);
+  border-color: var(--rg-line-strong);
+}
+.rg-btn--secondary:hover {
+  background: var(--rg-green-pale);
+  border-color: var(--rg-green);
+}
+.rg-btn--ghost {
+  background: transparent;
+  color: var(--rg-ink-dim);
+  border-color: transparent;
+}
+.rg-btn--ghost:hover {
+  color: var(--rg-green-dk);
+  background: rgba(74, 124, 78, 0.06);
+}
+.rg-btn--danger {
+  background: transparent;
+  color: var(--rg-warning);
+  border-color: rgba(184, 116, 45, 0.3);
+}
+.rg-btn--danger:hover {
+  background: rgba(184, 116, 45, 0.08);
+}
+.rg-btn--sm { padding: 6px 12px; font-size: 12px; }
+.rg-btn--lg { padding: 12px 22px; font-size: 14px; }
+.rg-btn--icon { padding: 8px; min-width: 32px; }
+
+/* ---------- Inputs ---------- */
+.rg-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.rg-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--rg-ink-dim);
+}
+.rg-input,
+.rg-select,
+.rg-textarea {
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--rg-ink);
+  background: #fff;
+  border: 1px solid var(--rg-line-strong);
+  border-radius: var(--rg-radius);
+  padding: 9px 12px;
+  line-height: 1.4;
+  transition: border-color 120ms, box-shadow 120ms;
+  width: 100%;
+}
+.rg-textarea {
+  resize: vertical;
+  min-height: 72px;
+}
+.rg-input:focus,
+.rg-select:focus,
+.rg-textarea:focus {
+  outline: none;
+  border-color: var(--rg-green);
+  box-shadow: 0 0 0 3px rgba(74, 124, 78, 0.12);
+}
+.rg-input::placeholder,
+.rg-textarea::placeholder {
+  color: var(--rg-ink-faint);
+}
+
+/* ---------- Cards / panels ---------- */
+.rg-card {
+  background: #fff;
+  border: 1px solid var(--rg-line);
+  border-radius: var(--rg-radius-lg);
+  box-shadow: var(--rg-shadow-sm);
+  overflow: hidden;
+}
+.rg-card__header {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--rg-line);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.rg-card__title {
+  font-family: var(--rg-font-display);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--rg-green-dk);
+  margin: 0;
+}
+.rg-card__body { padding: 16px 18px; }
+
+/* ---------- KPI tile ---------- */
+.rg-kpi {
+  background: #fff;
+  border: 1px solid var(--rg-line);
+  border-radius: var(--rg-radius);
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: var(--rg-shadow-sm);
+}
+.rg-kpi__label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--rg-ink-dim);
+  font-weight: 600;
+}
+.rg-kpi__value {
+  font-family: var(--rg-font-display);
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--rg-green-dk);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+.rg-kpi__delta {
+  font-size: 11px;
+  color: var(--rg-ink-faint);
+}
+
+/* ---------- Footer / utility ---------- */
+.rg-footer {
+  margin-top: auto;
+  padding: 10px 28px;
+  background: rgba(255, 255, 255, 0.5);
+  border-top: 1px solid var(--rg-line);
+  font-size: 11px;
+  color: var(--rg-ink-faint);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* ---------- Tag / pill ---------- */
+.rg-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  border-radius: 999px;
+  background: var(--rg-green-pale);
+  color: var(--rg-green-dk);
+  border: 1px solid var(--rg-line);
+}
+.rg-pill--tan {
+  background: rgba(216, 199, 154, 0.3);
+  color: var(--rg-tan-dk);
+  border-color: rgba(184, 165, 116, 0.4);
+}
+.rg-pill--warn {
+  background: rgba(184, 116, 45, 0.1);
+  color: var(--rg-warning);
+  border-color: rgba(184, 116, 45, 0.25);
+}
+
+/* ---------- Empty state ---------- */
+.rg-empty {
+  border: 2px dashed var(--rg-line-strong);
+  border-radius: var(--rg-radius-lg);
+  padding: 40px 32px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.5);
+  color: var(--rg-ink-dim);
+}
+.rg-empty h3 {
+  margin: 0 0 6px;
+  font-family: var(--rg-font-display);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--rg-green-dk);
+}
+.rg-empty p { margin: 0 0 16px; font-size: 13px; }
+.rg-empty.is-active {
+  border-color: var(--rg-green);
+  background: var(--rg-green-pale);
+}
+
+/* ---------- Helpers ---------- */
+.rg-hidden { display: none !important; }
+.rg-row { display: flex; gap: 12px; align-items: center; }
+.rg-row--end { justify-content: flex-end; }
+.rg-row--between { justify-content: space-between; }
+.rg-stack { display: flex; flex-direction: column; gap: 12px; }
+
+/* ---------- Scrollbar (subtle) ---------- */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--rg-line-strong);
+  border-radius: 999px;
+  border: 2px solid var(--rg-cream);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--rg-green); }
+
+/* ============================================================
+   "Live · running locally" pill — sits in the .rg-header band
+   alongside .rg-tag-pill. Reinforces "this is real software"
+   on every demo without needing to be said.
+   ============================================================ */
+.rg-live-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px 3px 8px;
+  border-radius: 999px;
+  background: rgba(74, 124, 78, 0.12);
+  border: 1px solid rgba(74, 124, 78, 0.32);
+  font-family: var(--rg-font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--rg-cream);
+  font-weight: 600;
+  user-select: none;
+}
+.rg-live-pill::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #6fcf73;
+  box-shadow: 0 0 8px rgba(111, 207, 115, 0.7);
+  animation: rg-live-pulse 1.6s ease-in-out infinite;
+}
+@keyframes rg-live-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.5; transform: scale(0.85); }
+}
+/* Dark-on-light variant — for tools whose header sits on a cream/light
+   background (e.g., Invoice's form-head). Uses dark green text + a
+   darker border so it pops against light surfaces. */
+.rg-live-pill--dark {
+  background: rgba(74, 124, 78, 0.10);
+  border-color: rgba(45, 74, 48, 0.45);
+  color: var(--rg-green-dk);
+}
+.rg-live-pill--dark::before {
+  background: var(--rg-success, #4a7c4e);
+  box-shadow: 0 0 6px rgba(74, 124, 78, 0.55);
+}
+
+/* ============================================================
+   Demo button — italic-lowercase ghost link.
+   Use for stage-only "demo: do a thing" buttons. Same voice as
+   the dashboard's `demo: another week` pattern.
+   ============================================================ */
+.rg-btn--demo {
+  background: none;
+  border: 0;
+  padding: 4px 8px;
+  font-family: var(--rg-font-body);
+  font-size: 11.5px;
+  font-style: italic;
+  color: var(--rg-ink-faint);
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  border-radius: 4px;
+  transition: color 140ms ease, background 140ms ease;
+}
+.rg-btn--demo:hover {
+  color: var(--rg-green-dk);
+  background: rgba(74, 124, 78, 0.06);
+}
+.rg-btn--demo:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  color: var(--rg-ink-faint);
+  background: none;
+  text-decoration: line-through dotted;
+}
+
+/* ============================================================
+   Toast — floating notification top-right of the tool viewport.
+   Same animation/positioning as dashboard's .add-toast.
+   ============================================================ */
+.rg-toast {
+  position: fixed;
+  top: 84px;
+  right: 24px;
+  background: #fff;
+  border: 1px solid var(--rg-line);
+  border-left: 3px solid var(--rg-success, #4a7c4e);
+  border-radius: 6px;
+  padding: 9px 14px 9px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--rg-ink);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.10);
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 220ms ease, transform 220ms ease;
+  z-index: 50;
+  pointer-events: none;
+  max-width: 320px;
+}
+.rg-toast.is-shown { opacity: 1; transform: translateY(0); }
+.rg-toast--warn { border-left-color: var(--rg-warning, #b8742d); }
+.rg-toast--info { border-left-color: var(--rg-ink-faint, #8a9b8c); }
+.rg-toast b { color: var(--rg-green-dk); font-weight: 700; }
+.rg-toast--warn b { color: var(--rg-warning, #b8742d); }
+.rg-toast .tdim { color: var(--rg-ink-dim); font-weight: 400; margin-left: 4px; }
+
+</style>
+<style>
+  /* ============================================================
+     Inquiry tool — local styles
+     ============================================================ */
+
+  body {
+    background: var(--rg-cream);
+    /* layered subtle topo / dot pattern */
+    background-image:
+      radial-gradient(rgba(74, 124, 78, 0.06) 1px, transparent 1px),
+      repeating-linear-gradient(
+        135deg,
+        transparent 0 28px,
+        rgba(74, 124, 78, 0.025) 28px 29px
+      );
+    background-size: 24px 24px, auto;
+  }
+
+  .rg-shell { min-height: 100vh; }
+
+  /* ---------- Header (custom inquiry-flavored) ---------- */
+  .rg-header { padding: 12px 28px; }
+  .rg-header .rg-tagline { font-size: 10px; }
+
+  /* ---------- Hero strip ---------- */
+  .hero {
+    position: relative;
+    padding: 26px 36px 28px;
+    background:
+      linear-gradient(95deg,
+        var(--rg-green-dk) 0%,
+        var(--rg-green-dk) 38%,
+        var(--rg-green) 70%,
+        #5b8e60 100%);
+    color: var(--rg-cream);
+    border-bottom: 3px solid var(--rg-tan);
+    overflow: hidden;
+  }
+  /* tan diagonal accent stripe */
+  .hero::before {
+    content: "";
+    position: absolute;
+    right: -120px;
+    top: -30px;
+    width: 380px;
+    height: 240%;
+    background: linear-gradient(180deg, rgba(216, 199, 154, 0.18), rgba(216, 199, 154, 0.04));
+    transform: rotate(14deg);
+    pointer-events: none;
+  }
+  /* topo line texture */
+  .hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(
+        90deg,
+        transparent 0 60px,
+        rgba(216, 199, 154, 0.06) 60px 61px
+      ),
+      repeating-linear-gradient(
+        0deg,
+        transparent 0 90px,
+        rgba(216, 199, 154, 0.05) 90px 91px
+      );
+    pointer-events: none;
+  }
+  .hero__inner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 28px;
+    max-width: 1640px;
+    margin: 0 auto;
+  }
+  .hero__text { max-width: 920px; }
+  .hero__eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--rg-tan);
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .hero h1 {
+    margin: 0 0 8px;
+    font-family: var(--rg-font-display);
+    font-weight: 600;
+    font-size: 34px;
+    letter-spacing: -0.015em;
+    line-height: 1.05;
+  }
+  .hero h1 em {
+    font-style: italic;
+    color: var(--rg-tan);
+    font-weight: 500;
+  }
+  .hero__lede {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: rgba(247, 245, 240, 0.88);
+    max-width: 640px;
+  }
+  .hero__badge {
+    flex-shrink: 0;
+    border: 1px solid rgba(216, 199, 154, 0.45);
+    border-radius: 12px;
+    padding: 12px 18px;
+    background: rgba(31, 42, 31, 0.18);
+    backdrop-filter: blur(2px);
+    text-align: right;
+    min-width: 200px;
+  }
+  .hero__badge-eye {
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--rg-tan);
+    font-weight: 700;
+  }
+  .hero__badge-name {
+    font-family: var(--rg-font-display);
+    font-style: italic;
+    font-size: 16px;
+    color: var(--rg-cream);
+    margin-top: 2px;
+    line-height: 1.2;
+  }
+  .hero__badge-meta {
+    font-size: 10px;
+    color: rgba(247, 245, 240, 0.65);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-top: 6px;
+  }
+
+  /* ---------- Page body ---------- */
+  .page {
+    max-width: 1640px;
+    margin: 0 auto;
+    padding: 28px 36px 36px;
+  }
+
+  /* Top-level alert */
+  .alert {
+    display: none;
+    margin: 0 0 18px;
+    padding: 12px 16px;
+    background: rgba(184, 116, 45, 0.1);
+    border: 1px solid rgba(184, 116, 45, 0.3);
+    border-left: 4px solid var(--rg-warning);
+    color: var(--rg-warning);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .alert.is-on { display: block; }
+
+  /* ---------- Form layout: two columns of section cards ---------- */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    align-items: start;
+  }
+  @media (max-width: 1100px) {
+    .form-grid { grid-template-columns: 1fr; }
+  }
+
+  /* Section card */
+  .section {
+    position: relative;
+    background: #fff;
+    border: 1px solid var(--rg-line);
+    border-radius: var(--rg-radius-lg);
+    box-shadow: var(--rg-shadow-sm);
+    padding: 22px 24px 20px;
+  }
+  .section__num {
+    position: absolute;
+    top: 14px;
+    right: 18px;
+    font-family: var(--rg-font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--rg-ink-faint);
+    letter-spacing: 0.1em;
+  }
+  .section__head {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--rg-line);
+  }
+  .section__eyebrow {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--rg-green);
+    margin-bottom: 4px;
+  }
+  .section__title {
+    margin: 0;
+    font-family: var(--rg-font-display);
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--rg-green-dk);
+    letter-spacing: -0.01em;
+  }
+
+  .field-stack { display: flex; flex-direction: column; gap: 14px; }
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .rg-label .req { color: var(--rg-warning); margin-left: 2px; }
+
+  /* invalid state */
+  .rg-input.is-invalid,
+  .rg-select.is-invalid,
+  .rg-textarea.is-invalid {
+    border-color: var(--rg-warning);
+    box-shadow: 0 0 0 3px rgba(184, 116, 45, 0.12);
+    background: rgba(184, 116, 45, 0.03);
+  }
+
+  /* ---------- Service interest cards ---------- */
+  .svc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .svc {
+    position: relative;
+    border: 1.5px solid var(--rg-line-strong);
+    border-radius: 12px;
+    padding: 14px 14px 14px 56px;
+    background: #fff;
+    cursor: pointer;
+    transition: transform 80ms ease, border-color 120ms, background 120ms, box-shadow 120ms;
+    display: block;
+  }
+  .svc:hover {
+    border-color: var(--rg-green);
+    background: rgba(74, 124, 78, 0.03);
+  }
+  .svc:active { transform: scale(0.985); }
+  .svc input { position: absolute; opacity: 0; pointer-events: none; }
+  .svc__icon {
+    position: absolute;
+    left: 12px;
+    top: 12px;
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    border-radius: 8px;
+    background: var(--rg-green-pale);
+    color: var(--rg-green-dk);
+    border: 1px solid var(--rg-line);
+    transition: background 120ms, border-color 120ms, color 120ms;
+  }
+  .svc__title {
+    font-family: var(--rg-font-display);
+    font-weight: 600;
+    color: var(--rg-green-dk);
+    font-size: 15px;
+    line-height: 1.2;
+  }
+  .svc__desc {
+    margin-top: 3px;
+    font-size: 12px;
+    color: var(--rg-ink-dim);
+    line-height: 1.35;
+  }
+  .svc.is-selected {
+    border-color: var(--rg-green-dk);
+    background: var(--rg-green-pale);
+    box-shadow: 0 0 0 3px rgba(74, 124, 78, 0.12), var(--rg-shadow-sm);
+  }
+  .svc.is-selected .svc__icon {
+    background: var(--rg-green-dk);
+    color: var(--rg-tan);
+    border-color: var(--rg-green-dk);
+  }
+  .svc.is-selected::after {
+    content: "✓";
+    position: absolute;
+    top: 10px; right: 12px;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--rg-green-dk);
+    color: var(--rg-tan);
+    font-size: 12px;
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+  }
+  .svc-grid.is-invalid .svc { border-color: rgba(184, 116, 45, 0.5); }
+
+  /* ---------- Radio chip groups ---------- */
+  .radio-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .radio-chip {
+    position: relative;
+    cursor: pointer;
+  }
+  .radio-chip input { position: absolute; opacity: 0; pointer-events: none; }
+  .radio-chip span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border: 1px solid var(--rg-line-strong);
+    border-radius: 999px;
+    background: #fff;
+    font-size: 13px;
+    color: var(--rg-ink);
+    transition: all 120ms;
+  }
+  .radio-chip:hover span {
+    border-color: var(--rg-green);
+    background: rgba(74, 124, 78, 0.04);
+  }
+  .radio-chip input:checked + span {
+    background: var(--rg-green-dk);
+    border-color: var(--rg-green-dk);
+    color: var(--rg-cream);
+    font-weight: 600;
+  }
+  .radio-row.is-invalid .radio-chip span { border-color: rgba(184, 116, 45, 0.45); }
+
+  /* ---------- Veteran note ---------- */
+  .vet-note {
+    margin-top: 14px;
+    padding: 12px 14px;
+    background: rgba(216, 199, 154, 0.18);
+    border: 1px solid rgba(184, 165, 116, 0.4);
+    border-left: 3px solid var(--rg-tan-dk);
+    border-radius: 8px;
+    font-size: 12.5px;
+    color: var(--rg-ink);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    line-height: 1.45;
+  }
+  .vet-note .rg-pill { flex-shrink: 0; }
+
+  /* ---------- Submit row ---------- */
+  .submit-row {
+    margin-top: 22px;
+    padding: 18px 22px;
+    background: #fff;
+    border: 1px solid var(--rg-line);
+    border-radius: var(--rg-radius-lg);
+    box-shadow: var(--rg-shadow-sm);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .submit-row .actions { display: flex; gap: 10px; }
+  .submit-row .fineprint {
+    font-size: 11px;
+    color: var(--rg-ink-faint);
+    line-height: 1.5;
+    max-width: 540px;
+  }
+
+  /* Bigger primary on submit */
+  .rg-btn--xl {
+    padding: 12px 26px;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+  }
+
+  /* ---------- Confirmation state ---------- */
+  .confirm {
+    max-width: 1100px;
+    margin: 0 auto;
+    background: #fff;
+    border: 1px solid var(--rg-line);
+    border-radius: var(--rg-radius-lg);
+    box-shadow: var(--rg-shadow-md);
+    overflow: hidden;
+  }
+  .confirm__top {
+    padding: 32px 36px 26px;
+    background:
+      linear-gradient(180deg, rgba(74, 124, 78, 0.06), transparent),
+      var(--rg-green-pale);
+    border-bottom: 3px solid var(--rg-tan);
+    position: relative;
+  }
+  .confirm__top::before {
+    content: "✓";
+    position: absolute;
+    top: 28px;
+    right: 36px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--rg-green-dk);
+    color: var(--rg-tan);
+    font-size: 28px;
+    display: grid;
+    place-items: center;
+    box-shadow: 0 6px 18px rgba(45, 74, 48, 0.25);
+  }
+  .confirm__eye {
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--rg-green);
+    font-weight: 700;
+  }
+  .confirm__title {
+    margin: 6px 0 8px;
+    font-family: var(--rg-font-display);
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--rg-green-dk);
+    letter-spacing: -0.015em;
+  }
+  .confirm__sub {
+    margin: 0;
+    font-size: 14px;
+    color: var(--rg-ink-dim);
+    max-width: 620px;
+    line-height: 1.5;
+  }
+
+  .confirm__body { padding: 26px 36px 32px; }
+
+  .summary-card {
+    border: 1px solid var(--rg-line);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .summary-card__head {
+    padding: 12px 18px;
+    background: var(--rg-cream);
+    border-bottom: 1px solid var(--rg-line);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .summary-card__head .label {
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--rg-ink-dim);
+  }
+  .summary-card__head .ref {
+    font-family: var(--rg-font-mono);
+    font-size: 11px;
+    color: var(--rg-ink-faint);
+  }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+  }
+  .summary-cell {
+    padding: 14px 18px;
+    border-right: 1px solid var(--rg-line);
+    border-bottom: 1px solid var(--rg-line);
+    background: #fff;
+    min-height: 64px;
+  }
+  .summary-cell:nth-child(4n) { border-right: none; }
+  .summary-grid .summary-cell:nth-last-child(-n+4) { border-bottom: none; }
+  .summary-cell .k {
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--rg-ink-faint);
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .summary-cell .v {
+    font-size: 13px;
+    color: var(--rg-ink);
+    line-height: 1.4;
+    word-break: break-word;
+  }
+  .summary-cell .v.empty { color: var(--rg-ink-faint); font-style: italic; }
+  .summary-cell--wide { grid-column: span 2; }
+  .summary-cell--full { grid-column: 1 / -1; border-right: none; }
+
+  .confirm__actions {
+    margin-top: 22px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  /* ---------- Footer ---------- */
+  .rg-footer { padding: 12px 28px; }
+
+  /* tighter for narrow embed */
+  @media (max-width: 800px) {
+    .svc-grid { grid-template-columns: 1fr; }
+    .field-row { grid-template-columns: 1fr; }
+    .summary-grid { grid-template-columns: repeat(2, 1fr); }
+    .summary-cell:nth-child(4n) { border-right: 1px solid var(--rg-line); }
+    .summary-cell:nth-child(2n) { border-right: none; }
+    .hero h1 { font-size: 26px; }
+  }
+
+  /* ===== Recent Inquiries inbox ===== */
+  .inbox-panel {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 14px;
+    margin: 0 0 14px;
+    background: var(--rg-cream-dk);
+    border: 1px solid var(--rg-line);
+    border-radius: var(--rg-radius);
+    min-height: 46px;
+    flex-wrap: wrap;
+  }
+  .inbox-meta {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .inbox-label {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--rg-ink-faint);
+    font-weight: 600;
+  }
+  .inbox-count {
+    font-family: var(--rg-font-mono);
+    font-size: 11px;
+    color: var(--rg-green-dk);
+    font-weight: 700;
+  }
+  .inbox-list {
+    display: flex;
+    gap: 6px;
+    flex: 1;
+    flex-wrap: wrap;
+    align-items: center;
+    min-height: 22px;
+  }
+  .inbox-list:empty::before {
+    content: "no submissions yet — try the demo button →";
+    color: var(--rg-ink-faint);
+    font-style: italic;
+    font-size: 11.5px;
+  }
+  .inbox-entry {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 9px 3px 7px;
+    border-radius: 999px;
+    background: #fff;
+    border: 1px solid var(--rg-line-strong);
+    font-size: 11.5px;
+    color: var(--rg-ink);
+    animation: inbox-entry-in 320ms cubic-bezier(0.2, 0.8, 0.3, 1);
+  }
+  .inbox-entry__dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--rg-green);
+  }
+  .inbox-entry__name { font-weight: 600; color: var(--rg-green-dk); }
+  .inbox-entry__time { color: var(--rg-ink-faint); font-family: var(--rg-font-mono); font-size: 10px; }
+  @keyframes inbox-entry-in {
+    from { opacity: 0; transform: translateY(-4px) scale(0.95); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .inbox-actions { margin-left: auto; }
+</style>
+</head>
+<body>
+  <div class="rg-shell">
+
+    <!-- ============== Header ============== -->
+    <header class="rg-header">
+      <a class="rg-mark" href="#" onclick="event.preventDefault()">Rivera Grounds <span class="ampersand">&amp;</span> Co</a>
+      <span class="rg-tag-pill">Veteran-Owned</span>
+      <span class="rg-tagline">Utah County, UT · Since 2018</span>
+      <span class="rg-live-pill" title="This is real software running in your browser, not a screenshot">Live · running locally</span>
+    </header>
+
+    <!-- ============== Hero strip ============== -->
+    <section class="hero">
+      <div class="hero__inner">
+        <div class="hero__text">
+          <div class="hero__eyebrow">Request a Quote · Book a Consultation</div>
+          <h1>Tell us about <em>your project.</em></h1>
+          <p class="hero__lede">We'll get back to you within one business day. Veterans get priority booking.</p>
+        </div>
+        <div class="hero__badge" aria-hidden="true">
+          <div class="hero__badge-eye">Owner</div>
+          <div class="hero__badge-name">Cody Rivera</div>
+          <div class="hero__badge-meta">USMC · Lic &amp; Ins</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== Page body ============== -->
+    <main class="page">
+
+      <!-- ===== Recent inquiries inbox ===== -->
+      <div class="inbox-panel" id="inboxPanel">
+        <div class="inbox-meta">
+          <span class="inbox-label">Recent inquiries</span>
+          <span class="inbox-count" id="inboxCount">0 received</span>
+        </div>
+        <div class="inbox-list" id="inboxList"></div>
+        <div class="inbox-actions">
+          <button type="button" class="rg-btn--demo" id="demoFillSubmitBtn"
+                  title="Auto-fill the form with Linda Park's profile — then click Send Inquiry yourself">
+            demo: auto-fill
+          </button>
+        </div>
+      </div>
+
+      <!-- ===== FORM STATE ===== -->
+      <div id="formState">
+
+        <div class="alert" id="topAlert" role="alert">
+          Please fill out the highlighted fields before sending.
+        </div>
+
+        <form id="inquiryForm" novalidate autocomplete="on">
+          <div class="form-grid">
+
+            <!-- Section 1: About you -->
+            <div class="section">
+              <div class="section__num">01</div>
+              <div class="section__head">
+                <div class="section__eyebrow">Step One</div>
+                <h2 class="section__title">About you</h2>
+              </div>
+              <div class="field-stack">
+                <div class="rg-field">
+                  <label class="rg-label" for="f-name">Full name <span class="req">*</span></label>
+                  <input class="rg-input" id="f-name" name="name" type="text" placeholder="First and last" required />
+                </div>
+                <div class="field-row">
+                  <div class="rg-field">
+                    <label class="rg-label" for="f-email">Email <span class="req">*</span></label>
+                    <input class="rg-input" id="f-email" name="email" type="email" placeholder="you@example.com" required />
+                  </div>
+                  <div class="rg-field">
+                    <label class="rg-label" for="f-phone">Phone <span class="req">*</span></label>
+                    <input class="rg-input" id="f-phone" name="phone" type="tel" placeholder="(801) 555-0142" required />
+                  </div>
+                </div>
+                <div class="rg-field">
+                  <label class="rg-label" for="f-address">Property address</label>
+                  <textarea class="rg-textarea" id="f-address" name="address" rows="2" placeholder="Street, city, ZIP — Utah County area"></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section 2: Service interest -->
+            <div class="section">
+              <div class="section__num">02</div>
+              <div class="section__head">
+                <div class="section__eyebrow">Step Two</div>
+                <h2 class="section__title">What do you need? <span class="req" style="font-size:13px">*</span></h2>
+              </div>
+              <div class="svc-grid" id="svcGrid">
+
+                <label class="svc">
+                  <input type="radio" name="service" value="Lawn care" />
+                  <div class="svc__icon" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 4 13C4 8 8 4 14 4h6v6c0 6-4 10-9 10z"/><path d="M2 22 15 9"/></svg>
+                  </div>
+                  <div class="svc__title">Lawn care</div>
+                  <div class="svc__desc">Weekly or monthly maintenance</div>
+                </label>
+
+                <label class="svc">
+                  <input type="radio" name="service" value="Hardscaping" />
+                  <div class="svc__icon" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16h7l2 4h9"/><path d="M5 12h6l1.5 3"/><path d="M8 7h7l2 4"/></svg>
+                  </div>
+                  <div class="svc__title">Hardscaping</div>
+                  <div class="svc__desc">Patios, walls, walkways, fire features</div>
+                </label>
+
+                <label class="svc">
+                  <input type="radio" name="service" value="Irrigation" />
+                  <div class="svc__icon" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s6 7 6 12a6 6 0 0 1-12 0c0-5 6-12 6-12z"/></svg>
+                  </div>
+                  <div class="svc__title">Irrigation</div>
+                  <div class="svc__desc">New install, repair, sprinkler tune-up</div>
+                </label>
+
+                <label class="svc">
+                  <input type="radio" name="service" value="Site consultation" />
+                  <div class="svc__icon" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5 13 13l-4.5 2.5L11 11z"/></svg>
+                  </div>
+                  <div class="svc__title">Site consultation</div>
+                  <div class="svc__desc">Not sure yet — help me figure it out</div>
+                </label>
+
+              </div>
+            </div>
+
+            <!-- Section 3: Property -->
+            <div class="section">
+              <div class="section__num">03</div>
+              <div class="section__head">
+                <div class="section__eyebrow">Step Three</div>
+                <h2 class="section__title">About the property</h2>
+              </div>
+              <div class="field-stack">
+                <div class="rg-field">
+                  <label class="rg-label" for="f-lot">Lot size <span class="req">*</span></label>
+                  <select class="rg-select" id="f-lot" name="lot" required>
+                    <option value="">Select lot size…</option>
+                    <option>Small (under ¼ acre)</option>
+                    <option>Medium (¼ – ½ acre)</option>
+                    <option>Large (½ – 1 acre)</option>
+                    <option>Estate (over 1 acre)</option>
+                    <option>Commercial / multi-property</option>
+                  </select>
+                </div>
+
+                <div class="rg-field">
+                  <label class="rg-label">How soon do you need it done? <span class="req">*</span></label>
+                  <div class="radio-row" id="urgencyRow" data-name="urgency">
+                    <label class="radio-chip"><input type="radio" name="urgency" value="This week if possible" /><span>This week if possible</span></label>
+                    <label class="radio-chip"><input type="radio" name="urgency" value="Within the month" /><span>Within the month</span></label>
+                    <label class="radio-chip"><input type="radio" name="urgency" value="Spring/Summer 2026" /><span>Spring/Summer 2026</span></label>
+                    <label class="radio-chip"><input type="radio" name="urgency" value="Just exploring" /><span>Just exploring</span></label>
+                  </div>
+                </div>
+
+                <div class="rg-field">
+                  <label class="rg-label">Worked with a landscape company before?</label>
+                  <div class="radio-row" data-name="prior">
+                    <label class="radio-chip"><input type="radio" name="prior" value="Yes" /><span>Yes</span></label>
+                    <label class="radio-chip"><input type="radio" name="prior" value="No" /><span>No</span></label>
+                    <label class="radio-chip"><input type="radio" name="prior" value="DIY — want a pro now" /><span>We did our own — want a pro now</span></label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section 4: Anything else -->
+            <div class="section">
+              <div class="section__num">04</div>
+              <div class="section__head">
+                <div class="section__eyebrow">Step Four</div>
+                <h2 class="section__title">Anything else we should know?</h2>
+              </div>
+              <div class="field-stack">
+                <div class="rg-field">
+                  <label class="rg-label" for="f-notes">Notes (optional)</label>
+                  <textarea class="rg-textarea" id="f-notes" name="notes" rows="4" placeholder="Pictures help. Project history. Specific concerns. Budget if you have one in mind."></textarea>
+                </div>
+              </div>
+              <div class="vet-note">
+                <span class="rg-pill rg-pill--tan">★ Veteran</span>
+                <span><strong>Veteran in the household?</strong> Mention it in your notes — we offer a 10% veteran discount, no questions asked.</span>
+              </div>
+            </div>
+
+          </div><!-- /.form-grid -->
+
+          <!-- Submit row -->
+          <div class="submit-row">
+            <div class="fineprint">
+              Your information stays on this page until you submit. We don't track you.<br/>
+              Form built in two hours, with AI.
+            </div>
+            <div class="actions">
+              <button type="button" class="rg-btn rg-btn--ghost" id="resetBtn">Reset</button>
+              <button type="submit" class="rg-btn rg-btn--primary rg-btn--xl" id="submitBtn">Send Inquiry →</button>
+            </div>
+          </div>
+
+        </form>
+      </div><!-- /#formState -->
+
+      <!-- ===== CONFIRMATION STATE ===== -->
+      <div id="confirmState" class="rg-hidden"></div>
+
+    </main>
+
+    <footer class="rg-footer">
+      <span>RIVERA GROUNDS CO · UTAH COUNTY, UT</span>
+      <span>VETERAN-OWNED · LIC &amp; INS</span>
+      <span id="footYear">© 2026</span>
+    </footer>
+  </div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ---- Elements
+  const form        = document.getElementById('inquiryForm');
+  const formState   = document.getElementById('formState');
+  const confirmEl   = document.getElementById('confirmState');
+  const topAlert    = document.getElementById('topAlert');
+  const svcGrid     = document.getElementById('svcGrid');
+  const urgencyRow  = document.getElementById('urgencyRow');
+  const resetBtn    = document.getElementById('resetBtn');
+
+  // Mirror selected state on service cards
+  svcGrid.addEventListener('change', () => {
+    const checked = svcGrid.querySelector('input[name="service"]:checked');
+    svcGrid.querySelectorAll('.svc').forEach(card => {
+      const input = card.querySelector('input');
+      card.classList.toggle('is-selected', input === checked);
+    });
+    svcGrid.classList.remove('is-invalid');
+  });
+
+  // Clear invalid state on edit
+  form.querySelectorAll('.rg-input, .rg-select, .rg-textarea').forEach(el => {
+    el.addEventListener('input',  () => el.classList.remove('is-invalid'));
+    el.addEventListener('change', () => el.classList.remove('is-invalid'));
+  });
+  form.querySelectorAll('.radio-row').forEach(row => {
+    row.addEventListener('change', () => row.classList.remove('is-invalid'));
+  });
+
+  // Reset
+  resetBtn.addEventListener('click', () => {
+    form.reset();
+    svcGrid.querySelectorAll('.svc').forEach(c => c.classList.remove('is-selected'));
+    form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+    topAlert.classList.remove('is-on');
+  });
+
+  // ---- Validation
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  function validate() {
+    let firstInvalid = null;
+    let ok = true;
+
+    const requiredFields = [
+      { id: 'f-name',  test: v => v.trim().length > 0 },
+      { id: 'f-email', test: v => EMAIL_RE.test(v.trim()) },
+      { id: 'f-phone', test: v => v.trim().length >= 7 },
+      { id: 'f-lot',   test: v => v.trim().length > 0 }
+    ];
+    requiredFields.forEach(f => {
+      const el = document.getElementById(f.id);
+      if (!f.test(el.value)) {
+        el.classList.add('is-invalid');
+        if (!firstInvalid) firstInvalid = el;
+        ok = false;
+      } else {
+        el.classList.remove('is-invalid');
+      }
+    });
+
+    if (!form.querySelector('input[name="service"]:checked')) {
+      svcGrid.classList.add('is-invalid');
+      if (!firstInvalid) firstInvalid = svcGrid;
+      ok = false;
+    }
+
+    if (!form.querySelector('input[name="urgency"]:checked')) {
+      urgencyRow.classList.add('is-invalid');
+      if (!firstInvalid) firstInvalid = urgencyRow;
+      ok = false;
+    }
+
+    return { ok, firstInvalid };
+  }
+
+  // ---- Submit
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const { ok, firstInvalid } = validate();
+    if (!ok) {
+      topAlert.classList.add('is-on');
+      if (firstInvalid && firstInvalid.scrollIntoView) {
+        firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (firstInvalid.focus) {
+          try { firstInvalid.focus({ preventScroll: true }); } catch(_) { firstInvalid.focus(); }
+        }
+      }
+      return;
+    }
+    topAlert.classList.remove('is-on');
+    const data = collectData();
+    addToInbox(data);
+    showConfirmation(data);
+  });
+
+  // ---- Recent inquiries inbox (grows with each submit)
+  const inboxList  = document.getElementById('inboxList');
+  const inboxCount = document.getElementById('inboxCount');
+  let inboxSubmissions = 0;
+  function addToInbox(d) {
+    inboxSubmissions++;
+    inboxCount.textContent = `${inboxSubmissions} received`;
+    const t = d.submittedAt || new Date();
+    const time = t.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+    const firstName = (d.name || '—').split(/\s+/)[0] || '—';
+    const entry = document.createElement('div');
+    entry.className = 'inbox-entry';
+    entry.innerHTML = `
+      <span class="inbox-entry__dot"></span>
+      <span class="inbox-entry__name">${escapeHTML(firstName)}</span>
+      <span class="inbox-entry__time">${escapeHTML(time)}</span>`;
+    inboxList.insertBefore(entry, inboxList.firstChild);
+    // Keep last 6 visible
+    while (inboxList.children.length > 6) inboxList.removeChild(inboxList.lastChild);
+  }
+
+  // ---- Demo button: auto-fill Linda's profile + submit
+  const LINDA = {
+    name:    'Linda Park',
+    email:   'linda.park@example.com',
+    phone:   '(801) 555-0142',
+    address: '412 Birch Lane, Provo, UT 84601',
+    service: 'Lawn care',
+    lot:     'Medium (¼ – ½ acre)',
+    urgency: 'This week if possible',
+    prior:   'No',
+    notes:   'Just moved in. Looking for weekly lawn service plus a one-time consult on the backyard — thinking a small patio. Photos can come later.'
+  };
+  const demoBtn = document.getElementById('demoFillSubmitBtn');
+  demoBtn.addEventListener('click', () => {
+    // If we're on the confirmation screen, flip back to the form first
+    const formState    = document.getElementById('formState');
+    const confirmState = document.getElementById('confirmState');
+    if (formState.classList.contains('rg-hidden')) {
+      formState.classList.remove('rg-hidden');
+      confirmState.classList.add('rg-hidden');
+      confirmState.innerHTML = '';
+    }
+    // Fill text inputs
+    const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
+    setVal('f-name',    LINDA.name);
+    setVal('f-email',   LINDA.email);
+    setVal('f-phone',   LINDA.phone);
+    setVal('f-address', LINDA.address);
+    setVal('f-lot',     LINDA.lot);
+    setVal('f-notes',   LINDA.notes);
+    // Pick the matching radios
+    const selectRadio = (name, value) => {
+      const r = form.querySelector(`input[name="${name}"][value="${value}"]`);
+      if (r) {
+        r.checked = true;
+        r.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    };
+    selectRadio('service', LINDA.service);
+    selectRadio('urgency', LINDA.urgency);
+    selectRadio('prior',   LINDA.prior);
+    // Don't auto-submit — leave the filled form on screen so the audience
+    // can read what got filled in. Presenter clicks Send Inquiry manually.
+  });
+
+  function collectData() {
+    const get = id => (document.getElementById(id).value || '').trim();
+    const radio = name => {
+      const el = form.querySelector(`input[name="${name}"]:checked`);
+      return el ? el.value : '';
+    };
+    return {
+      name:    get('f-name'),
+      email:   get('f-email'),
+      phone:   get('f-phone'),
+      address: get('f-address'),
+      service: radio('service'),
+      lot:     get('f-lot'),
+      urgency: radio('urgency'),
+      prior:   radio('prior'),
+      notes:   get('f-notes'),
+      submittedAt: new Date()
+    };
+  }
+
+  // ---- Helpers
+  function escapeHTML(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function makeRef(d) {
+    const dt = d.submittedAt;
+    const yy = String(dt.getFullYear()).slice(-2);
+    const mm = String(dt.getMonth() + 1).padStart(2, '0');
+    const dd = String(dt.getDate()).padStart(2, '0');
+    const r  = Math.random().toString(36).slice(2, 6).toUpperCase();
+    return `RG-${yy}${mm}${dd}-${r}`;
+  }
+
+  function fmtDate(d) {
+    return d.toLocaleString(undefined, {
+      month: 'short', day: 'numeric', year: 'numeric',
+      hour: 'numeric', minute: '2-digit'
+    });
+  }
+
+  function cell(label, val, opts) {
+    opts = opts || {};
+    const cls = ['summary-cell'];
+    if (opts.wide) cls.push('summary-cell--wide');
+    if (opts.full) cls.push('summary-cell--full');
+    const empty = !val || !String(val).trim();
+    return `<div class="${cls.join(' ')}">
+      <div class="k">${escapeHTML(label)}</div>
+      <div class="v ${empty ? 'empty' : ''}">${empty ? '—' : escapeHTML(val)}</div>
+    </div>`;
+  }
+
+  // ---- Confirmation render
+  function showConfirmation(d) {
+    const firstName = (d.name.split(/\s+/)[0]) || 'friend';
+    const ref = makeRef(d);
+
+    confirmEl.innerHTML = `
+      <div class="confirm">
+        <div class="confirm__top">
+          <div class="confirm__eye">Inquiry Received</div>
+          <h2 class="confirm__title">Thank you, ${escapeHTML(firstName)}.</h2>
+          <p class="confirm__sub">We've got your inquiry. Cody will reach out within one business day — usually same-day during the week. Keep an eye on your inbox at <strong>${escapeHTML(d.email)}</strong>.</p>
+        </div>
+        <div class="confirm__body">
+          <div class="summary-card">
+            <div class="summary-card__head">
+              <span class="label">Your Inquiry — Summary</span>
+              <span class="ref">REF ${escapeHTML(ref)} · ${escapeHTML(fmtDate(d.submittedAt))}</span>
+            </div>
+            <div class="summary-grid">
+              ${cell('Name', d.name)}
+              ${cell('Email', d.email)}
+              ${cell('Phone', d.phone)}
+              ${cell('Service', d.service)}
+              ${cell('Property address', d.address, { wide: true })}
+              ${cell('Lot size', d.lot)}
+              ${cell('Urgency', d.urgency)}
+              ${cell('Prior landscape work', d.prior)}
+              ${cell('Notes', d.notes, { full: true })}
+            </div>
+          </div>
+
+          <div class="confirm__actions">
+            <button type="button" class="rg-btn rg-btn--primary rg-btn--xl" id="downloadBtn">↓ Download summary (.html)</button>
+            <button type="button" class="rg-btn rg-btn--ghost" id="anotherBtn">Submit another</button>
+            <span style="margin-left:auto; font-size:11px; color:var(--rg-ink-faint); letter-spacing:0.06em;">
+              Saved locally to your browser session only.
+            </span>
+          </div>
+        </div>
+      </div>
+    `;
+
+    formState.classList.add('rg-hidden');
+    confirmEl.classList.remove('rg-hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    document.getElementById('downloadBtn').addEventListener('click', () => downloadSummary(d, ref));
+    document.getElementById('anotherBtn').addEventListener('click', () => {
+      form.reset();
+      svcGrid.querySelectorAll('.svc').forEach(c => c.classList.remove('is-selected'));
+      form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+      topAlert.classList.remove('is-on');
+      confirmEl.classList.add('rg-hidden');
+      confirmEl.innerHTML = '';
+      formState.classList.remove('rg-hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+
+  // ---- Downloadable summary (self-contained HTML, inline CSS)
+  function buildSummaryHTML(d, ref) {
+    const firstName = (d.name.split(/\s+/)[0]) || 'Customer';
+    const row = (label, val) => {
+      const empty = !val || !String(val).trim();
+      return `<tr>
+        <th>${escapeHTML(label)}</th>
+        <td${empty ? ' style="color:#8a9b8c;font-style:italic"' : ''}>${empty ? '—' : escapeHTML(val)}</td>
+      </tr>`;
+    };
+
+    return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Rivera Grounds Co — Inquiry Summary · ${escapeHTML(firstName)}</title>
+<style>
+  body {
+    margin: 0;
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", system-ui, sans-serif;
+    color: #1f2a1f;
+    background: #f7f5f0;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 760px; margin: 32px auto; padding: 0 20px; }
+  .head {
+    background: #2d4a30;
+    color: #f7f5f0;
+    padding: 22px 28px;
+    border-radius: 14px 14px 0 0;
+    border-bottom: 3px solid #d8c79a;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .mark {
+    font-family: ui-serif, Georgia, serif;
+    font-style: italic;
+    font-size: 22px;
+    letter-spacing: 0.01em;
+  }
+  .mark .amp { color: #d8c79a; }
+  .head .meta {
+    text-align: right;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(247,245,240,0.75);
+  }
+  .card {
+    background: #fff;
+    border: 1px solid rgba(74,124,78,0.18);
+    border-top: none;
+    border-radius: 0 0 14px 14px;
+    padding: 28px;
+    box-shadow: 0 4px 12px rgba(31,42,31,0.06);
+  }
+  .eye {
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: #4a7c4e;
+    font-weight: 700;
+  }
+  h1 {
+    font-family: ui-serif, Georgia, serif;
+    font-weight: 600;
+    font-size: 26px;
+    color: #2d4a30;
+    margin: 6px 0 4px;
+    letter-spacing: -0.01em;
+  }
+  .sub { color: #5a6f5d; margin: 0 0 18px; font-size: 14px; }
+  .ref {
+    display: inline-block;
+    margin-bottom: 18px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 11px;
+    color: #5a6f5d;
+    background: #f7f5f0;
+    border: 1px solid rgba(74,124,78,0.18);
+    border-radius: 999px;
+    padding: 4px 12px;
+    letter-spacing: 0.08em;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  th, td {
+    text-align: left;
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(74,124,78,0.12);
+    vertical-align: top;
+  }
+  th {
+    width: 200px;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #5a6f5d;
+    font-weight: 700;
+  }
+  td { color: #1f2a1f; white-space: pre-wrap; }
+  tr:last-child th, tr:last-child td { border-bottom: none; }
+  .veteran {
+    margin-top: 22px;
+    padding: 14px 16px;
+    background: rgba(216,199,154,0.25);
+    border-left: 3px solid #b8a574;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #1f2a1f;
+  }
+  .foot {
+    margin-top: 22px;
+    padding: 14px 28px;
+    text-align: center;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #8a9b8c;
+  }
+  .foot strong { color: #4a7c4e; }
+  @media print {
+    body { background: #fff; }
+    .wrap { margin: 0; max-width: none; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="head">
+      <div>
+        <div class="mark">Rivera Grounds <span class="amp">&amp;</span> Co</div>
+        <div style="font-size:11px;color:rgba(247,245,240,0.7);letter-spacing:0.14em;text-transform:uppercase;margin-top:4px">
+          Veteran-owned · Utah County, UT · Since 2018
+        </div>
+      </div>
+      <div class="meta">
+        Inquiry Summary<br/>
+        <span style="color:#d8c79a">${escapeHTML(fmtDate(d.submittedAt))}</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="eye">Inquiry Received</div>
+      <h1>Thank you, ${escapeHTML(firstName)}.</h1>
+      <p class="sub">We've got your inquiry. Mateo will reach out within one business day. Keep this summary for your records.</p>
+      <div class="ref">REF ${escapeHTML(ref)}</div>
+
+      <table>
+        ${row('Name', d.name)}
+        ${row('Email', d.email)}
+        ${row('Phone', d.phone)}
+        ${row('Property address', d.address)}
+        ${row('Service interest', d.service)}
+        ${row('Lot size', d.lot)}
+        ${row('Urgency', d.urgency)}
+        ${row('Prior landscape work', d.prior)}
+        ${row('Notes', d.notes)}
+      </table>
+
+      <div class="veteran">
+        <strong>★ Veteran-owned.</strong> If anyone in the household has served, mention it when Mateo follows up — we apply a 10% veteran discount, no questions asked.
+      </div>
+    </div>
+
+    <div class="foot">
+      <strong>Rivera Grounds Co</strong> · Utah County, UT · Lic &amp; Ins
+    </div>
+  </div>
+</body>
+</html>`;
+  }
+
+  function downloadSummary(d, ref) {
+    const html = buildSummaryHTML(d, ref);
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    const firstName = (d.name.split(/\s+/)[0] || 'Customer').replace(/[^A-Za-z0-9]+/g, '');
+    const dt = d.submittedAt;
+    const dateStr = `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+    a.href = url;
+    a.download = `Rivera-Grounds-Inquiry-${firstName}-${dateStr}.html`;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 0);
+  }
+
+  // ---- Footer year
+  document.getElementById('footYear').textContent = `© ${new Date().getFullYear()} Rivera Grounds Co`;
+})();
+</script>
+</body>
+</html>

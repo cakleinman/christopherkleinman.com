@@ -1,0 +1,1175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Making Internal Business Tools With AI — VBRC 2026</title>
+
+<link rel="stylesheet" href="styles/deck.css" />
+</head>
+<body>
+
+<div class="deck deck--cold-open">
+
+  <!-- Atmosphere layers (live outside the slide stack) -->
+  <div class="bg-stage"></div>
+  <div class="bg-particles"></div>
+  <div class="bg-vignette"></div>
+
+  <div class="stage">
+
+    <!-- ╔══════════════════════════════════════════════════════════╗
+         ║ SLIDE 01 — Cold open: Opossums                           ║
+         ║ Plays auto-advancing music + slides for ~45 sec.         ║
+         ║ Fallback: large title card if iframe blocked.            ║
+         ╚══════════════════════════════════════════════════════════╝ -->
+        <!-- ╔══════════════════════════════════════════════════════════╗
+         ║ COLD OPEN — Opossums sequence (slides 01–15)             ║
+         ║ Audio-synced, beat-driven advance via cold-open.js       ║
+         ╚══════════════════════════════════════════════════════════╝ -->
+    <section class="slide slide--cold cold-01" id="s01" data-cold-hold="1" data-cold-transition="zoom">
+      <div class="cold-bg cold-bg--ken" style="background-image: linear-gradient(135deg, #0a1f12, #07070a);"></div>
+      <div class="cold-overlay" style="background: radial-gradient(ellipse at 50% 60%, rgba(43,255,0,0.18), rgba(0,0,0,0.85) 70%);"></div>
+      <div class="cold-scan"></div>
+      <div class="cold-ticks"><span></span></div>
+      <div class="cold-slug">FILE 00 <span class="cold-dot"></span> A CASE FOR THE OPOSSUM</div>
+      <div class="cold-panel cold-panel--center">
+          <h1 class="cold-stack cold-fragment cold-fragment--snap">OPOSSUMS</h1>
+          <h1 class="cold-stack cold-fragment cold-fragment--snap cold-stroke cold-stroke--green">ARE</h1>
+          <h1 class="cold-stack cold-fragment cold-fragment--snap cold-accent--green cold-glitch cold-pulse" data-text="S-TIER">S-TIER</h1>
+      </div>
+    </section>
+
+
+    <section class="slide slide--cold cold-02" id="s02" data-cold-hold="3" data-cold-transition="fade">
+      <div class="cold-bg cold-bg--ken" style="background-image: url('assets/opossums/Pictures/O1.jpg');"></div>
+      <div class="cold-overlay"></div>
+      <div class="cold-scan"></div>
+      <div class="cold-ticks"><span></span></div>
+      <div class="cold-slug">FILE 01 <span class="cold-dot"></span> SUBJECT</div>
+      <div class="cold-panel cold-panel--bottom">
+          <div class="cold-tag cold-fragment cold-fragment--pop">SUBJECT</div>
+          <h2 class="cold-fragment cold-fragment--fly-in">VIRGINIA OPOSSUM</h2>
+          <p class="cold-subtext cold-fragment cold-fragment--pop cold-accent--green">Didelphis virginiana &nbsp;·&nbsp; harmless &nbsp;·&nbsp; ancient &nbsp;·&nbsp; useful</p>
+      </div>
+    </section>
+
+
+    <section class="slide slide--cold cold-03" id="s03" data-cold-hold="2" data-cold-transition="slide">
+      <div class="cold-bg cold-bg--ken" style="background-image: url('assets/opossums/Pictures/O3.webp');"></div>
+      <div class="cold-overlay"></div>
+      <div class="cold-scan"></div>
+      <div class="cold-ticks"><span></span></div>
+      <div class="cold-slug">FILE 02 <span class="cold-dot"></span> DEEP TIME</div>
+      <div class="cold-panel cold-panel--center">
+          <h1 class="cold-stack cold-fragment cold-fragment--snap cold-counter cold-grad--amber" data-count="70">70+</h1>
+          <h1 class="cold-stack cold-fragment cold-fragment--snap">MILLION YEARS</h1>
+          <p class="cold-subtext cold-fragment cold-fragment--pop">Time-tested pedigree. Outlasted the dinosaurs.</p>
+      </div>
+    </section>
+
+
+    <section class="slide slide--cold cold-04" id="s04" data-cold-hold="2" data-cold-transition="slide">
+      <div class="cold-bg cold-bg--ken" style="background-image: url('assets/opossums/Pictures/O2.jpg');"></div>
+      <div class="cold-overlay"></div>
+      <div class="cold-scan"></div>
+      <div class="cold-ticks"><span></span></div>
+      <div class="cold-slug">FILE 03 <span class="cold-dot"></span> RANGE</div>
+      <div class="cold-panel">
+          <h1 class="cold-stack cold-fragment cold-fragment--fly-in">ONLY</h1>
+          <h1 class="cold-stack cold-fragment cold-fragment--fly-in cold-stroke cold-stroke--cyan">MARSUPIAL</h1>
+          <h1 class="cold-stack cold-fragment cold-fragment--fly-in cold-accent--cyan">NORTH OF MEXICO</h1>
+          <p class="cold-subtext cold-fragment cold-fragment--pop">Range expanding north as winters warm.</p>
+      </div>
+    </section>
+
+
+    <section class="slide slide--cold cold-05" id="s05" data-cold-hold="2" data-cold-transition="zoom">
+      <div class="cold-bg cold-bg--ken" style="background-image: url('assets/opossums/Pictures/O6.jpg');"></div>
+      <div class="cold-overlay"></div>
+      <div class="cold-scan"></div>
+      <div class="cold-ticks"><span></span></div>
+      <div class="cold-slug">FILE 04 <span class="cold-dot"></span> DENTITION</div>
+      <div class="cold-panel">
+          <h1 class="cold-stack cold-fragment cold-fragment--snap cold-counter cold-grad--amber cold-pulse" data-count="50">50</h1>
+          <h1 class="cold-stack cold-fragment cold-fragment--fly-in cold-stroke cold-stroke--amber">TEETH</h1>
+          <p class="cold-subtext cold-fragment cold-fragment--pop">More than any other land mammal in North America.</p>
+      </div>
+    </section>
+
+
+    <section class="slide slide--cold cold-06" id="s06" data-cold-hold="3" data-cold-transition="slide">
+      <div class="cold-bg cold-bg--ken" style="background-image: url('assets/opossums/Pictures/O10.webp');"></div>
+      <div class="cold-overlay"></div>
+      <div class="cold-scan"></div>
+      <div class="cold-ticks"><span></span></div>
+      <div class="cold-slug">FILE 05 <span class="cold-dot"></span> THERMAL PROFILE</div>
+      <div class="cold-panel cold-panel--center">
+          <h1 class="cold-stack cold-fragment cold-fragment--snap cold-counter cold-grad--cyan cold-pulse" data-count="94">94°</h1>
+          <h1 class="cold-stack cold-fragment cold-fragment--snap">BODY TEMP</h1>
+          <h2 class="cold-fragment cold-fragment--pop cold-accent--cyan cold-glitch" data-text="RABIES? UNLIKELY.">RABIES? UNLIKELY.</h2>
+          <p class="cold-subtext cold-fragment cold-fragment--pop">Too cold for the virus to thrive. Cases in opossums are vanishingly rare.</p>
+      </div>
+    </section>
+
+
+    <section class="slide slide--cold cold-07" id="s07" data-cold-hold="2" data-cold-transition="slide">
+      <div class="cold-bg cold-bg--ken" style="background-image: url('assets/opossums/Pictures/O5.webp');"></div>
+      <div class="cold-overlay"></div>
+      <div class="cold-scan"></div>
+      <div class="cold-ticks"><span></span></div>
+      <div class="cold-slug">FILE 06 <span class="cold-dot"></span> CHEMISTRY</div>
+      <div class="cold-panel">
+          <h1 class="cold-stack cold-fragment cold-fragment--fly-in cold-stroke cold-stroke--red">VENOM</h1>
+          <h1 class="cold-stack cold-fragment cold-fragment--fly-in cold-accent--red">RESISTANT</h1>
+          <p class="cold-subtext cold-fragment cold-fragment--pop"><strong>LTNF</strong> peptide neutralizes pit-viper venom. Eats copperheads.</p>
+      </div>
+    </section>
+
+
+    <section class="slide slide--cold cold-08" id="s08" data-cold-hold="3" data-cold-transition="zoom">
+      <div class="cold-bg cold-bg--ken" style="background-image: url('assets/opossums/Pictures/O8.jpeg');"></div>
+      <div class="cold-overlay"></div>
+      <div class="cold-scan"></div>
+      <div class="cold-ticks"><span></span></div>
+      <div class="cold-slug">FILE 07 <span class="cold-dot"></span> THANATOSIS</div>
+      <div class="cold-panel">
+          <h1 class="cold-stack cold-fragment cold-fragment--snap">PLAYS</h1>
+          <h1 class="cold-stack cold-fragment cold-fragment--snap cold-accent--amber cold-stroke cold-stroke--amber">DEAD</h1>
+          <p class="cold-subtext cold-fragment cold-fragment--pop">Involuntary stress reflex — drool, foul smell, frozen body. Can last up to ~4 hours.</p>
+      </div>
+    </section>
+
+
+    <section class="slide slide--cold cold-09" id="s09" data-cold-hold="1" data-cold-transition="slide">
+      <div class="cold-bg cold-bg--ken" style="background-image: url('assets/opossums/Pictures/O7.jpg');"></div>
+      <div class="cold-overlay"></div>
+      <div class="cold-scan"></div>
+      <div class="cold-ticks"><span></span></div>
+      <div class="cold-slug">FILE 08 <span class="cold-dot"></span> APPENDAGE</div>
+      <div class="cold-panel">
+        <h1 class="cold-stack cold-fragment cold-fragment--fly-in">PREHENSILE</h1>
+        <h1 class="cold-stack cold-fragment cold-fragment--fly-in cold-accent--green">TAIL</h1>
+        <div class="cold-stacked-words">
+          <div class="cold-word cold-fragment cold-fragment--sweep">GRIPS</div>
+          <div class="cold-word cold-fragment cold-fragment--sweep">CLIMBS</div>
+          <div class="cold-word cold-fragment cold-fragment--sweep">BALANCES</div>
+        </div>
+      </div>
+    </section>
+
+
+    <section class="slide slide--cold cold-10" id="s10" data-cold-hold="2" data-cold-transition="fade">
+      <div class="cold-bg cold-bg--ken" style="background-image: url('assets/opossums/Pictures/O9.jpg');"></div>
+      <div class="cold-overlay" style="background: rgba(0,0,0,0.78);"></div>
+      <div class="cold-scan"></div>
+      <div class="cold-ticks"><span></span></div>
+      <div class="cold-slug">FILE 09 <span class="cold-dot"></span> MYTH / REALITY</div>
+      <div class="cold-split-panel">
+        <div class="cold-split-left">
+          <div class="cold-split-label cold-accent--red cold-fragment cold-fragment--pop">MYTH</div>
+          <div class="cold-myth-item cold-fragment cold-fragment--strike">"DIRTY"</div>
+          <div class="cold-myth-item cold-fragment cold-fragment--strike">"RABID"</div>
+          <div class="cold-myth-item cold-fragment cold-fragment--strike">"MEAN"</div>
+        </div>
+        <div class="cold-split-divider"></div>
+        <div class="cold-split-right">
+          <div class="cold-split-label cold-accent--green cold-fragment cold-fragment--pop">REALITY</div>
+          <div class="cold-reality-item cold-fragment cold-fragment--sweep">GROOM LIKE CATS</div>
+          <div class="cold-reality-item cold-fragment cold-fragment--sweep">94° COLD-PROOF</div>
+          <div class="cold-reality-item cold-fragment cold-fragment--sweep">BLUFF &amp; BAIL</div>
+        </div>
+      </div>
+    </section>
+
+
+    <section class="slide slide--cold cold-11" id="s11" data-cold-hold="1" data-cold-transition="slide">
+      <div class="cold-bg cold-bg--ken" style="background-image: url('assets/opossums/Pictures/O7.jpg');"></div>
+      <div class="cold-overlay"></div>
+      <div class="cold-scan"></div>
+      <div class="cold-ticks"><span></span></div>
+      <div class="cold-slug">FILE 10 <span class="cold-dot"></span> DIET</div>
+      <div class="cold-panel">
+        <h1 class="cold-stack cold-fragment cold-fragment--fly-in">EATS</h1>
+        <h1 class="cold-stack cold-fragment cold-fragment--fly-in cold-accent--green cold-glitch" data-text="EVERYTHING">EVERYTHING</h1>
+        <div class="cold-stacked-words">
+          <div class="cold-word cold-fragment cold-fragment--sweep">BUGS · SLUGS</div>
+          <div class="cold-word cold-fragment cold-fragment--sweep">RODENTS</div>
+          <div class="cold-word cold-fragment cold-fragment--sweep">CARRION</div>
+          <div class="cold-word cold-fragment cold-fragment--sweep">SNAKES &amp; FRUIT</div>
+        </div>
+      </div>
+    </section>
+
+
+    <section class="slide slide--cold cold-12" id="s12" data-cold-hold="3" data-cold-transition="zoom">
+      <div class="cold-bg cold-bg--ken" style="background-image: url('assets/opossums/Pictures/O8.jpeg');"></div>
+      <div class="cold-overlay"></div>
+      <div class="cold-scan"></div>
+      <div class="cold-ticks"><span></span></div>
+      <div class="cold-slug">FILE 11 <span class="cold-dot"></span> LYME ECOLOGY</div>
+      <div class="cold-panel">
+          <h1 class="cold-stack cold-fragment cold-fragment--snap cold-accent--green">LYME</h1>
+          <h1 class="cold-stack cold-fragment cold-fragment--snap cold-stroke cold-stroke--green">DEAD-END</h1>
+          <p class="cold-subtext cold-fragment cold-fragment--pop"><strong>Low-competence host</strong> — ticks that bite them rarely catch Lyme.</p>
+      </div>
+    </section>
+
+
+    <section class="slide slide--cold cold-13" id="s13" data-cold-hold="2" data-cold-transition="zoom">
+      <div class="cold-bg cold-bg--ken" style="background-image: url('assets/opossums/Pictures/O3.webp');"></div>
+      <div class="cold-overlay" style="background: rgba(0,0,0,0.82);"></div>
+      <div class="cold-scan"></div>
+      <div class="cold-ticks"><span></span></div>
+      <div class="cold-slug">FILE 12 <span class="cold-dot"></span> SHEET</div>
+      <div class="cold-panel cold-panel--center">
+        <h2 class="cold-fragment cold-fragment--pop" style="margin-bottom: 30px;">SPEC SHEET</h2>
+        <div class="cold-stats-grid">
+          <div class="cold-stat-item cold-fragment cold-fragment--pop">
+            <div class="cold-stat-number cold-grad--amber cold-counter" data-count="70">70M</div>
+            <div class="cold-stat-label">YEARS · LINEAGE</div>
+          </div>
+          <div class="cold-stat-item cold-fragment cold-fragment--pop">
+            <div class="cold-stat-number cold-grad--cyan cold-counter" data-count="50">50</div>
+            <div class="cold-stat-label">TEETH</div>
+          </div>
+          <div class="cold-stat-item cold-fragment cold-fragment--pop">
+            <div class="cold-stat-number cold-grad--pink cold-counter" data-count="13">13</div>
+            <div class="cold-stat-label">JOEYS · MAX</div>
+          </div>
+          <div class="cold-stat-item cold-fragment cold-fragment--pop">
+            <div class="cold-stat-number cold-grad--green cold-counter" data-count="94">94°</div>
+            <div class="cold-stat-label">BODY TEMP</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <section class="slide slide--cold cold-14" id="s14" data-cold-hold="3" data-cold-transition="slide">
+      <div class="cold-bg cold-bg--ken" style="background-image: url('assets/opossums/Pictures/O11.jpg');"></div>
+      <div class="cold-overlay"></div>
+      <div class="cold-scan"></div>
+      <div class="cold-ticks"><span></span></div>
+      <div class="cold-slug">FILE 13 <span class="cold-dot"></span> DYNASTY</div>
+      <div class="cold-panel">
+        <h2 class="cold-fragment cold-fragment--fly-in">INDIVIDUAL <span class="cold-accent--amber">2–4 YRS</span></h2>
+        <h2 class="cold-fragment cold-fragment--fly-in">SPECIES <span class="cold-accent--green">70 MILLION</span></h2>
+        <p class="cold-subtext cold-fragment cold-fragment--pop">Short lives. Ancient blueprint. The franchise just keeps shipping.</p>
+      </div>
+    </section>
+
+
+    <section class="slide slide--cold cold-15" id="s15" data-cold-hold="4" data-cold-transition="zoom">
+      <div class="cold-bg cold-bg--ken" style="background-image: url('assets/opossums/Pictures/O12.jpg');"></div>
+      <div class="cold-overlay"></div>
+      <div class="cold-scan"></div>
+      <div class="cold-ticks"><span></span></div>
+      <div class="cold-slug">FILE 14 <span class="cold-dot"></span> VERDICT</div>
+      <div class="cold-panel cold-panel--center">
+        <h1 class="cold-stack cold-fragment cold-fragment--snap">RESPECT</h1>
+        <h1 class="cold-stack cold-fragment cold-fragment--snap cold-accent--green">THE</h1>
+        <h1 class="cold-stack cold-fragment cold-fragment--snap cold-glitch cold-pulse" data-text="OPOSSUM">OPOSSUM</h1>
+        <div class="cold-cta-text cold-fragment cold-fragment--pop cold-accent--green">THEY'RE ON YOUR SIDE</div>
+      </div>
+    </section>
+
+
+<!-- ╔══════════════════════════════════════════════════════════╗
+         ║ SLIDE 16 — Bridge / anecdote                             ║
+         ║ Quiet "lights up" moment after the cold-open blackout.   ║
+         ║ No chrome on purpose — the formal deck starts at s17.    ║
+         ╚══════════════════════════════════════════════════════════╝ -->
+    <section class="slide slide--bridge" id="s16">
+      <div class="bridge-glow"></div>
+      <div class="anecdote">
+        <p class="anecdote-quote">
+          <span class="line">Over the holiday my family did a</span>
+          <span class="line"><span class="gold">PowerPoint Night</span></span>
+          <span class="line">I made that one in <span class="gold">thirty minutes</span></span>
+          <span class="line">because I had <span class="gold pulse-gold">the tools for the job</span>.</span>
+        </p>
+      </div>
+    </section>
+
+
+    <!-- ╔══════════════════════════════════════════════════════════╗
+         ║ SLIDE 17 — Title                                         ║
+         ║ Big gradient title with eyebrow + byline.                ║
+         ╚══════════════════════════════════════════════════════════╝ -->
+    <section class="slide" id="s17">
+      <span class="corner tl"></span><span class="corner tr"></span>
+      <span class="corner bl"></span><span class="corner br"></span>
+
+      <div class="meta-row meta-top">
+        <span>VBRC · 10TH ANNUAL · 2026</span>
+        <span>17 / 36</span>
+      </div>
+
+      <div class="title-stage">
+        <div>
+          <div class="title-eyebrow">A 40-Minute Briefing</div>
+          <h1 class="title-headline">
+            Making Internal<br/>
+            Business Tools<br/>
+            With <span class="gold">AI.</span>
+          </h1>
+          <div class="title-sub">Stop chatting. Start building.</div>
+          <div class="title-byline">Christopher Kleinman · vbrc 2026</div>
+        </div>
+      </div>
+
+      <div class="meta-row meta-bot">
+        <span>CHRISTOPHER KLEINMAN</span>
+        <span>MAKING INTERNAL BUSINESS TOOLS WITH AI</span>
+        <span>17 / 36</span>
+      </div>
+    </section>
+
+
+    <!-- ╔══════════════════════════════════════════════════════════╗
+         ║ SLIDE 18 — The shift: chatbot vs developer               ║
+         ║ Side-by-side. Cold left, hot right.                      ║
+         ╚══════════════════════════════════════════════════════════╝ -->
+    <section class="slide" id="s18">
+      <span class="corner tl"></span><span class="corner tr"></span>
+      <span class="corner bl"></span><span class="corner br"></span>
+
+      <div class="meta-row meta-top">
+        <span>VBRC · 04</span>
+        <span>18 / 36</span>
+      </div>
+
+      <div class="fig-label">THE SHIFT</div>
+      <h1 class="headline">
+        Most people use AI<br/>
+        to <span class="gold">answer questions.</span>
+      </h1>
+
+      <div class="split-stage">
+        <div class="split-card is-cold">
+          <div>
+            <div class="split-tag">What everyone does</div>
+            <h3 class="split-title">Ask it<br/>things.</h3>
+          </div>
+          <p class="split-body">
+            Type a question. Read the answer.<br/>
+            Copy. Paste. Done.<br/>
+            <em style="color: var(--ink-faint);">→ AI as advisor.</em>
+          </p>
+        </div>
+        <div class="split-mid">→</div>
+        <div class="split-card is-hero">
+          <div>
+            <div class="split-tag">What you can also do</div>
+            <h3 class="split-title">Have it<br/><span style="color: var(--gold);">write software.</span></h3>
+          </div>
+          <p class="split-body">
+            Describe a tool. It writes the code.<br/>
+            You open the file. It works.<br/>
+            <span style="color: var(--gold);">→ AI as your in-house builder.</span>
+          </p>
+        </div>
+      </div>
+
+      <div class="meta-row meta-bot">
+        <span>CHRISTOPHER KLEINMAN</span>
+        <span>MAKING INTERNAL BUSINESS TOOLS WITH AI</span>
+        <span>18 / 36</span>
+      </div>
+    </section>
+
+
+    <!-- ╔══════════════════════════════════════════════════════════╗
+         ║ SLIDE 19 — The framing: 5% of the software you pay for   ║
+         ║ Stacked subscription rows + giant tally.                 ║
+         ╚══════════════════════════════════════════════════════════╝ -->
+    <section class="slide" id="s19">
+      <span class="corner tl"></span><span class="corner tr"></span>
+      <span class="corner bl"></span><span class="corner br"></span>
+
+      <div class="meta-row meta-top">
+        <span>VBRC · 05</span>
+        <span>19 / 36</span>
+      </div>
+
+      <div class="fig-label">THE OBSERVATION</div>
+      <h1 class="headline headline--md">
+        You pay for software.<br/>
+        You use <span class="gold">five percent</span> of it.
+      </h1>
+
+      <div class="subs-stack">
+        <div class="subs-list">
+          <div class="sub-row">
+            <span>QuickBooks</span>
+            <span class="feature">— but you only use <em>"send an invoice"</em></span>
+            <span class="price">$35/mo</span>
+          </div>
+          <div class="sub-row">
+            <span>Jobber</span>
+            <span class="feature">— but you only use <em>"who's on what truck"</em></span>
+            <span class="price">$50/mo</span>
+          </div>
+          <div class="sub-row">
+            <span>HubSpot</span>
+            <span class="feature">— but you only use <em>"a list with notes"</em></span>
+            <span class="price">$25/mo</span>
+          </div>
+          <div class="sub-row">
+            <span>Typeform</span>
+            <span class="feature">— but you only use <em>"get an inquiry"</em></span>
+            <span class="price">$25/mo</span>
+          </div>
+          <div class="sub-row">
+            <span>Excel / M365</span>
+            <span class="feature">— but you only use <em>"a clean chart"</em></span>
+            <span class="price">$15/mo</span>
+          </div>
+        </div>
+
+        <div class="subs-tally">
+          <div class="subs-tally-label">A YEAR, ON FEATURES YOU MOSTLY DON'T USE</div>
+          <div class="subs-tally-num">$1,800</div>
+          <div class="subs-tally-label is-question">What if you just built the five percent you actually use?</div>
+        </div>
+      </div>
+
+      <div class="meta-row meta-bot">
+        <span>CHRISTOPHER KLEINMAN</span>
+        <span>MAKING INTERNAL BUSINESS TOOLS WITH AI</span>
+        <span>19 / 36</span>
+      </div>
+    </section>
+
+
+    <!-- ╔══════════════════════════════════════════════════════════╗
+         ║ SLIDE 20 — Single-use software interlude                 ║
+         ║ Sets up the demo block: single-use vs persistent tools.  ║
+         ╚══════════════════════════════════════════════════════════╝ -->
+    <section class="slide" id="s20">
+      <span class="corner tl"></span><span class="corner tr"></span>
+      <span class="corner bl"></span><span class="corner br"></span>
+
+      <div class="meta-row meta-top">
+        <span>VBRC · INTERLUDE</span>
+        <span>20 / 36</span>
+      </div>
+
+      <div class="fig-label">A QUIET ASIDE</div>
+      <h1 class="headline headline--md">
+        Some tools live forever.<br/>
+        Some live <span class="gold">an afternoon.</span>
+      </h1>
+
+      <div class="singleuse-stage">
+        <div class="singleuse-card">
+          <div class="singleuse-tag">Permanent</div>
+          <div class="singleuse-title">Your invoice tool. Your dashboard.</div>
+          <p class="singleuse-body">
+            You'll use these every week. They grow with the business.
+          </p>
+        </div>
+        <div class="singleuse-card">
+          <div class="singleuse-tag">Disposable</div>
+          <div class="singleuse-title">A one-time signup form. A scheduling page for one event.</div>
+          <p class="singleuse-body">
+            Built in an hour. Used for a day.<br/>
+            <strong style="color: var(--gold); font-weight: 700;">Software used to be too expensive for that.</strong><br/>
+            <strong style="color: var(--gold); font-weight: 700;">Not anymore.</strong>
+          </p>
+        </div>
+      </div>
+
+      <div class="meta-row meta-bot">
+        <span>CHRISTOPHER KLEINMAN</span>
+        <span>MAKING INTERNAL BUSINESS TOOLS WITH AI</span>
+        <span>20 / 36</span>
+      </div>
+    </section>
+
+
+    <!-- ╔══════════════════════════════════════════════════════════╗
+         ║ SLIDE 21 — DEMO 1 INTRO: Inquiry form                    ║
+         ║ Linda Park's journey starts here — she fills the form.   ║
+         ╚══════════════════════════════════════════════════════════╝ -->
+    <section class="slide slide--demo-intro" id="s21">
+      <span class="corner tl"></span><span class="corner tr"></span>
+      <span class="corner bl"></span><span class="corner br"></span>
+
+      <div class="meta-row meta-top">
+        <span>VBRC · DEMO 01</span>
+        <span>21 / 36</span>
+      </div>
+
+      <div class="demo-intro-stage">
+        <div class="demo-intro-card">
+          <div class="demo-intro-eyebrow">Demo 01 — Inquiry</div>
+          <h1 class="demo-intro-headline">
+            Ask the questions<br/>
+            you <span class="gold">actually need.</span>
+          </h1>
+          <div class="demo-intro-meta">
+            <span class="replaces">Replaces · Typeform · Jotform · ~$25/mo</span>
+            <span class="built">~1 hour</span>
+            <span class="next-hint">→ Next: live tool</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="meta-row meta-bot">
+        <span>CHRISTOPHER KLEINMAN</span>
+        <span>MAKING INTERNAL BUSINESS TOOLS WITH AI</span>
+        <span>21 / 36</span>
+      </div>
+    </section>
+
+
+    <!-- ╔══════════════════════════════════════════════════════════╗
+         ║ SLIDE 22 — DEMO 1 TOOL: Inquiry live                     ║
+         ╚══════════════════════════════════════════════════════════╝ -->
+    <section class="slide slide--tool" id="s22">
+      <div class="tool-stage">
+        <iframe src="tools/inquiry.html" title="Rivera Grounds inquiry form"></iframe>
+      </div>
+      <div class="tool-tag">Demo 01 · Inquiry</div>
+      <div class="tool-tag-r">22 / 36</div>
+    </section>
+
+
+    <!-- ╔══════════════════════════════════════════════════════════╗
+         ║ SLIDE 23 — DEMO 2 INTRO: Mini CRM                        ║
+         ║ Linda lands in the CRM next.                             ║
+         ╚══════════════════════════════════════════════════════════╝ -->
+    <section class="slide slide--demo-intro" id="s23">
+      <span class="corner tl"></span><span class="corner tr"></span>
+      <span class="corner bl"></span><span class="corner br"></span>
+
+      <div class="meta-row meta-top">
+        <span>VBRC · DEMO 02</span>
+        <span>23 / 36</span>
+      </div>
+
+      <div class="demo-intro-stage">
+        <div class="demo-intro-card">
+          <div class="demo-intro-eyebrow">Demo 02 — Customers</div>
+          <h1 class="demo-intro-headline">
+            Track customers.<br/>
+            Log calls. Set <span class="gold">follow-ups.</span>
+          </h1>
+          <div class="demo-intro-meta">
+            <span class="replaces">Replaces · HubSpot · Salesforce · ~$25/mo</span>
+            <span class="built">~3 hours</span>
+            <span class="next-hint">→ Next: live tool</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="meta-row meta-bot">
+        <span>CHRISTOPHER KLEINMAN</span>
+        <span>MAKING INTERNAL BUSINESS TOOLS WITH AI</span>
+        <span>23 / 36</span>
+      </div>
+    </section>
+
+
+    <!-- ╔══════════════════════════════════════════════════════════╗
+         ║ SLIDE 24 — DEMO 2 TOOL: CRM live                         ║
+         ╚══════════════════════════════════════════════════════════╝ -->
+    <section class="slide slide--tool" id="s24">
+      <div class="tool-stage">
+        <iframe src="tools/crm.html" title="Rivera Grounds customer tracker"></iframe>
+      </div>
+      <div class="tool-tag">Demo 02 · Customers</div>
+      <div class="tool-tag-r">24 / 36</div>
+    </section>
+
+
+    <!-- ╔══════════════════════════════════════════════════════════╗
+         ║ SLIDE 25 — DEMO 3 INTRO: Field Schedule                  ║
+         ║ Linda's first job gets scheduled.                        ║
+         ╚══════════════════════════════════════════════════════════╝ -->
+    <section class="slide slide--demo-intro" id="s25">
+      <span class="corner tl"></span><span class="corner tr"></span>
+      <span class="corner bl"></span><span class="corner br"></span>
+
+      <div class="meta-row meta-top">
+        <span>VBRC · DEMO 03</span>
+        <span>25 / 36</span>
+      </div>
+
+      <div class="demo-intro-stage">
+        <div class="demo-intro-card">
+          <div class="demo-intro-eyebrow">Demo 03 — Schedule</div>
+          <h1 class="demo-intro-headline">
+            Schedule the crew.<br/>
+            Track the <span class="gold">trucks.</span>
+          </h1>
+          <div class="demo-intro-meta">
+            <span class="replaces">Replaces · Jobber · Housecall Pro · ~$50/mo</span>
+            <span class="built">~6 hours</span>
+            <span class="next-hint">→ Next: live tool</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="meta-row meta-bot">
+        <span>CHRISTOPHER KLEINMAN</span>
+        <span>MAKING INTERNAL BUSINESS TOOLS WITH AI</span>
+        <span>25 / 36</span>
+      </div>
+    </section>
+
+
+    <!-- ╔══════════════════════════════════════════════════════════╗
+         ║ SLIDE 26 — DEMO 3 TOOL: Schedule live                    ║
+         ╚══════════════════════════════════════════════════════════╝ -->
+    <section class="slide slide--tool" id="s26">
+      <div class="tool-stage">
+        <iframe src="tools/schedule.html" title="Rivera Grounds field schedule"></iframe>
+      </div>
+      <div class="tool-tag">Demo 03 · Schedule</div>
+      <div class="tool-tag-r">26 / 36</div>
+    </section>
+
+
+    <!-- ╔══════════════════════════════════════════════════════════╗
+         ║ SLIDE 27 — DEMO 4 INTRO: Invoice generator               ║
+         ║ Job done — Linda gets her bill.                          ║
+         ╚══════════════════════════════════════════════════════════╝ -->
+    <section class="slide slide--demo-intro" id="s27">
+      <span class="corner tl"></span><span class="corner tr"></span>
+      <span class="corner bl"></span><span class="corner br"></span>
+
+      <div class="meta-row meta-top">
+        <span>VBRC · DEMO 04</span>
+        <span>27 / 36</span>
+      </div>
+
+      <div class="demo-intro-stage">
+        <div class="demo-intro-card">
+          <div class="demo-intro-eyebrow">Demo 04 — Invoice</div>
+          <h1 class="demo-intro-headline">
+            Fill out a form.<br/>
+            Get a <span class="gold">polished PDF.</span>
+          </h1>
+          <div class="demo-intro-meta">
+            <span class="replaces">Replaces · FreshBooks · QuickBooks invoicing · ~$35/mo</span>
+            <span class="built">~3 hours</span>
+            <span class="next-hint">→ Next: live tool</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="meta-row meta-bot">
+        <span>CHRISTOPHER KLEINMAN</span>
+        <span>MAKING INTERNAL BUSINESS TOOLS WITH AI</span>
+        <span>27 / 36</span>
+      </div>
+    </section>
+
+
+    <!-- ╔══════════════════════════════════════════════════════════╗
+         ║ SLIDE 28 — DEMO 4 TOOL: Invoice live                     ║
+         ╚══════════════════════════════════════════════════════════╝ -->
+    <section class="slide slide--tool" id="s28">
+      <div class="tool-stage">
+        <iframe src="tools/invoice.html" title="Rivera Grounds invoice generator"></iframe>
+      </div>
+      <div class="tool-tag">Demo 04 · Invoice</div>
+      <div class="tool-tag-r">28 / 36</div>
+    </section>
+
+
+    <!-- ╔══════════════════════════════════════════════════════════╗
+         ║ SLIDE 29 — DEMO 5 INTRO: CSV → Dashboard                 ║
+         ║ Linda's revenue lands in the dashboard data.             ║
+         ╚══════════════════════════════════════════════════════════╝ -->
+    <section class="slide slide--demo-intro" id="s29">
+      <span class="corner tl"></span><span class="corner tr"></span>
+      <span class="corner bl"></span><span class="corner br"></span>
+
+      <div class="meta-row meta-top">
+        <span>VBRC · DEMO 05</span>
+        <span>29 / 36</span>
+      </div>
+
+      <div class="demo-intro-stage">
+        <div class="demo-intro-card">
+          <div class="demo-intro-eyebrow">Demo 05 — Dashboard</div>
+          <h1 class="demo-intro-headline">
+            Drag in a messy CSV.<br/>
+            Get a <span class="gold">dashboard.</span>
+          </h1>
+          <div class="demo-intro-meta">
+            <span class="replaces">Replaces · Excel BI · ~$15/mo</span>
+            <span class="built">~2 hours</span>
+            <span class="next-hint">→ Next: the messy CSV</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="meta-row meta-bot">
+        <span>CHRISTOPHER KLEINMAN</span>
+        <span>MAKING INTERNAL BUSINESS TOOLS WITH AI</span>
+        <span>29 / 36</span>
+      </div>
+    </section>
+
+
+    <!-- ╔══════════════════════════════════════════════════════════╗
+         ║ SLIDE 30 — DEMO 5 BEFORE: messy CSV in a spreadsheet     ║
+         ║ The "before" of the dashboard demo.                      ║
+         ╚══════════════════════════════════════════════════════════╝ -->
+    <section class="slide slide--tool" id="s30">
+      <div class="tool-stage">
+        <iframe src="tools/spreadsheet.html" title="Messy CSV viewed in a spreadsheet"></iframe>
+      </div>
+      <div class="tool-tag">Raw export · before the dashboard</div>
+      <div class="tool-tag-r">30 / 36</div>
+    </section>
+
+
+    <!-- ╔══════════════════════════════════════════════════════════╗
+         ║ SLIDE 31 — DEMO 5 TOOL: CSV Dashboard live (the AFTER)   ║
+         ╚══════════════════════════════════════════════════════════╝ -->
+    <section class="slide slide--tool" id="s31">
+      <div class="tool-stage">
+        <iframe src="tools/csv-dashboard.html" title="Rivera Grounds dashboard"></iframe>
+      </div>
+      <div class="tool-tag">Demo 05 · Dashboard</div>
+      <div class="tool-tag-r">31 / 36</div>
+    </section>
+
+
+    <!-- ╔══════════════════════════════════════════════════════════╗
+         ║ SLIDE 32 — The receipt slide                             ║
+         ╚══════════════════════════════════════════════════════════╝ -->
+    <section class="slide" id="s32">
+      <span class="corner tl"></span><span class="corner tr"></span>
+      <span class="corner bl"></span><span class="corner br"></span>
+
+      <div class="meta-row meta-top">
+        <span>VBRC · TALLY</span>
+        <span>32 / 36</span>
+      </div>
+
+      <div class="fig-label">FIVE TOOLS · ONE FOLDER</div>
+
+      <div class="title-stage">
+        <div>
+          <div class="title-eyebrow">All five demos · in this deck</div>
+          <h1 class="title-headline" style="font-size: 240px;">
+            <span class="gold">~$1,800</span><br/>
+            a year.
+          </h1>
+          <div class="title-sub" style="margin-top: 64px;">
+            Built in two days. Sitting in one folder. No subscription.
+          </div>
+        </div>
+      </div>
+
+      <div class="meta-row meta-bot">
+        <span>CHRISTOPHER KLEINMAN</span>
+        <span>MAKING INTERNAL BUSINESS TOOLS WITH AI</span>
+        <span>32 / 36</span>
+      </div>
+    </section>
+
+
+    <!-- ╔══════════════════════════════════════════════════════════╗
+         ║ SLIDE 33 — Caveat: where AI ISN'T the answer             ║
+         ║ Three boundaries: regulated, public-facing, costly.      ║
+         ╚══════════════════════════════════════════════════════════╝ -->
+    <section class="slide" id="s33">
+      <span class="corner tl"></span><span class="corner tr"></span>
+      <span class="corner bl"></span><span class="corner br"></span>
+
+      <div class="meta-row meta-top">
+        <span>VBRC · BOUNDARIES</span>
+        <span>33 / 36</span>
+      </div>
+
+      <div class="fig-label">A QUICK CAVEAT</div>
+      <h1 class="headline headline--md">
+        Some things still need<br/>
+        a <span class="gold">real expert.</span>
+      </h1>
+
+      <div class="caveat-stack">
+        <div class="caveat-card">
+          <div class="caveat-num">01</div>
+          <div class="caveat-title">Regulated data</div>
+          <p class="caveat-body">
+            HIPAA, payment cards, payroll, anything the IRS wants — get those tools from someone whose <em>name is on the line.</em>
+          </p>
+          <p class="caveat-aside">
+            <em>For example:</em> we almost built a sign-on-screen tool for this talk — and didn't. Signatures and contracts belong with people whose name is on the liability insurance.
+          </p>
+        </div>
+        <div class="caveat-card">
+          <div class="caveat-num">02</div>
+          <div class="caveat-title">Customer-facing logins</div>
+          <p class="caveat-body">
+            A landing page is fine. A login form on the open internet is not. If <em>strangers can poke at it,</em> have it reviewed.
+          </p>
+        </div>
+        <div class="caveat-card">
+          <div class="caveat-num">03</div>
+          <div class="caveat-title">Expensive to be wrong</div>
+          <p class="caveat-body">
+            Tax math. Dosing. Anything where the wrong number costs real money. These need <em>a licensed human</em> in the loop.
+          </p>
+        </div>
+      </div>
+
+      <div class="caveat-summary">
+        These tools live <strong>inside</strong> your business. On your machine. For your eyes.
+      </div>
+
+      <div class="meta-row meta-bot">
+        <span>CHRISTOPHER KLEINMAN</span>
+        <span>MAKING INTERNAL BUSINESS TOOLS WITH AI</span>
+        <span>33 / 36</span>
+      </div>
+    </section>
+
+
+    <!-- ╔══════════════════════════════════════════════════════════╗
+         ║ SLIDE 34 — How to do this                                ║
+         ╚══════════════════════════════════════════════════════════╝ -->
+    <section class="slide" id="s34">
+      <span class="corner tl"></span><span class="corner tr"></span>
+      <span class="corner bl"></span><span class="corner br"></span>
+
+      <div class="meta-row meta-top">
+        <span>VBRC · HOW TO</span>
+        <span>34 / 36</span>
+      </div>
+
+      <div class="fig-label">HOW TO ACTUALLY DO THIS</div>
+      <h1 class="headline headline--md">
+        You're not learning to code.<br/>
+        You're learning to <span class="gold">direct.</span>
+      </h1>
+
+      <div class="howto-stack">
+        <div class="howto-row">
+          <div class="howto-num">1</div>
+          <div class="howto-text">
+            Pick a tool. <strong>Then try another.</strong>
+            <span class="dim">Claude Code · Cursor · Codex · Copilot · Gemini · ChatGPT — they're all great, and each one's a little different. Spend a month with one, then shop around.</span>
+          </div>
+        </div>
+        <div class="howto-row">
+          <div class="howto-num">2</div>
+          <div class="howto-text">
+            Tell it what you want, in plain English.
+            <span class="dim">"Build me a single HTML file that takes a CSV and shows a dashboard."</span>
+          </div>
+        </div>
+        <div class="howto-row">
+          <div class="howto-num">3</div>
+          <div class="howto-text">
+            Open the file. Try it. Tell it what to fix.
+            <span class="dim">It iterates with you. Like an assistant who never sleeps.</span>
+          </div>
+        </div>
+        <div class="howto-row">
+          <div class="howto-num">4</div>
+          <div class="howto-text">
+            Your data stays on your machine.
+            <span class="dim">Nothing you saw today phoned home. The five tools sit in a folder on a laptop.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="meta-row meta-bot">
+        <span>CHRISTOPHER KLEINMAN</span>
+        <span>MAKING INTERNAL BUSINESS TOOLS WITH AI</span>
+        <span>34 / 36</span>
+      </div>
+    </section>
+
+
+    <!-- ╔══════════════════════════════════════════════════════════╗
+         ║ SLIDE 35 — Close                                         ║
+         ╚══════════════════════════════════════════════════════════╝ -->
+    <section class="slide" id="s35">
+      <span class="corner tl"></span><span class="corner tr"></span>
+      <span class="corner bl"></span><span class="corner br"></span>
+
+      <div class="meta-row meta-top">
+        <span>VBRC · CLOSE</span>
+        <span>35 / 36</span>
+      </div>
+
+      <div class="close-stage">
+        <div>
+          <h1 class="close-headline">
+            Build the tool<br/>
+            <span style="color: var(--ink);">you need.</span>
+          </h1>
+          <p class="close-sub">
+            Not the tool someone else built for someone else.
+          </p>
+        </div>
+      </div>
+
+      <div class="meta-row meta-bot">
+        <span>CHRISTOPHER KLEINMAN</span>
+        <span>MAKING INTERNAL BUSINESS TOOLS WITH AI</span>
+        <span>35 / 36</span>
+      </div>
+    </section>
+
+
+    <!-- ╔══════════════════════════════════════════════════════════╗
+         ║ SLIDE 36 — Share / take it home                          ║
+         ╚══════════════════════════════════════════════════════════╝ -->
+    <section class="slide" id="s36">
+      <span class="corner tl"></span><span class="corner tr"></span>
+      <span class="corner bl"></span><span class="corner br"></span>
+
+      <div class="meta-row meta-top">
+        <span>VBRC · TAKE IT HOME</span>
+        <span>36 / 36</span>
+      </div>
+
+      <div class="fig-label">EVERYTHING YOU SAW TODAY</div>
+
+      <div class="share-stage">
+        <div class="qr-frame">
+          <span class="qr-bracket tl"></span>
+          <span class="qr-bracket tr"></span>
+          <span class="qr-bracket bl"></span>
+          <span class="qr-bracket br"></span>
+          <div class="qr-img">
+            <!-- Real QR pointing to https://christopherkleinman.com — generated by qrcode npm,
+                 high error correction (H), scan-verified with jsQR. -->
+            <img src="assets/qr/site.svg" alt="QR code linking to christopherkleinman.com" width="100%" height="100%" />
+            <!-- Old faux pattern preserved as fallback in case the SVG fails to load -->
+            <svg viewBox="0 0 100 100" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="display:none">
+              <rect width="100" height="100" fill="#fff"/>
+              <g fill="#000">
+                <!-- Faux QR pattern. Real QR will be dropped in pre-conference. -->
+                <rect x="0" y="0" width="28" height="28" fill="none" stroke="#000" stroke-width="4"/>
+                <rect x="8" y="8" width="12" height="12"/>
+                <rect x="72" y="0" width="28" height="28" fill="none" stroke="#000" stroke-width="4"/>
+                <rect x="80" y="8" width="12" height="12"/>
+                <rect x="0" y="72" width="28" height="28" fill="none" stroke="#000" stroke-width="4"/>
+                <rect x="8" y="80" width="12" height="12"/>
+                <!-- Random-ish data modules -->
+                <rect x="36" y="4" width="4" height="4"/>
+                <rect x="44" y="4" width="4" height="4"/>
+                <rect x="52" y="4" width="8" height="4"/>
+                <rect x="36" y="12" width="8" height="4"/>
+                <rect x="48" y="12" width="4" height="4"/>
+                <rect x="56" y="12" width="4" height="4"/>
+                <rect x="36" y="20" width="4" height="8"/>
+                <rect x="48" y="20" width="4" height="4"/>
+                <rect x="56" y="20" width="8" height="4"/>
+                <rect x="4" y="36" width="4" height="4"/>
+                <rect x="12" y="36" width="8" height="4"/>
+                <rect x="24" y="36" width="4" height="4"/>
+                <rect x="32" y="36" width="4" height="8"/>
+                <rect x="40" y="36" width="4" height="4"/>
+                <rect x="48" y="36" width="8" height="4"/>
+                <rect x="60" y="36" width="4" height="8"/>
+                <rect x="72" y="36" width="4" height="4"/>
+                <rect x="80" y="36" width="8" height="4"/>
+                <rect x="92" y="36" width="4" height="8"/>
+                <rect x="4" y="44" width="8" height="4"/>
+                <rect x="16" y="44" width="4" height="4"/>
+                <rect x="24" y="44" width="4" height="4"/>
+                <rect x="36" y="44" width="4" height="4"/>
+                <rect x="44" y="44" width="8" height="4"/>
+                <rect x="56" y="44" width="4" height="4"/>
+                <rect x="64" y="44" width="8" height="4"/>
+                <rect x="76" y="44" width="4" height="4"/>
+                <rect x="84" y="44" width="4" height="4"/>
+                <rect x="92" y="44" width="4" height="4"/>
+                <rect x="4" y="52" width="4" height="8"/>
+                <rect x="16" y="52" width="4" height="4"/>
+                <rect x="28" y="52" width="4" height="4"/>
+                <rect x="36" y="52" width="8" height="4"/>
+                <rect x="48" y="52" width="4" height="4"/>
+                <rect x="56" y="52" width="4" height="8"/>
+                <rect x="68" y="52" width="4" height="4"/>
+                <rect x="76" y="52" width="4" height="4"/>
+                <rect x="84" y="52" width="8" height="4"/>
+                <rect x="36" y="60" width="4" height="4"/>
+                <rect x="44" y="60" width="4" height="4"/>
+                <rect x="52" y="60" width="8" height="4"/>
+                <rect x="64" y="60" width="4" height="4"/>
+                <rect x="72" y="60" width="8" height="4"/>
+                <rect x="88" y="60" width="4" height="4"/>
+                <rect x="36" y="68" width="4" height="8"/>
+                <rect x="44" y="68" width="8" height="4"/>
+                <rect x="56" y="68" width="4" height="4"/>
+                <rect x="64" y="68" width="8" height="4"/>
+                <rect x="76" y="68" width="4" height="4"/>
+                <rect x="84" y="68" width="4" height="8"/>
+                <rect x="36" y="76" width="4" height="4"/>
+                <rect x="44" y="76" width="4" height="4"/>
+                <rect x="52" y="76" width="4" height="4"/>
+                <rect x="60" y="76" width="8" height="4"/>
+                <rect x="72" y="76" width="4" height="4"/>
+                <rect x="80" y="76" width="4" height="8"/>
+                <rect x="92" y="76" width="4" height="4"/>
+                <rect x="36" y="84" width="8" height="4"/>
+                <rect x="48" y="84" width="4" height="4"/>
+                <rect x="56" y="84" width="4" height="8"/>
+                <rect x="68" y="84" width="8" height="4"/>
+                <rect x="80" y="84" width="4" height="4"/>
+                <rect x="88" y="84" width="4" height="4"/>
+                <rect x="36" y="92" width="4" height="4"/>
+                <rect x="48" y="92" width="8" height="4"/>
+                <rect x="60" y="92" width="4" height="4"/>
+                <rect x="68" y="92" width="4" height="4"/>
+                <rect x="80" y="92" width="4" height="4"/>
+                <rect x="92" y="92" width="4" height="4"/>
+              </g>
+            </svg>
+          </div>
+        </div>
+
+        <div class="share-info">
+          <div class="lead">Open it on your phone</div>
+          <h2>The whole deck.<br/>The five tools.<br/>Yours to keep.</h2>
+          <div class="url">christopherkleinman.com</div>
+        </div>
+      </div>
+
+      <div class="meta-row meta-bot">
+        <span>CHRISTOPHER KLEINMAN</span>
+        <span>MAKING INTERNAL BUSINESS TOOLS WITH AI</span>
+        <span>36 / 36</span>
+      </div>
+    </section>
+
+  </div><!-- /.stage -->
+
+  <!-- Source overlay (S key) -->
+  <div class="source-overlay">
+    <pre><code>&lt;!-- This entire deck is one folder. --&gt;
+&lt;!-- One index.html, one stylesheet, one script. --&gt;
+&lt;!-- Five working tools, sitting next to it. --&gt;
+&lt;!-- Press S again to close.                   --&gt;</code></pre>
+  </div>
+
+
+  <!-- ============================================================
+       Cold-open overlays — siblings of .stage, gated by .deck--cold-open
+       ============================================================ -->
+  <audio id="cold-audio" preload="auto">
+    <source src="assets/opossums/Villain Season.mp3" type="audio/mpeg">
+  </audio>
+  <div id="cold-vignette" class="cold-vignette"></div>
+  <div id="cold-flash" class="cold-flash-overlay"></div>
+  <div id="cold-ticker" class="cold-ticker" aria-hidden="true">
+    <div class="track">
+      <span>VIRGINIA OPOSSUM · DIDELPHIS VIRGINIANA</span>
+      <span>NORTH AMERICA'S ONLY MARSUPIAL NORTH OF MEXICO</span>
+      <span>50 TEETH — MOST OF ANY LAND MAMMAL IN N.A.</span>
+      <span>BODY TEMP ~94°F — HOSTILE TO MOST VIRUSES</span>
+      <span>LTNF PEPTIDE NEUTRALIZES SNAKE VENOM</span>
+      <span>LOW-COMPETENCE HOST FOR LYME-CARRYING TICKS</span>
+      <span>INVOLUNTARY DEATH-FEIGN UP TO ~4 HOURS</span>
+      <span>13 TEATS · UP TO 13 JOEYS PER LITTER</span>
+      <span>DIDELPHIDAE LINEAGE: 65–70 MILLION YEARS</span>
+    </div>
+  </div>
+  <div id="cold-start-overlay" class="cold-start-overlay">
+    <div class="inner">
+      <div class="big cold-glitch" data-text="PRESS ANY KEY">PRESS ANY KEY</div>
+      <div class="sub">CLICK · KEY · TAP TO BEGIN</div>
+    </div>
+  </div>
+
+</div><!-- /.deck -->
+
+<!-- Stage reset — clears CRM/Schedule localStorage and reloads every tool
+     iframe so each demo starts fresh between rehearsals. Subtle by design;
+     low opacity until hover. Keyboard equivalent: Shift+R. -->
+<button id="stage-reset" class="stage-reset" type="button"
+        title="Reset all rehearsal state (Shift+R)"
+        aria-label="Reset all rehearsal state">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+       stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/>
+  </svg>
+  <span>Stage reset</span>
+</button>
+<div id="stage-reset-toast" class="stage-reset-toast" hidden></div>
+
+<script src="vendor/gsap.min.js"></script>
+<script src="vendor/typed.min.js"></script>
+<script src="scripts/cold-open.js" defer></script>
+<script src="scripts/deck.js"></script>
+
+<script>
+  /* Stage reset — wipes all tool localStorage + reloads every iframe.
+     Each tool with persistent state (CRM, Schedule) checks for ?reset
+     on its URL on init and clears its own storage before rendering. */
+  (function () {
+    const btn   = document.getElementById('stage-reset');
+    const toast = document.getElementById('stage-reset-toast');
+    if (!btn) return;
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.hidden = false;
+      requestAnimationFrame(() => requestAnimationFrame(() => toast.classList.add('is-shown')));
+      clearTimeout(toast._t);
+      toast._t = setTimeout(() => {
+        toast.classList.remove('is-shown');
+        setTimeout(() => { toast.hidden = true; }, 240);
+      }, 2400);
+    }
+
+    function resetAll() {
+      // Best-effort: clear any rivera-* keys we can reach in our own scope
+      try {
+        Object.keys(localStorage).forEach(k => {
+          if (/^rivera-/.test(k)) localStorage.removeItem(k);
+        });
+      } catch (_) {}
+      // Reload each tool iframe with a ?reset= cache-buster so each tool's
+      // own init can wipe its localStorage cleanly.
+      const iframes = document.querySelectorAll('iframe[src*="tools/"]');
+      let count = 0;
+      iframes.forEach(f => {
+        try {
+          const u = new URL(f.src, location.href);
+          u.searchParams.set('reset', String(Date.now()));
+          f.src = u.toString();
+          count++;
+        } catch (e) {
+          // fallback — re-set src to itself to force reload
+          const s = f.getAttribute('src');
+          f.setAttribute('src', '');
+          requestAnimationFrame(() => f.setAttribute('src', s + (s.includes('?') ? '&' : '?') + 'reset=' + Date.now()));
+          count++;
+        }
+      });
+      showToast(`Reset · ${count} tool${count === 1 ? '' : 's'} cleared`);
+    }
+
+    btn.addEventListener('click', resetAll);
+
+    // Keyboard shortcut: Shift+R (avoids conflict with deck's regular keys)
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'R' && e.shiftKey && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        // Don't trigger if user is typing in a real input
+        const t = e.target;
+        if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+        e.preventDefault();
+        resetAll();
+      }
+    });
+  })();
+</script>
+
+</body>
+</html>

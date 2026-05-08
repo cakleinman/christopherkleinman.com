@@ -1,0 +1,1754 @@
+<!doctype html>
+
+<!--
+  ============================================================
+  Rivera Grounds Co · Invoice Generator — STARTER CODE
+  ============================================================
+
+  This is a single-file, self-contained version of the tool
+  demoed at the 10th Annual Veteran-Owned Business Conference
+  (May 2026) by Christopher Kleinman.
+
+  Talk: "Making Internal Business Tools With AI"
+  Site: https://christopherkleinman.com
+
+  Use this file as a jumping-off point for your own tool.
+  Feed it to your AI of choice (Claude, Cursor, Copilot,
+  Gemini, ChatGPT, etc.) and ask it to adapt the patterns to
+  your business — your customers, your fields, your workflow.
+
+  Original source file: tools/invoice.html
+  Brand tokens (Rivera Grounds Co colors, type, components)
+  are inlined from _shared.css in the <style> block below.
+  Replace them with your own brand and you have a starting
+  point that's already wired together.
+
+  External libraries are loaded from jsDelivr — swap to your
+  preferred CDN or vendor them locally for offline use.
+  ============================================================
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Rivera Grounds Co — Invoice Generator</title>
+<style>
+/* ===== Inlined from _shared.css =====
+   Brand tokens, components, and helpers from Rivera Grounds Co's
+   shared stylesheet. Replace with your own brand. */
+/* ============================================================
+   Rivera Grounds Co — Shared Tool Styles
+   ----------------------------------------------------------------
+   Every demo tool in /tools/ pulls in this file. Defines brand
+   tokens, header band, base typography, buttons, inputs, cards.
+   Tools layer their own tool-local CSS on top.
+   ============================================================ */
+
+/* ---------- Brand tokens ---------- */
+:root {
+  --rg-green:        #4a7c4e;
+  --rg-green-dk:     #2d4a30;
+  --rg-green-pale:   #e3ede4;
+  --rg-tan:          #d8c79a;
+  --rg-tan-dk:       #b8a574;
+  --rg-cream:        #f7f5f0;
+  --rg-cream-dk:     #efeae0;
+  --rg-ink:          #1f2a1f;
+  --rg-ink-dim:      #5a6f5d;
+  --rg-ink-faint:    #8a9b8c;
+  --rg-line:         rgba(74, 124, 78, 0.18);
+  --rg-line-strong:  rgba(74, 124, 78, 0.4);
+  --rg-warning:      #b8742d;
+  --rg-success:      #4a7c4e;
+
+  --rg-radius:       8px;
+  --rg-radius-lg:    14px;
+  --rg-shadow-sm:    0 1px 2px rgba(31, 42, 31, 0.06), 0 1px 3px rgba(31, 42, 31, 0.04);
+  --rg-shadow-md:    0 4px 12px rgba(31, 42, 31, 0.08), 0 2px 4px rgba(31, 42, 31, 0.04);
+  --rg-shadow-lg:    0 16px 40px rgba(31, 42, 31, 0.12), 0 4px 12px rgba(31, 42, 31, 0.06);
+
+  --rg-font-display: ui-serif, Georgia, "Times New Roman", serif;
+  --rg-font-body:    -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --rg-font-mono:    ui-monospace, "SF Mono", Menlo, Monaco, "Cascadia Code", monospace;
+}
+
+/* ---------- Reset / base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--rg-cream);
+  color: var(--rg-ink);
+  font-family: var(--rg-font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-image:
+    radial-gradient(rgba(74, 124, 78, 0.06) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* ---------- Page shell ---------- */
+.rg-shell {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- Header band ---------- */
+.rg-header {
+  background: var(--rg-green-dk);
+  color: var(--rg-cream);
+  padding: 14px 28px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  border-bottom: 3px solid var(--rg-tan);
+}
+.rg-mark {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--rg-font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 22px;
+  letter-spacing: 0.01em;
+  color: var(--rg-cream);
+  text-decoration: none;
+}
+.rg-mark::before {
+  content: "";
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--rg-tan);
+  box-shadow: 0 0 0 3px rgba(216, 199, 154, 0.25);
+}
+.rg-mark .ampersand { color: var(--rg-tan); }
+.rg-tagline {
+  font-size: 11px;
+  color: rgba(247, 245, 240, 0.65);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-left: auto;
+}
+.rg-tag-pill {
+  margin-left: 18px;
+  padding: 4px 10px;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--rg-tan);
+  border: 1px solid rgba(216, 199, 154, 0.3);
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+/* ---------- Page title strip ---------- */
+.rg-title-strip {
+  padding: 18px 28px;
+  background: rgba(255, 255, 255, 0.6);
+  border-bottom: 1px solid var(--rg-line);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.rg-title-strip h1 {
+  margin: 0;
+  font-family: var(--rg-font-display);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--rg-green-dk);
+}
+.rg-title-strip .rg-sub {
+  font-size: 13px;
+  color: var(--rg-ink-dim);
+}
+
+/* ---------- Buttons ---------- */
+.rg-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 16px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  border: 1px solid transparent;
+  border-radius: var(--rg-radius);
+  cursor: pointer;
+  transition: transform 80ms ease, box-shadow 120ms ease, background 120ms ease;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+}
+.rg-btn:active { transform: translateY(1px); }
+.rg-btn--primary {
+  background: var(--rg-green-dk);
+  color: var(--rg-cream);
+}
+.rg-btn--primary:hover {
+  background: var(--rg-green);
+  box-shadow: var(--rg-shadow-md);
+}
+.rg-btn--secondary {
+  background: var(--rg-cream);
+  color: var(--rg-green-dk);
+  border-color: var(--rg-line-strong);
+}
+.rg-btn--secondary:hover {
+  background: var(--rg-green-pale);
+  border-color: var(--rg-green);
+}
+.rg-btn--ghost {
+  background: transparent;
+  color: var(--rg-ink-dim);
+  border-color: transparent;
+}
+.rg-btn--ghost:hover {
+  color: var(--rg-green-dk);
+  background: rgba(74, 124, 78, 0.06);
+}
+.rg-btn--danger {
+  background: transparent;
+  color: var(--rg-warning);
+  border-color: rgba(184, 116, 45, 0.3);
+}
+.rg-btn--danger:hover {
+  background: rgba(184, 116, 45, 0.08);
+}
+.rg-btn--sm { padding: 6px 12px; font-size: 12px; }
+.rg-btn--lg { padding: 12px 22px; font-size: 14px; }
+.rg-btn--icon { padding: 8px; min-width: 32px; }
+
+/* ---------- Inputs ---------- */
+.rg-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.rg-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--rg-ink-dim);
+}
+.rg-input,
+.rg-select,
+.rg-textarea {
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--rg-ink);
+  background: #fff;
+  border: 1px solid var(--rg-line-strong);
+  border-radius: var(--rg-radius);
+  padding: 9px 12px;
+  line-height: 1.4;
+  transition: border-color 120ms, box-shadow 120ms;
+  width: 100%;
+}
+.rg-textarea {
+  resize: vertical;
+  min-height: 72px;
+}
+.rg-input:focus,
+.rg-select:focus,
+.rg-textarea:focus {
+  outline: none;
+  border-color: var(--rg-green);
+  box-shadow: 0 0 0 3px rgba(74, 124, 78, 0.12);
+}
+.rg-input::placeholder,
+.rg-textarea::placeholder {
+  color: var(--rg-ink-faint);
+}
+
+/* ---------- Cards / panels ---------- */
+.rg-card {
+  background: #fff;
+  border: 1px solid var(--rg-line);
+  border-radius: var(--rg-radius-lg);
+  box-shadow: var(--rg-shadow-sm);
+  overflow: hidden;
+}
+.rg-card__header {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--rg-line);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.rg-card__title {
+  font-family: var(--rg-font-display);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--rg-green-dk);
+  margin: 0;
+}
+.rg-card__body { padding: 16px 18px; }
+
+/* ---------- KPI tile ---------- */
+.rg-kpi {
+  background: #fff;
+  border: 1px solid var(--rg-line);
+  border-radius: var(--rg-radius);
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: var(--rg-shadow-sm);
+}
+.rg-kpi__label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--rg-ink-dim);
+  font-weight: 600;
+}
+.rg-kpi__value {
+  font-family: var(--rg-font-display);
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--rg-green-dk);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+.rg-kpi__delta {
+  font-size: 11px;
+  color: var(--rg-ink-faint);
+}
+
+/* ---------- Footer / utility ---------- */
+.rg-footer {
+  margin-top: auto;
+  padding: 10px 28px;
+  background: rgba(255, 255, 255, 0.5);
+  border-top: 1px solid var(--rg-line);
+  font-size: 11px;
+  color: var(--rg-ink-faint);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* ---------- Tag / pill ---------- */
+.rg-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  border-radius: 999px;
+  background: var(--rg-green-pale);
+  color: var(--rg-green-dk);
+  border: 1px solid var(--rg-line);
+}
+.rg-pill--tan {
+  background: rgba(216, 199, 154, 0.3);
+  color: var(--rg-tan-dk);
+  border-color: rgba(184, 165, 116, 0.4);
+}
+.rg-pill--warn {
+  background: rgba(184, 116, 45, 0.1);
+  color: var(--rg-warning);
+  border-color: rgba(184, 116, 45, 0.25);
+}
+
+/* ---------- Empty state ---------- */
+.rg-empty {
+  border: 2px dashed var(--rg-line-strong);
+  border-radius: var(--rg-radius-lg);
+  padding: 40px 32px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.5);
+  color: var(--rg-ink-dim);
+}
+.rg-empty h3 {
+  margin: 0 0 6px;
+  font-family: var(--rg-font-display);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--rg-green-dk);
+}
+.rg-empty p { margin: 0 0 16px; font-size: 13px; }
+.rg-empty.is-active {
+  border-color: var(--rg-green);
+  background: var(--rg-green-pale);
+}
+
+/* ---------- Helpers ---------- */
+.rg-hidden { display: none !important; }
+.rg-row { display: flex; gap: 12px; align-items: center; }
+.rg-row--end { justify-content: flex-end; }
+.rg-row--between { justify-content: space-between; }
+.rg-stack { display: flex; flex-direction: column; gap: 12px; }
+
+/* ---------- Scrollbar (subtle) ---------- */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--rg-line-strong);
+  border-radius: 999px;
+  border: 2px solid var(--rg-cream);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--rg-green); }
+
+/* ============================================================
+   "Live · running locally" pill — sits in the .rg-header band
+   alongside .rg-tag-pill. Reinforces "this is real software"
+   on every demo without needing to be said.
+   ============================================================ */
+.rg-live-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px 3px 8px;
+  border-radius: 999px;
+  background: rgba(74, 124, 78, 0.12);
+  border: 1px solid rgba(74, 124, 78, 0.32);
+  font-family: var(--rg-font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--rg-cream);
+  font-weight: 600;
+  user-select: none;
+}
+.rg-live-pill::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #6fcf73;
+  box-shadow: 0 0 8px rgba(111, 207, 115, 0.7);
+  animation: rg-live-pulse 1.6s ease-in-out infinite;
+}
+@keyframes rg-live-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.5; transform: scale(0.85); }
+}
+/* Dark-on-light variant — for tools whose header sits on a cream/light
+   background (e.g., Invoice's form-head). Uses dark green text + a
+   darker border so it pops against light surfaces. */
+.rg-live-pill--dark {
+  background: rgba(74, 124, 78, 0.10);
+  border-color: rgba(45, 74, 48, 0.45);
+  color: var(--rg-green-dk);
+}
+.rg-live-pill--dark::before {
+  background: var(--rg-success, #4a7c4e);
+  box-shadow: 0 0 6px rgba(74, 124, 78, 0.55);
+}
+
+/* ============================================================
+   Demo button — italic-lowercase ghost link.
+   Use for stage-only "demo: do a thing" buttons. Same voice as
+   the dashboard's `demo: another week` pattern.
+   ============================================================ */
+.rg-btn--demo {
+  background: none;
+  border: 0;
+  padding: 4px 8px;
+  font-family: var(--rg-font-body);
+  font-size: 11.5px;
+  font-style: italic;
+  color: var(--rg-ink-faint);
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  border-radius: 4px;
+  transition: color 140ms ease, background 140ms ease;
+}
+.rg-btn--demo:hover {
+  color: var(--rg-green-dk);
+  background: rgba(74, 124, 78, 0.06);
+}
+.rg-btn--demo:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  color: var(--rg-ink-faint);
+  background: none;
+  text-decoration: line-through dotted;
+}
+
+/* ============================================================
+   Toast — floating notification top-right of the tool viewport.
+   Same animation/positioning as dashboard's .add-toast.
+   ============================================================ */
+.rg-toast {
+  position: fixed;
+  top: 84px;
+  right: 24px;
+  background: #fff;
+  border: 1px solid var(--rg-line);
+  border-left: 3px solid var(--rg-success, #4a7c4e);
+  border-radius: 6px;
+  padding: 9px 14px 9px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--rg-ink);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.10);
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 220ms ease, transform 220ms ease;
+  z-index: 50;
+  pointer-events: none;
+  max-width: 320px;
+}
+.rg-toast.is-shown { opacity: 1; transform: translateY(0); }
+.rg-toast--warn { border-left-color: var(--rg-warning, #b8742d); }
+.rg-toast--info { border-left-color: var(--rg-ink-faint, #8a9b8c); }
+.rg-toast b { color: var(--rg-green-dk); font-weight: 700; }
+.rg-toast--warn b { color: var(--rg-warning, #b8742d); }
+.rg-toast .tdim { color: var(--rg-ink-dim); font-weight: 400; margin-left: 4px; }
+
+</style>
+<style>
+  /* ============================================================
+     Invoice tool — local styles
+     ============================================================ */
+  body {
+    background: var(--rg-cream);
+    background-image:
+      radial-gradient(rgba(74, 124, 78, 0.05) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+
+  .tool {
+    display: grid;
+    grid-template-columns: 40% 60%;
+    min-height: 100vh;
+    align-items: stretch;
+  }
+
+  /* ---------- Left pane: form ---------- */
+  .pane-form {
+    border-right: 1px solid var(--rg-line);
+    background: rgba(255, 255, 255, 0.55);
+    padding: 22px 24px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    overflow-y: auto;
+  }
+
+  .form-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--rg-line);
+  }
+  .form-head h2 {
+    margin: 0;
+    font-family: var(--rg-font-display);
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--rg-green-dk);
+    letter-spacing: -0.01em;
+  }
+  .form-head .form-eyebrow {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--rg-ink-faint);
+    font-weight: 600;
+  }
+
+  .section-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--rg-green);
+    margin: 4px 0 -4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-label::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--rg-line);
+  }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+  }
+
+  /* Line items */
+  .lines {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .lines-head {
+    display: grid;
+    grid-template-columns: 1fr 60px 80px 90px 28px;
+    gap: 8px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-weight: 700;
+    color: var(--rg-ink-dim);
+    padding: 0 4px;
+  }
+  .lines-head span:nth-child(2),
+  .lines-head span:nth-child(3),
+  .lines-head span:nth-child(4) {
+    text-align: right;
+  }
+  .line {
+    display: grid;
+    grid-template-columns: 1fr 60px 80px 90px 28px;
+    gap: 8px;
+    align-items: center;
+  }
+  .line .rg-input {
+    padding: 7px 10px;
+    font-size: 13px;
+  }
+  .line .num,
+  .line .amount {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  .line .amount {
+    font-family: var(--rg-font-mono);
+    font-size: 13px;
+    color: var(--rg-green-dk);
+    font-weight: 600;
+    padding: 7px 10px;
+    background: var(--rg-green-pale);
+    border: 1px solid var(--rg-line);
+    border-radius: var(--rg-radius);
+  }
+  .line .row-remove {
+    background: transparent;
+    border: none;
+    color: var(--rg-ink-faint);
+    cursor: pointer;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    font-size: 16px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 120ms, color 120ms;
+  }
+  .line .row-remove:hover {
+    background: rgba(184, 116, 45, 0.12);
+    color: var(--rg-warning);
+  }
+
+  .lines-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .add-line {
+    align-self: flex-start;
+  }
+
+  .actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 8px;
+    padding-top: 16px;
+    border-top: 1px solid var(--rg-line);
+  }
+  .actions .rg-btn--lg { flex: 1; }
+
+  /* ---------- Right pane: preview ---------- */
+  .pane-preview {
+    background: var(--rg-cream-dk);
+    background-image:
+      linear-gradient(135deg, rgba(74, 124, 78, 0.04) 0%, transparent 60%);
+    padding: 24px 28px 28px;
+    overflow-y: auto;
+  }
+
+  .preview-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    padding: 0 4px;
+  }
+  .preview-bar .preview-title {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--rg-ink-dim);
+    font-weight: 700;
+  }
+  .preview-bar .live-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--rg-green-dk);
+    font-weight: 700;
+  }
+  .preview-bar .live-pill::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--rg-green);
+    box-shadow: 0 0 0 3px rgba(74, 124, 78, 0.18);
+    animation: pulse 1.8s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 3px rgba(74, 124, 78, 0.18); }
+    50%      { box-shadow: 0 0 0 6px rgba(74, 124, 78, 0.05); }
+  }
+
+  /* The "paper" */
+  .paper {
+    background: #fff;
+    border-radius: 6px;
+    box-shadow:
+      0 1px 2px rgba(31, 42, 31, 0.05),
+      0 12px 36px rgba(31, 42, 31, 0.10),
+      0 24px 64px rgba(31, 42, 31, 0.06);
+    padding: 44px 52px 40px;
+    color: var(--rg-ink);
+    font-family: var(--rg-font-body);
+    font-size: 12.5px;
+    line-height: 1.55;
+    max-width: 720px;
+    margin: 0 auto;
+    /* paper texture */
+    background-image:
+      linear-gradient(180deg, rgba(74, 124, 78, 0.015) 0%, transparent 12%);
+  }
+
+  .paper-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
+    padding-bottom: 18px;
+    border-bottom: 2px solid var(--rg-green-dk);
+  }
+  .wordmark {
+    font-family: var(--rg-font-display);
+    font-size: 30px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--rg-green-dk);
+    line-height: 1;
+    margin: 0;
+  }
+  .wordmark-tag {
+    margin-top: 6px;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--rg-ink-dim);
+    font-weight: 600;
+  }
+  .paper-addr {
+    text-align: right;
+    font-size: 11px;
+    color: var(--rg-ink-dim);
+    line-height: 1.55;
+    font-variant-numeric: tabular-nums;
+  }
+  .paper-addr .biz-name {
+    font-family: var(--rg-font-display);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--rg-ink);
+    margin-bottom: 2px;
+  }
+
+  .paper-meta {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 28px;
+    margin-top: 24px;
+  }
+  .paper-meta .invoice-label {
+    font-family: var(--rg-font-display);
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--rg-green-dk);
+    letter-spacing: 0.06em;
+    margin: 0 0 6px;
+    line-height: 1;
+  }
+  .paper-meta .invoice-num {
+    font-size: 12px;
+    color: var(--rg-ink-dim);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.05em;
+  }
+  .meta-pair {
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 4px 14px;
+    justify-content: end;
+    align-content: start;
+    font-size: 11px;
+  }
+  .meta-pair dt {
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--rg-ink-faint);
+    font-weight: 600;
+    margin: 0;
+    font-size: 9.5px;
+    align-self: center;
+  }
+  .meta-pair dd {
+    margin: 0;
+    text-align: right;
+    color: var(--rg-ink);
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+  }
+
+  .paper-billto {
+    margin-top: 24px;
+    padding: 14px 16px;
+    background: var(--rg-cream);
+    border-left: 3px solid var(--rg-tan);
+    border-radius: 0 4px 4px 0;
+  }
+  .paper-billto .billto-label {
+    font-size: 9.5px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--rg-ink-faint);
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .paper-billto .billto-name {
+    font-family: var(--rg-font-display);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--rg-ink);
+    line-height: 1.25;
+  }
+  .paper-billto .billto-attn,
+  .paper-billto .billto-addr {
+    font-size: 11.5px;
+    color: var(--rg-ink-dim);
+    margin-top: 2px;
+  }
+
+  /* Line item table */
+  .paper-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 22px;
+    font-size: 12px;
+  }
+  .paper-table thead th {
+    background: var(--rg-green-dk);
+    color: var(--rg-cream);
+    text-align: left;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 700;
+    padding: 9px 12px;
+  }
+  .paper-table thead th:nth-child(2),
+  .paper-table thead th:nth-child(3),
+  .paper-table thead th:nth-child(4) {
+    text-align: right;
+  }
+  .paper-table tbody td {
+    padding: 11px 12px;
+    border-bottom: 1px solid var(--rg-line);
+    vertical-align: top;
+  }
+  .paper-table tbody td:nth-child(2),
+  .paper-table tbody td:nth-child(3),
+  .paper-table tbody td:nth-child(4) {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  .paper-table tbody td:nth-child(4) {
+    font-weight: 600;
+    color: var(--rg-ink);
+  }
+  .paper-table tbody tr:last-child td {
+    border-bottom: 1px solid var(--rg-green-dk);
+  }
+
+  .paper-totals {
+    margin-top: 14px;
+    display: flex;
+    justify-content: flex-end;
+  }
+  .totals-grid {
+    display: grid;
+    grid-template-columns: auto 130px;
+    gap: 6px 24px;
+    font-size: 12px;
+    min-width: 280px;
+  }
+  .totals-grid .label {
+    text-align: right;
+    color: var(--rg-ink-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 10.5px;
+    font-weight: 600;
+    align-self: center;
+  }
+  .totals-grid .val {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+  }
+  .totals-grid .label-total {
+    font-family: var(--rg-font-display);
+    font-size: 14px;
+    color: var(--rg-green-dk);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    padding-top: 8px;
+    border-top: 2px solid var(--rg-green-dk);
+    margin-top: 4px;
+  }
+  .totals-grid .val-total {
+    font-family: var(--rg-font-display);
+    font-size: 18px;
+    color: var(--rg-green-dk);
+    font-weight: 700;
+    padding-top: 8px;
+    border-top: 2px solid var(--rg-green-dk);
+    margin-top: 4px;
+  }
+
+  .paper-notes {
+    margin-top: 28px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--rg-line-strong);
+    font-size: 11.5px;
+    color: var(--rg-ink-dim);
+    line-height: 1.6;
+    font-style: italic;
+  }
+  .paper-notes-label {
+    font-style: normal;
+    font-size: 9.5px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--rg-green);
+    font-weight: 700;
+    margin-bottom: 4px;
+    display: block;
+  }
+
+  .paper-foot {
+    margin-top: 32px;
+    padding-top: 14px;
+    border-top: 1px solid var(--rg-line);
+    text-align: center;
+    font-size: 9.5px;
+    color: var(--rg-ink-faint);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  /* Saved flash */
+  .toast {
+    position: fixed;
+    bottom: 18px;
+    right: 18px;
+    background: var(--rg-green-dk);
+    color: var(--rg-cream);
+    padding: 10px 16px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    box-shadow: var(--rg-shadow-md);
+    opacity: 0;
+    transform: translateY(8px);
+    pointer-events: none;
+    transition: opacity 200ms, transform 200ms;
+    z-index: 50;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Responsive — stack on narrow */
+  @media (max-width: 1100px) {
+    .tool { grid-template-columns: 1fr; }
+    .pane-form { border-right: none; border-bottom: 1px solid var(--rg-line); }
+  }
+</style>
+</head>
+<body>
+
+<div class="tool">
+
+  <!-- ============================================================
+       LEFT PANE — Editable form
+       ============================================================ -->
+  <section class="pane-form">
+
+    <header class="form-head">
+      <div>
+        <h2>New invoice</h2>
+        <span class="form-eyebrow">Rivera Grounds Co · Billing</span>
+      </div>
+      <span class="rg-live-pill rg-live-pill--dark" title="This is real software running in your browser, not a screenshot">Live · running locally</span>
+    </header>
+
+    <!-- Invoice meta -->
+    <div class="section-label">Invoice</div>
+    <div class="grid-3">
+      <div class="rg-field">
+        <label class="rg-label" for="f-num">Invoice #</label>
+        <input id="f-num" class="rg-input" type="text" />
+      </div>
+      <div class="rg-field">
+        <label class="rg-label" for="f-date">Date</label>
+        <input id="f-date" class="rg-input" type="date" />
+      </div>
+      <div class="rg-field">
+        <label class="rg-label" for="f-due">Due date</label>
+        <input id="f-due" class="rg-input" type="date" />
+      </div>
+    </div>
+
+    <!-- Bill to -->
+    <div class="section-label">Bill to</div>
+    <div class="rg-stack" style="gap:10px;">
+      <div class="grid-2">
+        <div class="rg-field">
+          <label class="rg-label" for="f-client">Client name</label>
+          <input id="f-client" class="rg-input" type="text" />
+        </div>
+        <div class="rg-field">
+          <label class="rg-label" for="f-attn">Attention</label>
+          <input id="f-attn" class="rg-input" type="text" />
+        </div>
+      </div>
+      <div class="rg-field">
+        <label class="rg-label" for="f-addr">Address</label>
+        <input id="f-addr" class="rg-input" type="text" />
+      </div>
+    </div>
+
+    <!-- Line items -->
+    <div class="section-label">Line items</div>
+    <div class="lines">
+      <div class="lines-head">
+        <span>Description</span>
+        <span>Qty</span>
+        <span>Rate</span>
+        <span>Amount</span>
+        <span></span>
+      </div>
+      <div id="lines-body"></div>
+    </div>
+    <div class="lines-actions">
+      <button id="add-line" class="rg-btn rg-btn--secondary rg-btn--sm add-line" type="button">
+        + Add line item
+      </button>
+      <button id="demoLineBtn" type="button" class="rg-btn--demo"
+              title="Append a sample line for Linda's job — totals tick up live">
+        demo: + line item
+      </button>
+    </div>
+
+    <!-- Tax + notes -->
+    <div class="section-label">Tax &amp; notes</div>
+    <div class="grid-2">
+      <div class="rg-field">
+        <label class="rg-label" for="f-tax">Tax rate (%)</label>
+        <input id="f-tax" class="rg-input" type="number" step="0.01" min="0" />
+      </div>
+      <div></div>
+    </div>
+    <div class="rg-field">
+      <label class="rg-label" for="f-notes">Notes / terms</label>
+      <textarea id="f-notes" class="rg-textarea" rows="3"></textarea>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+      <button id="btn-pdf" class="rg-btn rg-btn--primary rg-btn--lg" type="button">
+        Download PDF
+      </button>
+      <button id="btn-load-demo" class="rg-btn rg-btn--secondary" type="button"
+              title="Populate Linda Park's full invoice instead of typing it live">
+        Load demo data
+      </button>
+      <button id="btn-reset" class="rg-btn rg-btn--ghost" type="button">
+        Clear
+      </button>
+    </div>
+
+  </section>
+
+  <!-- ============================================================
+       RIGHT PANE — Live preview
+       ============================================================ -->
+  <section class="pane-preview">
+
+    <div class="preview-bar">
+      <span class="preview-title">Live preview</span>
+      <span class="live-pill">Updating</span>
+    </div>
+
+    <div class="paper" id="paper">
+      <header class="paper-head">
+        <div>
+          <h1 class="wordmark">RIVERA GROUNDS CO</h1>
+          <div class="wordmark-tag">Veteran-Owned · Utah County, UT · Since 2018</div>
+        </div>
+        <div class="paper-addr">
+          <div class="biz-name">Rivera Grounds Co</div>
+          1840 N State St · Suite 4<br/>
+          Provo, UT 84601<br/>
+          (801) 555-0100<br/>
+          invoices@riveragroundsco.com
+        </div>
+      </header>
+
+      <div class="paper-meta">
+        <div>
+          <div class="invoice-label">INVOICE</div>
+          <div class="invoice-num" id="p-num">—</div>
+        </div>
+        <dl class="meta-pair">
+          <dt>Issued</dt><dd id="p-date">—</dd>
+          <dt>Due</dt>   <dd id="p-due">—</dd>
+        </dl>
+      </div>
+
+      <div class="paper-billto">
+        <div class="billto-label">Bill to</div>
+        <div class="billto-name" id="p-client">—</div>
+        <div class="billto-attn" id="p-attn"></div>
+        <div class="billto-addr" id="p-addr">—</div>
+      </div>
+
+      <table class="paper-table">
+        <thead>
+          <tr>
+            <th>Description</th>
+            <th>Qty</th>
+            <th>Rate</th>
+            <th>Amount</th>
+          </tr>
+        </thead>
+        <tbody id="p-rows"></tbody>
+      </table>
+
+      <div class="paper-totals">
+        <div class="totals-grid">
+          <div class="label">Subtotal</div>
+          <div class="val" id="p-sub">$0.00</div>
+          <div class="label" id="p-tax-label">Tax (0%)</div>
+          <div class="val" id="p-tax">$0.00</div>
+          <div class="label label-total">Total due</div>
+          <div class="val val-total" id="p-total">$0.00</div>
+        </div>
+      </div>
+
+      <div class="paper-notes">
+        <span class="paper-notes-label">Notes &amp; terms</span>
+        <span id="p-notes"></span>
+      </div>
+
+      <footer class="paper-foot">
+        Rivera Grounds Co · invoices@riveragroundsco.com · (801) 555-0100
+      </footer>
+    </div>
+
+  </section>
+
+</div>
+
+<div class="toast" id="toast">PDF saved</div>
+
+<!-- ============================================================
+     Vendor: jsPDF + AutoTable
+     ============================================================ -->
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.0/dist/jspdf.plugin.autotable.min.js"></script>
+
+<script>
+(() => {
+  'use strict';
+
+  // ─── Brand constants ─────────────────────────────────────────────
+  const BRAND = {
+    name:    'Rivera Grounds Co',
+    tagline: 'Veteran-Owned · Utah County, UT · Since 2018',
+    addr1:   '1840 N State St · Suite 4',
+    addr2:   'Provo, UT 84601',
+    phone:   '(801) 555-0100',
+    email:   'invoices@riveragroundsco.com',
+    green:   [45, 74, 48],     // forest green primary (rg-green-dk)
+    greenLt: [74, 124, 78],    // rg-green
+    cream:   [247, 245, 240],  // rg-cream
+    tan:     [216, 199, 154],  // rg-tan
+    ink:     [31, 42, 31],
+    inkDim:  [90, 111, 93],
+    inkFaint:[138, 155, 140],
+    line:    [225, 230, 225],
+  };
+
+  // ─── Blank starting state ────────────────────────────────────────
+  // The invoice opens empty so the presenter can type Linda's info live.
+  // The "Load demo data" button populates the DEMO snapshot for the
+  // audience-friendly version of the demo.
+  const BLANK = {
+    num:    '',
+    date:   '',
+    due:    '',
+    client: '',
+    attn:   '',
+    addr:   '',
+    tax:    7.25,
+    notes:  '',
+    items:  [
+      { desc: '', qty: 1, rate: 0, unit: '' },
+    ],
+  };
+
+  // ─── Demo data — full invoice for Linda Park ────────────────────
+  // She's the customer threading through every demo. By the time the
+  // audience reaches Invoice, they've seen Linda submit her inquiry,
+  // get added to the CRM, and have her job scheduled. Now she gets
+  // billed for her first week of service.
+  const DEMO = {
+    num:    'RGC-2026-073',
+    date:   '2026-05-04',
+    due:    '2026-06-03',
+    client: 'Linda Park',
+    attn:   '',
+    addr:   '412 Birch Lane, Provo UT 84601',
+    tax:    7.25,
+    notes:  'Thank you, Linda. Payment due within 30 days. Make checks payable to Rivera Grounds Co.',
+    items: [
+      { desc: 'Initial visit — yard walk-through & site notes', qty: 1, rate: 0, unit: 'visit' },
+    ],
+  };
+
+  // ─── State ───────────────────────────────────────────────────────
+  let state = clone(BLANK);
+
+  // ─── DOM refs ────────────────────────────────────────────────────
+  const $ = (id) => document.getElementById(id);
+  const fNum    = $('f-num');
+  const fDate   = $('f-date');
+  const fDue    = $('f-due');
+  const fClient = $('f-client');
+  const fAttn   = $('f-attn');
+  const fAddr   = $('f-addr');
+  const fTax    = $('f-tax');
+  const fNotes  = $('f-notes');
+  const linesBody = $('lines-body');
+
+  const pNum   = $('p-num');
+  const pDate  = $('p-date');
+  const pDue   = $('p-due');
+  const pClient= $('p-client');
+  const pAttn  = $('p-attn');
+  const pAddr  = $('p-addr');
+  const pRows  = $('p-rows');
+  const pSub   = $('p-sub');
+  const pTax   = $('p-tax');
+  const pTaxLabel = $('p-tax-label');
+  const pTotal = $('p-total');
+  const pNotes = $('p-notes');
+  const toast  = $('toast');
+
+  // ─── Helpers ─────────────────────────────────────────────────────
+  function clone(o) { return JSON.parse(JSON.stringify(o)); }
+
+  function fmtMoney(n) {
+    if (!isFinite(n)) n = 0;
+    return '$' + n.toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  }
+
+  function fmtDate(iso) {
+    if (!iso) return '—';
+    // Parse as local date to avoid TZ shift
+    const [y, m, d] = iso.split('-').map(Number);
+    if (!y || !m || !d) return iso;
+    const dt = new Date(y, m - 1, d);
+    return dt.toLocaleDateString('en-US', {
+      month: 'short', day: 'numeric', year: 'numeric',
+    });
+  }
+
+  function calcLine(it) {
+    const q = Number(it.qty) || 0;
+    const r = Number(it.rate) || 0;
+    return q * r;
+  }
+
+  function calcTotals() {
+    const sub = state.items.reduce((s, it) => s + calcLine(it), 0);
+    const taxRate = Number(state.tax) || 0;
+    const tax = sub * (taxRate / 100);
+    return { sub, tax, total: sub + tax, rate: taxRate };
+  }
+
+  // ─── Form rendering ──────────────────────────────────────────────
+  function renderLines() {
+    linesBody.innerHTML = '';
+    state.items.forEach((it, idx) => {
+      const row = document.createElement('div');
+      row.className = 'line';
+      row.innerHTML = `
+        <input class="rg-input desc" type="text" value="${escapeAttr(it.desc)}" placeholder="Description" />
+        <input class="rg-input num qty" type="number" step="0.5" min="0" value="${it.qty}" />
+        <input class="rg-input num rate" type="number" step="0.01" min="0" value="${it.rate}" />
+        <div class="amount">${fmtMoney(calcLine(it))}</div>
+        <button class="row-remove" type="button" aria-label="Remove line" title="Remove">×</button>
+      `;
+      const [descI, qtyI, rateI] = row.querySelectorAll('input');
+      const amountEl = row.querySelector('.amount');
+      const removeB = row.querySelector('.row-remove');
+
+      descI.addEventListener('input', () => {
+        state.items[idx].desc = descI.value;
+        renderPreview();
+      });
+      qtyI.addEventListener('input', () => {
+        state.items[idx].qty = qtyI.value === '' ? 0 : Number(qtyI.value);
+        amountEl.textContent = fmtMoney(calcLine(state.items[idx]));
+        renderPreview();
+      });
+      rateI.addEventListener('input', () => {
+        state.items[idx].rate = rateI.value === '' ? 0 : Number(rateI.value);
+        amountEl.textContent = fmtMoney(calcLine(state.items[idx]));
+        renderPreview();
+      });
+      removeB.addEventListener('click', () => {
+        state.items.splice(idx, 1);
+        if (state.items.length === 0) {
+          state.items.push({ desc: '', qty: 1, rate: 0, unit: '' });
+        }
+        renderLines();
+        renderPreview();
+      });
+
+      linesBody.appendChild(row);
+    });
+  }
+
+  function escapeAttr(s) {
+    return String(s ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;')
+      .replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  function escapeHtml(s) {
+    return String(s ?? '').replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function syncFormFromState() {
+    fNum.value    = state.num;
+    fDate.value   = state.date;
+    fDue.value    = state.due;
+    fClient.value = state.client;
+    fAttn.value   = state.attn;
+    fAddr.value   = state.addr;
+    fTax.value    = state.tax;
+    fNotes.value  = state.notes;
+    renderLines();
+  }
+
+  // ─── Preview rendering ───────────────────────────────────────────
+  function renderPreview() {
+    pNum.textContent    = state.num || '—';
+    pDate.textContent   = fmtDate(state.date);
+    pDue.textContent    = fmtDate(state.due);
+    pClient.textContent = state.client || '—';
+    pAttn.textContent   = state.attn ? `Attn: ${state.attn}` : '';
+    pAddr.textContent   = state.addr || '';
+    pNotes.textContent  = state.notes || '';
+
+    // Items
+    pRows.innerHTML = '';
+    state.items.forEach((it) => {
+      const tr = document.createElement('tr');
+      const qtyText = it.unit ? `${trimNum(it.qty)} ${it.unit}` : trimNum(it.qty);
+      tr.innerHTML = `
+        <td>${escapeHtml(it.desc)}</td>
+        <td>${escapeHtml(qtyText)}</td>
+        <td>${fmtMoney(Number(it.rate) || 0)}</td>
+        <td>${fmtMoney(calcLine(it))}</td>
+      `;
+      pRows.appendChild(tr);
+    });
+
+    // Totals
+    const t = calcTotals();
+    pSub.textContent      = fmtMoney(t.sub);
+    pTax.textContent      = fmtMoney(t.tax);
+    pTaxLabel.textContent = `Tax (${trimNum(t.rate)}%)`;
+    pTotal.textContent    = fmtMoney(t.total);
+  }
+
+  function trimNum(n) {
+    const v = Number(n);
+    if (!isFinite(v)) return '0';
+    return v % 1 === 0 ? String(v) : String(+v.toFixed(2));
+  }
+
+  // ─── Event wiring ────────────────────────────────────────────────
+  fNum.addEventListener('input',    () => { state.num    = fNum.value;    renderPreview(); });
+  fDate.addEventListener('input',   () => { state.date   = fDate.value;   renderPreview(); });
+  fDue.addEventListener('input',    () => { state.due    = fDue.value;    renderPreview(); });
+  fClient.addEventListener('input', () => { state.client = fClient.value; renderPreview(); });
+  fAttn.addEventListener('input',   () => { state.attn   = fAttn.value;   renderPreview(); });
+  fAddr.addEventListener('input',   () => { state.addr   = fAddr.value;   renderPreview(); });
+  fTax.addEventListener('input',    () => { state.tax    = fTax.value === '' ? 0 : Number(fTax.value); renderPreview(); });
+  fNotes.addEventListener('input',  () => { state.notes  = fNotes.value;  renderPreview(); });
+
+  $('add-line').addEventListener('click', () => {
+    state.items.push({ desc: '', qty: 1, rate: 0, unit: '' });
+    renderLines();
+    renderPreview();
+  });
+
+  $('btn-reset').addEventListener('click', () => {
+    state = clone(BLANK);
+    syncFormFromState();
+    renderPreview();
+    flashToast('Cleared');
+    // Reset demo line cycle so it can re-run
+    demoLineIdx = 0;
+    const dbtn = $('demoLineBtn');
+    if (dbtn) {
+      dbtn.disabled = false;
+      dbtn.textContent = 'demo: + line item';
+    }
+  });
+
+  $('btn-load-demo').addEventListener('click', () => {
+    state = clone(DEMO);
+    syncFormFromState();
+    renderPreview();
+    flashToast('Demo data loaded');
+    demoLineIdx = 0;
+    const dbtn = $('demoLineBtn');
+    if (dbtn) {
+      dbtn.disabled = false;
+      dbtn.textContent = 'demo: + line item';
+    }
+  });
+
+  // ─── Demo button: cycles 3 sample lines for Linda's first job ────
+  const DEMO_LINES = [
+    { desc: 'Lawn care — weekly visit',          qty: 4,   rate: 85,  unit: 'visits' },
+    { desc: 'Hardscape consult — backyard patio', qty: 1.5, rate: 120, unit: 'hrs'    },
+    { desc: 'Mulch — premium hardwood',           qty: 2,   rate: 95,  unit: 'yards'  },
+  ];
+  let demoLineIdx = 0;
+  $('demoLineBtn').addEventListener('click', () => {
+    if (demoLineIdx >= DEMO_LINES.length) {
+      const dbtn = $('demoLineBtn');
+      dbtn.disabled = true;
+      dbtn.textContent = 'demo: out of line items';
+      flashToast('Out of sample line items · click Reset to re-run');
+      return;
+    }
+    const line = DEMO_LINES[demoLineIdx];
+    demoLineIdx++;
+    state.items.push({ ...line });
+    renderLines();
+    renderPreview();
+    flashToast(`+ ${line.desc}`);
+  });
+
+  $('btn-pdf').addEventListener('click', () => {
+    try {
+      buildPDF();
+      flashToast('PDF saved');
+    } catch (err) {
+      console.error(err);
+      flashToast('PDF failed — see console');
+    }
+  });
+
+  function flashToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(flashToast._t);
+    flashToast._t = setTimeout(() => toast.classList.remove('show'), 1600);
+  }
+
+  // ─── PDF generation ──────────────────────────────────────────────
+  function buildPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: 'pt', format: 'letter' });
+
+    const pageW = doc.internal.pageSize.getWidth();   // 612
+    const pageH = doc.internal.pageSize.getHeight();  // 792
+    const ML = 54, MR = 54;                           // margins
+    const contentW = pageW - ML - MR;
+
+    // ── Wordmark (forest green serif) ──
+    doc.setFont('times', 'bold');
+    doc.setFontSize(26);
+    doc.setTextColor(...BRAND.green);
+    doc.text('RIVERA GROUNDS CO', ML, 84, { charSpace: 1.2 });
+
+    // Tagline (muted gray)
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(...BRAND.inkDim);
+    doc.text('VETERAN-OWNED  ·  WASATCH FRONT  ·  EST. 2018', ML, 100, { charSpace: 1.4 });
+
+    // Address block (right aligned)
+    doc.setFont('times', 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor(...BRAND.ink);
+    doc.text(BRAND.name, pageW - MR, 64, { align: 'right' });
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(...BRAND.inkDim);
+    let aY = 78;
+    [BRAND.addr1, BRAND.addr2, BRAND.phone, BRAND.email].forEach((line) => {
+      doc.text(line, pageW - MR, aY, { align: 'right' });
+      aY += 11;
+    });
+
+    // Heavy rule under header
+    doc.setDrawColor(...BRAND.green);
+    doc.setLineWidth(1.2);
+    doc.line(ML, 118, pageW - MR, 118);
+
+    // ── INVOICE label + meta ──
+    doc.setFont('times', 'bold');
+    doc.setFontSize(22);
+    doc.setTextColor(...BRAND.green);
+    doc.text('INVOICE', ML, 152, { charSpace: 1.6 });
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(...BRAND.inkDim);
+    doc.text(state.num || '', ML, 168);
+
+    // Right-side meta (Issued / Due)
+    const metaX = pageW - MR;
+    const metaLabelX = metaX - 105;
+    doc.setFontSize(8);
+    doc.setTextColor(...BRAND.inkFaint);
+    doc.text('ISSUED', metaLabelX, 148, { charSpace: 1.4 });
+    doc.text('DUE',    metaLabelX, 164, { charSpace: 1.4 });
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(...BRAND.ink);
+    doc.text(fmtDate(state.date), metaX, 148, { align: 'right' });
+    doc.text(fmtDate(state.due),  metaX, 164, { align: 'right' });
+
+    // ── Bill to block ──
+    const billY = 196;
+    // Tan accent stripe
+    doc.setFillColor(...BRAND.tan);
+    doc.rect(ML, billY - 12, 3, 54, 'F');
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(...BRAND.inkFaint);
+    doc.text('BILL TO', ML + 12, billY - 2, { charSpace: 1.6 });
+
+    doc.setFont('times', 'bold');
+    doc.setFontSize(13);
+    doc.setTextColor(...BRAND.ink);
+    doc.text(state.client || '', ML + 12, billY + 14);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(...BRAND.inkDim);
+    if (state.attn) doc.text(`Attn: ${state.attn}`, ML + 12, billY + 28);
+    if (state.addr) doc.text(state.addr, ML + 12, billY + (state.attn ? 41 : 28));
+
+    // ── Line items table (autotable) ──
+    const tableStartY = 270;
+    const body = state.items.map((it) => {
+      const qtyText = it.unit ? `${trimNum(it.qty)} ${it.unit}` : trimNum(it.qty);
+      return [
+        it.desc || '',
+        qtyText,
+        fmtMoney(Number(it.rate) || 0),
+        fmtMoney(calcLine(it)),
+      ];
+    });
+
+    doc.autoTable({
+      startY: tableStartY,
+      head: [['Description', 'Qty', 'Rate', 'Amount']],
+      body: body,
+      theme: 'plain',
+      margin: { left: ML, right: MR },
+      styles: {
+        font: 'helvetica',
+        fontSize: 10,
+        cellPadding: { top: 8, right: 10, bottom: 8, left: 10 },
+        textColor: BRAND.ink,
+        lineColor: BRAND.line,
+        lineWidth: 0.5,
+      },
+      headStyles: {
+        fillColor: BRAND.green,
+        textColor: BRAND.cream,
+        fontStyle: 'bold',
+        fontSize: 8.5,
+        cellPadding: { top: 7, right: 10, bottom: 7, left: 10 },
+        // simulate letter-spacing via charSpace
+      },
+      columnStyles: {
+        0: { cellWidth: 'auto' },
+        1: { cellWidth: 60,  halign: 'right' },
+        2: { cellWidth: 70,  halign: 'right' },
+        3: { cellWidth: 80,  halign: 'right', fontStyle: 'bold' },
+      },
+      didParseCell: (data) => {
+        if (data.section === 'head') {
+          // upper-case + spaced header text handled below
+          data.cell.text = data.cell.text.map((t) => t.toUpperCase());
+        }
+      },
+      didDrawCell: (data) => {
+        // Bottom green rule on last body row
+        if (data.section === 'body' && data.row.index === body.length - 1) {
+          const { x, y, width, height } = data.cell;
+          if (data.column.index === 0) {
+            doc.setDrawColor(...BRAND.green);
+            doc.setLineWidth(0.8);
+            // draw a rule across full table width — only once on first column
+            const tableW = contentW;
+            doc.line(ML, y + height, ML + tableW, y + height);
+          }
+        }
+      },
+    });
+
+    let cursorY = doc.lastAutoTable.finalY + 18;
+
+    // ── Totals block (right-aligned) ──
+    const t = calcTotals();
+    const totalsX = pageW - MR;
+    const totalsLabelX = totalsX - 130;
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(...BRAND.inkDim);
+    doc.text('SUBTOTAL', totalsLabelX, cursorY, { charSpace: 1.2 });
+    doc.setTextColor(...BRAND.ink);
+    doc.text(fmtMoney(t.sub), totalsX, cursorY, { align: 'right' });
+
+    cursorY += 16;
+    doc.setTextColor(...BRAND.inkDim);
+    doc.text(`TAX (${trimNum(t.rate)}%)`, totalsLabelX, cursorY, { charSpace: 1.2 });
+    doc.setTextColor(...BRAND.ink);
+    doc.text(fmtMoney(t.tax), totalsX, cursorY, { align: 'right' });
+
+    cursorY += 10;
+    // Heavy rule above total
+    doc.setDrawColor(...BRAND.green);
+    doc.setLineWidth(1.2);
+    doc.line(totalsLabelX - 10, cursorY, totalsX, cursorY);
+
+    cursorY += 18;
+    doc.setFont('times', 'bold');
+    doc.setFontSize(13);
+    doc.setTextColor(...BRAND.green);
+    doc.text('TOTAL DUE', totalsLabelX, cursorY, { charSpace: 1.4 });
+
+    doc.setFontSize(16);
+    doc.text(fmtMoney(t.total), totalsX, cursorY + 1, { align: 'right' });
+
+    cursorY += 36;
+
+    // ── Notes ──
+    if (state.notes && cursorY < pageH - 110) {
+      // dashed-style separator
+      doc.setDrawColor(...BRAND.line);
+      doc.setLineWidth(0.5);
+      doc.line(ML, cursorY - 14, pageW - MR, cursorY - 14);
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8);
+      doc.setTextColor(...BRAND.greenLt);
+      doc.text('NOTES & TERMS', ML, cursorY, { charSpace: 1.6 });
+
+      doc.setFont('times', 'italic');
+      doc.setFontSize(10);
+      doc.setTextColor(...BRAND.inkDim);
+      const wrapped = doc.splitTextToSize(state.notes, contentW);
+      doc.text(wrapped, ML, cursorY + 14);
+    }
+
+    // ── Footer ──
+    doc.setDrawColor(...BRAND.line);
+    doc.setLineWidth(0.5);
+    doc.line(ML, pageH - 54, pageW - MR, pageH - 54);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(...BRAND.inkFaint);
+    doc.text(
+      `${BRAND.name.toUpperCase()}  ·  ${BRAND.email}  ·  ${BRAND.phone}`,
+      pageW / 2, pageH - 38,
+      { align: 'center', charSpace: 1.4 }
+    );
+
+    // Save
+    const safeNum = (state.num || 'invoice').replace(/[^A-Za-z0-9_-]+/g, '-');
+    doc.save(`Rivera-Grounds-Invoice-${safeNum}.pdf`);
+  }
+
+  // ─── Init ────────────────────────────────────────────────────────
+  syncFormFromState();
+  renderPreview();
+})();
+</script>
+
+</body>
+</html>
