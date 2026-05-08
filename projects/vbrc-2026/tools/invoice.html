@@ -1296,7 +1296,11 @@
     // ── Totals block (right-aligned) ──
     const t = calcTotals();
     const totalsX = pageW - MR;
-    const totalsLabelX = totalsX - 130;
+    // Total-due label is bigger/bolder than the subtotal/tax labels and the
+    // value uses a 16pt serif that's wider than its 9pt counterparts, so a
+    // 130px gap collides at common 4-digit totals. 200px keeps "TOTAL DUE"
+    // and a 7-digit currency value clearly separated.
+    const totalsLabelX = totalsX - 200;
 
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
