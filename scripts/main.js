@@ -304,34 +304,34 @@
   }
 
   /* ============================================
-     OPORD SCROLL PROGRESS BAR
+     SCROLL PROGRESS BAR
      ============================================ */
-  var opordSegments = document.querySelectorAll('.opord-segment');
-  var opordSections = ['hero', 'about', 'projects', 'more-projects', 'contact'];
+  var progressSegments = document.querySelectorAll('.scroll-progress-segment');
+  var progressSections = ['hero', 'about', 'projects', 'more-projects', 'contact'];
 
-  // Build OPORD section offset cache
-  var opordSectionEls = opordSections.map(function (id) {
+  // Build section offset cache
+  var progressSectionEls = progressSections.map(function (id) {
     if (id === 'hero') return document.querySelector('.hero');
     return document.getElementById(id);
   }).filter(Boolean);
 
-  function updateOpordBar() {
-    if (opordSegments.length === 0) return;
+  function updateProgressBar() {
+    if (progressSegments.length === 0) return;
     var scrollY = window.pageYOffset;
-    var offsets = opordSectionEls.map(function (el) { return el.offsetTop; });
+    var offsets = progressSectionEls.map(function (el) { return el.offsetTop; });
     offsets.push(document.documentElement.scrollHeight);
 
-    opordSegments.forEach(function (seg, i) {
+    progressSegments.forEach(function (seg, i) {
       if (i >= offsets.length - 1) return;
       var sectionStart = offsets[i];
       var sectionEnd = offsets[i + 1];
       var sectionHeight = sectionEnd - sectionStart;
       var viewMiddle = scrollY + window.innerHeight * 0.4;
 
-      var fill = seg.querySelector('.opord-fill');
+      var fill = seg.querySelector('.scroll-progress-fill');
       if (!fill) {
         fill = document.createElement('div');
-        fill.className = 'opord-fill';
+        fill.className = 'scroll-progress-fill';
         fill.style.cssText = 'position:absolute;inset:0;background:var(--accent);transform-origin:top;transition:transform 0.15s ease;';
         seg.appendChild(fill);
       }
@@ -347,14 +347,14 @@
     });
   }
 
-  // Integrate OPORD into the shared scroll frame
+  // Integrate progress bar into the shared scroll frame
   var origOnScroll = onScrollFrame;
   onScrollFrame = function () {
     origOnScroll();
-    updateOpordBar();
+    updateProgressBar();
   };
 
-  updateOpordBar();
+  updateProgressBar();
 
   /* ============================================
      SMOOTH SCROLL
