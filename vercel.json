@@ -5,15 +5,17 @@
     { "source": "/scrab", "destination": "https://auditbuffet.com/games/scrab", "statusCode": 301 },
     { "source": "/scrab/leaderboard", "destination": "https://auditbuffet.com/games/scrab/leaderboard", "statusCode": 301 },
     { "source": "/vbrc", "destination": "/projects/vbrc-2026/", "statusCode": 302 },
-    { "source": "/vbrc-2026", "destination": "/projects/vbrc-2026/", "statusCode": 302 }
+    { "source": "/vbrc-2026", "destination": "/projects/vbrc-2026/", "statusCode": 302 },
+    { "source": "/talks", "destination": "/presentations", "statusCode": 302 },
+    { "source": "/vcc", "destination": "/presentations#vibe-code-club", "statusCode": 302 }
   ],
   "headers": [
     {
-      "source": "/projects/vbrc-2026/(.*)",
+      "source": "/(.*)",
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self' https://cdn.jsdelivr.net; frame-src 'self'; child-src 'self'; frame-ancestors 'self'; worker-src 'self' blob:"
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data:; connect-src 'self'; frame-ancestors 'self'"
         },
         {
           "key": "X-Content-Type-Options",
@@ -34,35 +36,6 @@
         {
           "key": "Strict-Transport-Security",
           "value": "max-age=63072000; includeSubDomains; preload"
-        }
-      ]
-    },
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'"
-        },
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        },
-        {
-          "key": "X-Frame-Options",
-          "value": "DENY"
-        },
-        {
-          "key": "Referrer-Policy",
-          "value": "strict-origin-when-cross-origin"
-        },
-        {
-          "key": "Permissions-Policy",
-          "value": "camera=(), microphone=(), geolocation=()"
-        },
-        {
-          "key": "Strict-Transport-Security",
-          "value": "max-age=63072000; includeSubDomains; preload"
         },
         {
           "key": "X-XSS-Protection",
@@ -71,6 +44,15 @@
         {
           "key": "Cross-Origin-Opener-Policy",
           "value": "same-origin"
+        }
+      ]
+    },
+    {
+      "source": "/projects/vbrc-2026/(.*)",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self' https://cdn.jsdelivr.net; frame-src 'self'; child-src 'self'; frame-ancestors 'self'; worker-src 'self' blob:"
         }
       ]
     }

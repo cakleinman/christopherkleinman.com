@@ -1,0 +1,2712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Context Engineering · The Universal Upgrade · VBRC M3</title>
+
+<!-- Google Fonts (CDN). Fallbacks to system fonts if offline. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   VBRC · Month 3 · Context Engineering
+   Visual language adapted from Month 2 deck:
+   blueprint engineering doc + holographic motion
+   Single file. No build step. Arrow-key nav.
+   ============================================================ */
+
+/* ---------- Design tokens ---------- */
+:root {
+  --bg:           #0a2540;
+  --bg-deeper:    #061a30;
+  --ink:          #e8f1ff;
+  --ink-dim:      rgba(232, 241, 255, 0.7);
+  --ink-faint:    rgba(232, 241, 255, 0.4);
+  --ink-ghost:    rgba(232, 241, 255, 0.18);
+  --grid-major:   rgba(232, 241, 255, 0.10);
+  --grid-minor:   rgba(232, 241, 255, 0.04);
+  --gold:         #ffd166;
+  --gold-glow:    rgba(255, 209, 102, 0.45);
+  --cyan:         #6ee7ff;
+  --green:        #7fffa8;
+  --red:          #ff6b6b;
+  --violet:       #b48cff;
+
+  --font-display: "Space Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono:    "IBM Plex Mono", "JetBrains Mono", ui-monospace, Menlo, monospace;
+
+  --ease:    cubic-bezier(0.22, 1, 0.36, 1);
+  --d-fast:  200ms;
+  --d-base:  400ms;
+  --d-slow:  700ms;
+}
+
+.deck--projector {
+  --bg:        #0e2d4a;
+  --gold:      #ffdb7a;
+  --gold-glow: rgba(255, 219, 122, 0.55);
+}
+
+/* ---------- Reset ---------- */
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0;
+  background: #000;
+  color: var(--ink);
+  font-family: var(--font-display);
+  overflow: hidden;
+  height: 100%; width: 100%;
+}
+
+/* ---------- Deck shell + scaling ---------- */
+.deck {
+  position: fixed; inset: 0;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+/* 1920×1080 stage scaled to fit viewport */
+.stage {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 1920px; height: 1080px;
+  transform: translate(-50%, -50%) scale(var(--scale, 1));
+  transform-origin: center center;
+}
+
+/* ---------- Holographic background (continuous, never fades) ---------- */
+.bg-stage {
+  position: absolute; inset: 0;
+  pointer-events: none; z-index: 0; overflow: hidden;
+}
+.bg-stage::before {
+  content: "";
+  position: absolute; inset: -30%;
+  background: conic-gradient(
+    from 0deg at 50% 50%,
+    rgba(120, 200, 255, 0.18),
+    rgba(255, 210, 120, 0.12),
+    rgba(180, 140, 255, 0.18),
+    rgba(120, 255, 220, 0.12),
+    rgba(120, 200, 255, 0.18)
+  );
+  filter: blur(60px);
+  animation: holo 28s linear infinite;
+  will-change: transform;
+}
+@keyframes holo { to { transform: rotate(360deg); } }
+
+.bg-stage::after {
+  content: "";
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(var(--grid-major) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-major) 1px, transparent 1px),
+    linear-gradient(var(--grid-minor) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-minor) 1px, transparent 1px);
+  background-size: 80px 80px, 80px 80px, 16px 16px, 16px 16px;
+}
+
+/* ---------- Slide stack (crossfade) ---------- */
+.slide {
+  position: absolute; inset: 0;
+  width: 1920px; height: 1080px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 350ms var(--ease);
+  z-index: 1;
+}
+.slide.is-active   { opacity: 1; pointer-events: auto; z-index: 2; }
+.slide.is-leaving  { opacity: 0; z-index: 1; }
+
+/* Subtle entrance for headline + content when a slide activates */
+.slide.is-active .headline,
+.slide.is-active .subhead,
+.slide.is-active .fig-label,
+.slide.is-active .content > * {
+  animation: slideUp 0.55s var(--ease) both;
+}
+.slide.is-active .subhead    { animation-delay: 0.10s; }
+.slide.is-active .content > *{ animation-delay: 0.18s; }
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+/* ---------- Slide chrome ---------- */
+.corner {
+  position: absolute;
+  width: 18px; height: 18px;
+  border: 1.2px solid var(--ink);
+  z-index: 5;
+}
+.corner.tl { top: 28px;    left: 28px;    border-right: none; border-bottom: none; }
+.corner.tr { top: 28px;    right: 28px;   border-left: none;  border-bottom: none; }
+.corner.bl { bottom: 28px; left: 28px;    border-right: none; border-top: none;    }
+.corner.br { bottom: 28px; right: 28px;   border-left: none;  border-top: none;    }
+
+.meta-row {
+  position: absolute;
+  left: 80px; right: 80px;
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 20px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+.meta-row.meta-top { top: 56px; }
+.meta-row.meta-bot {
+  bottom: 56px;
+  border-top: 1px dashed var(--ink-ghost);
+  padding-top: 14px;
+  font-size: 18px;
+  color: rgba(232, 241, 255, 0.55);
+}
+
+.fig-label {
+  position: absolute;
+  left: 80px;
+  top: 140px;
+  font-family: var(--font-mono);
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold);
+  opacity: 0.95;
+}
+
+.headline {
+  position: absolute;
+  left: 80px; right: 80px;
+  top: 200px;
+  margin: 0; padding: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 130px;
+  line-height: 0.92;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  max-width: 1750px;
+}
+.headline .gold   { color: var(--gold); }
+.headline .ink    { color: var(--ink); }
+.headline .dim    { color: var(--ink-dim); }
+.headline.h-xl    { font-size: 180px; }
+.headline.h-lg    { font-size: 150px; }
+.headline.h-md    { font-size: 110px; }
+.headline.h-sm    { font-size: 88px;  }
+
+.subhead {
+  position: absolute;
+  left: 80px; right: 80px;
+  font-family: var(--font-mono);
+  font-size: 38px;
+  color: var(--gold);
+  letter-spacing: 0.01em;
+}
+
+.content {
+  position: absolute;
+  left: 80px; right: 80px;
+  top: 520px;
+  bottom: 140px;
+}
+.content--low  { top: 600px; }
+.content--high { top: 460px; }
+
+/* ---------- Wireframe node (.wnode) ---------- */
+.wnode {
+  display: inline-block;
+  border: 1.2px solid var(--ink);
+  background: rgba(10, 37, 64, 0.85);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  text-align: center;
+  position: relative;
+  vertical-align: top;
+}
+.wnode b {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: -0.01em;
+}
+.wnode span {
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-dim);
+}
+.wnode--sm { padding: 14px 22px; min-width: 140px; }
+.wnode--sm b    { font-size: 26px; margin-bottom: 4px; }
+.wnode--sm span { font-size: 16px; }
+.wnode--md { padding: 22px 32px; min-width: 220px; }
+.wnode--md b    { font-size: 34px; margin-bottom: 6px; }
+.wnode--md span { font-size: 20px; }
+.wnode--lg { padding: 32px 44px; min-width: 320px; }
+.wnode--lg b    { font-size: 46px; margin-bottom: 8px; }
+.wnode--lg span { font-size: 22px; }
+.wnode.plain b { color: var(--ink); }
+.wnode.primary {
+  border-color: var(--gold);
+  box-shadow: 0 0 30px var(--gold-glow), inset 0 0 20px rgba(255, 209, 102, 0.05);
+}
+.wnode.primary b { color: var(--gold); }
+
+/* ---------- Black-out overlay (B key) ---------- */
+.deck--black::after {
+  content: "";
+  position: fixed; inset: 0;
+  background: #000;
+  z-index: 9999;
+}
+
+/* ---------- Timer (T key) ---------- */
+.timer {
+  position: fixed;
+  bottom: 8px; right: 12px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.22);
+  z-index: 10;
+  letter-spacing: 0.1em;
+  display: none;
+  pointer-events: none;
+}
+.deck--timer .timer { display: block; }
+
+/* ============================================================
+   PER-SLIDE LAYOUTS
+   ============================================================ */
+
+/* ---------- Slide 01 — Title ---------- */
+#s01 .headline {
+  top: 320px;
+  font-size: 170px;
+}
+.hero-tag {
+  position: absolute;
+  left: 80px;
+  top: 760px;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+.hero-tag .tag-dot {
+  width: 18px; height: 18px;
+  background: var(--gold);
+  box-shadow: 0 0 24px var(--gold-glow);
+  border-radius: 50%;
+}
+.hero-tag .tag-text {
+  font-family: var(--font-mono);
+  font-size: 34px;
+  color: var(--ink-dim);
+  letter-spacing: 0.04em;
+}
+.hero-mark {
+  position: absolute;
+  right: 80px; top: 320px;
+  width: 320px; height: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hero-mark svg { width: 100%; height: 100%; overflow: visible; }
+
+/* ---------- Slide 02 — The arc ---------- */
+.arc-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.arc-row {
+  display: grid;
+  grid-template-columns: 220px 340px 1fr;
+  align-items: center;
+  gap: 36px;
+  border: 1.2px solid var(--ink-ghost);
+  background: rgba(10, 37, 64, 0.55);
+  padding: 22px 40px;
+}
+.arc-row.is-current {
+  border-color: var(--gold);
+  box-shadow: 0 0 30px var(--gold-glow), inset 0 0 20px rgba(255, 209, 102, 0.04);
+}
+.arc-num {
+  font-family: var(--font-mono);
+  font-size: 24px;
+  letter-spacing: 0.22em;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+}
+.arc-row.is-current .arc-num { color: var(--gold); }
+.arc-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 52px;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+.arc-row.is-current .arc-title { color: var(--gold); }
+.arc-desc {
+  font-family: var(--font-mono);
+  font-size: 30px;
+  color: var(--ink-dim);
+  line-height: 1.4;
+}
+.arc-quote {
+  margin-top: 8px;
+  padding-top: 18px;
+  border-top: 1px dashed var(--ink-ghost);
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 32px;
+  color: var(--ink-dim);
+  font-style: italic;
+  text-align: center;
+  letter-spacing: -0.01em;
+}
+.arc-quote em { color: var(--gold); font-style: italic; }
+
+/* ---------- Slide 03 — Frustration quotes ---------- */
+.quote-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.quote-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  padding: 2px 0;
+}
+.quote-mark {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 88px;
+  line-height: 0.6;
+  color: var(--gold);
+  opacity: 0.55;
+  flex-shrink: 0;
+  margin-top: 14px;
+}
+.quote-text {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 46px;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.quote-punchline {
+  margin-top: 6px;
+  padding-top: 18px;
+  border-top: 1px dashed var(--ink-ghost);
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 44px;
+  letter-spacing: -0.02em;
+  color: var(--gold);
+}
+
+/* ---------- Slide 04 — Definition ---------- */
+.def-body {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 46px;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin-bottom: 32px;
+  max-width: 1700px;
+}
+.def-body .gold { color: var(--gold); font-weight: 700; }
+.def-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  margin-bottom: 32px;
+}
+.def-col {
+  border: 1.5px solid var(--ink);
+  background: rgba(10, 37, 64, 0.6);
+  padding: 40px 44px;
+  position: relative;
+}
+.def-col.is-this {
+  border-color: var(--gold);
+  box-shadow: 0 0 30px var(--gold-glow), inset 0 0 20px rgba(255, 209, 102, 0.05);
+}
+.def-label {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  letter-spacing: 0.22em;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+.def-col.is-this .def-label { color: var(--gold); }
+.def-eq {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 54px;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.def-col.is-this .def-eq { color: var(--ink); }
+.def-foot {
+  font-family: var(--font-mono);
+  font-size: 26px;
+  color: var(--ink-dim);
+  letter-spacing: 0.05em;
+  text-align: center;
+}
+
+/* ---------- Slide 05 — Counterintuitive ---------- */
+.big-quote {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 70px;
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+  max-width: 1750px;
+  margin-bottom: 50px;
+}
+.big-quote .gold   { color: var(--gold); }
+/* (strike treatment removed — no longer used in this deck) */
+
+.diag-intro {
+  font-family: var(--font-mono);
+  font-size: 26px;
+  letter-spacing: 0.05em;
+  color: var(--ink-dim);
+  margin-bottom: 22px;
+}
+.diag-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 60px;
+}
+.diag-item {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  font-family: var(--font-mono);
+  font-size: 34px;
+  color: var(--ink);
+}
+.diag-item::before {
+  content: "✕";
+  color: var(--gold);
+  font-weight: 700;
+  font-size: 32px;
+  width: 32px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.diag-foot {
+  margin-top: 36px;
+  font-family: var(--font-mono);
+  font-size: 28px;
+  color: var(--gold);
+  letter-spacing: 0.02em;
+}
+
+/* ---------- Slide 06 — Four levers ---------- */
+.lever-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 28px;
+  height: 100%;
+}
+.lever-card {
+  border: 1.5px solid var(--ink);
+  background: rgba(10, 37, 64, 0.6);
+  padding: 36px 32px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.lever-num {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  letter-spacing: 0.22em;
+  color: var(--gold);
+  margin-bottom: 18px;
+}
+.lever-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 60px;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--ink);
+  margin-bottom: 22px;
+}
+.lever-lead {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 28px;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin-bottom: 18px;
+  padding-bottom: 18px;
+  border-bottom: 1px dashed var(--ink-ghost);
+}
+.lever-bullets {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-mono);
+  font-size: 22px;
+  line-height: 1.5;
+  color: var(--ink-dim);
+}
+.lever-bullets li {
+  position: relative;
+  padding-left: 22px;
+  margin-bottom: 6px;
+}
+.lever-bullets li:last-child { margin-bottom: 0; }
+.lever-bullets li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 8px;
+  height: 8px;
+  background: var(--gold);
+  border-radius: 1px;
+  box-shadow: 0 0 8px var(--gold-glow);
+}
+
+/* ---------- Slides 07 + 08 — Before/After ---------- */
+.ba-split {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr;
+  gap: 48px;
+  height: 100%;
+}
+.ba-pane {
+  border: 1.5px solid var(--ink-ghost);
+  background: rgba(10, 37, 64, 0.55);
+  padding: 28px 32px 24px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  min-height: 0;
+}
+.ba-pane.is-after {
+  border-color: var(--gold);
+  box-shadow: 0 0 36px var(--gold-glow), inset 0 0 24px rgba(255, 209, 102, 0.04);
+}
+.ba-tag {
+  position: absolute;
+  top: -16px; left: 28px;
+  background: var(--bg);
+  padding: 0 18px;
+  font-family: var(--font-mono);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+.ba-pane.is-after .ba-tag { color: var(--gold); }
+.ba-prompt {
+  font-family: var(--font-mono);
+  font-size: 24px;
+  line-height: 1.4;
+  color: var(--cyan);
+  border-left: 3px solid var(--ink-ghost);
+  padding: 4px 0 4px 18px;
+  margin-bottom: 14px;
+}
+.ba-pane.is-after .ba-prompt { border-left-color: var(--gold); }
+.ba-prompt .anno {
+  display: block;
+  color: var(--ink);
+  margin-top: 4px;
+}
+.ba-prompt .anno .gold { color: var(--gold); }
+
+/* Mocked output thumbnails — pure CSS sketches */
+.mock {
+  border: 1.2px solid var(--ink-ghost);
+  background: var(--bg-deeper);
+  padding: 10px 14px;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+  overflow: hidden;
+}
+.mock .mock-bar {
+  height: 3px;
+  background: var(--ink-ghost);
+  border-radius: 1px;
+}
+.mock .mock-h {
+  height: 16px;
+  background: var(--ink-dim);
+  width: 70%;
+  border-radius: 2px;
+}
+.mock .mock-sub {
+  height: 9px;
+  background: var(--ink-ghost);
+  width: 55%;
+  border-radius: 2px;
+}
+.mock .mock-line {
+  height: 7px;
+  background: var(--ink-ghost);
+  width: 100%;
+  border-radius: 2px;
+}
+.mock .mock-line.short { width: 75%; }
+.mock .mock-line.tiny  { width: 40%; }
+.mock .mock-img {
+  flex: 1;
+  min-height: 60px;
+  background:
+    linear-gradient(135deg, rgba(120, 200, 255, 0.15), rgba(180, 140, 255, 0.15));
+  border: 1px solid var(--ink-ghost);
+  margin: 2px 0;
+  position: relative;
+}
+.mock .mock-img::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(45deg, rgba(255,255,255,0.04) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.04) 50%, rgba(255,255,255,0.04) 75%, transparent 75%);
+  background-size: 14px 14px;
+}
+.mock .mock-cta {
+  height: 22px;
+  width: 100px;
+  background: var(--ink-faint);
+  border-radius: 3px;
+  margin-top: 2px;
+}
+.mock--after .mock-h    { background: var(--ink); }
+.mock--after .mock-sub  { background: var(--gold); width: 65%; height: 11px; }
+.mock--after .mock-line { background: var(--ink-dim); }
+.mock--after .mock-img  {
+  background:
+    linear-gradient(135deg, rgba(255, 209, 102, 0.2), rgba(120, 200, 255, 0.18));
+}
+.mock--after .mock-cta  {
+  background: var(--gold);
+  width: 140px;
+  height: 26px;
+  box-shadow: 0 0 20px var(--gold-glow);
+}
+.mock-cap {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  color: var(--ink-dim);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-top: 6px;
+  text-align: center;
+}
+.mock--after .mock-cap  { color: var(--gold); }
+
+.ba-foot {
+  position: absolute;
+  left: 80px; right: 80px;
+  bottom: 140px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 28px;
+  color: var(--ink-dim);
+  letter-spacing: 0.06em;
+}
+.ba-foot .gold { color: var(--gold); }
+
+/* Response block (for moves 3/4/5 demo slides) */
+.ba-response {
+  font-family: var(--font-mono);
+  font-size: 26px;
+  line-height: 1.45;
+  color: var(--ink-dim);
+  padding: 4px 0 4px 18px;
+  border-left: 3px solid var(--ink-ghost);
+  margin-top: 14px;
+  min-height: 0;
+}
+.ba-pane.is-after .ba-response {
+  border-left-color: var(--gold);
+  color: var(--ink);
+}
+.ba-response ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.ba-response li {
+  position: relative;
+  padding-left: 22px;
+  margin-bottom: 6px;
+  color: var(--ink);
+}
+.ba-response li::before {
+  content: "→";
+  position: absolute;
+  left: 0;
+  color: var(--gold);
+  font-weight: 700;
+}
+.ba-response li b {
+  color: var(--gold);
+  font-weight: 600;
+  margin-right: 4px;
+}
+.ba-response.chat-log {
+  border-left: 1px dashed var(--ink-ghost);
+  font-size: 24px;
+  line-height: 1.6;
+  color: var(--ink);
+}
+.ba-conclusion {
+  margin-top: auto;
+  padding-top: 22px;
+  border-top: 1px dashed var(--ink-ghost);
+  font-family: var(--font-mono);
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  text-align: center;
+}
+.ba-pane.is-after .ba-conclusion {
+  color: var(--gold);
+  border-top-color: rgba(255, 209, 102, 0.35);
+}
+.ba-response.chat-log .chat-user {
+  color: var(--cyan);
+  margin-right: 8px;
+  font-weight: 600;
+}
+.ba-response.chat-log .chat-ai {
+  color: var(--gold);
+  margin-right: 8px;
+  font-weight: 600;
+  opacity: 0.9;
+}
+.ba-foot .gold { color: var(--gold); }
+
+/* Slide 8 — example paragraph block */
+.ba-vague {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 72px;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--ink-dim);
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-style: italic;
+}
+.ba-example {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  justify-content: center;
+}
+.ba-example-intro {
+  font-family: var(--font-mono);
+  font-size: 24px;
+  letter-spacing: 0.04em;
+  color: var(--gold);
+  text-transform: uppercase;
+}
+.ba-example-text {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 1.4;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  border-left: 3px solid var(--gold);
+  padding: 6px 0 6px 20px;
+  position: relative;
+  min-height: 0;
+}
+.typing-cursor {
+  display: inline-block;
+  width: 0.55em;
+  color: var(--gold);
+  animation: typeBlink 1s steps(1) infinite;
+  font-weight: 700;
+  margin-left: 1px;
+}
+@keyframes typeBlink {
+  50% { opacity: 0; }
+}
+.ba-placeholder-note {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  color: var(--ink-faint);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-top: 6px;
+  text-align: right;
+}
+
+/* ---------- Slide 09 — Five moves ---------- */
+.moves-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.move-row {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  align-items: baseline;
+  gap: 24px;
+  padding: 10px 0;
+  border-bottom: 1px dashed var(--ink-ghost);
+}
+.move-row:last-child { border-bottom: none; }
+.move-num {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 52px;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--gold);
+}
+.move-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.move-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 34px;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.move-desc {
+  font-family: var(--font-mono);
+  font-size: 24px;
+  color: var(--ink-dim);
+  line-height: 1.35;
+}
+.moves-foot {
+  margin-top: 14px;
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: 22px;
+  letter-spacing: 0.18em;
+  color: var(--gold);
+  text-transform: uppercase;
+}
+
+/* ---------- Slide 10 — Externalize ---------- */
+.ext-body {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 48px;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  max-width: 1700px;
+  margin-bottom: 40px;
+}
+.ext-body .gold { color: var(--gold); font-weight: 700; }
+.ext-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 60px;
+}
+.ext-row {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  align-items: center;
+  gap: 28px;
+  border: 1.2px solid var(--ink-ghost);
+  background: rgba(10, 37, 64, 0.55);
+  padding: 18px 26px;
+}
+.ext-tool {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 36px;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.ext-loc {
+  font-family: var(--font-mono);
+  font-size: 26px;
+  color: var(--gold);
+  letter-spacing: 0.02em;
+  background: var(--bg-deeper);
+  padding: 8px 16px;
+  border: 1px solid var(--ink-ghost);
+  display: inline-block;
+  justify-self: start;
+}
+
+/* ---------- Slide: real CLAUDE.md showcase (code viewport) ---------- */
+.cmd-viewport {
+  width: 100%;
+  height: 100%;
+  background: var(--bg-deeper);
+  border: 1.5px solid var(--ink-faint);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+  font-family: var(--font-mono);
+}
+.cmd-chrome {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--ink-ghost);
+  background: rgba(255, 255, 255, 0.02);
+  flex-shrink: 0;
+}
+.cmd-chrome i {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  display: block;
+}
+.cmd-chrome i:nth-child(1) { background: #ff5f57; }
+.cmd-chrome i:nth-child(2) { background: #febc2e; }
+.cmd-chrome i:nth-child(3) { background: #28c840; }
+.cmd-chrome span {
+  margin-left: auto;
+  font-size: 18px;
+  color: var(--ink-faint);
+  letter-spacing: 0.05em;
+}
+.cmd-body {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+.cmd-content {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  padding: 26px 36px;
+  font-size: 18px;
+  line-height: 1.65;
+  color: var(--ink-dim);
+  transition: transform 1200ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+.cmd-line {
+  white-space: pre-wrap;
+  word-break: break-word;
+  padding: 1px 0 1px 14px;
+  margin-left: -14px;
+  border-left: 3px solid transparent;
+  transition: background 400ms ease, color 400ms ease, border-color 400ms ease, box-shadow 400ms ease;
+}
+.cmd-line.cmd-empty { min-height: 12px; }
+.cmd-line.cmd-h1 {
+  color: var(--ink);
+  font-weight: 700;
+  font-size: 22px;
+  margin-top: 6px;
+}
+.cmd-line.cmd-h2 {
+  color: var(--cyan);
+  font-weight: 600;
+  font-size: 20px;
+  margin-top: 10px;
+}
+.cmd-line.cmd-h3 {
+  color: var(--cyan);
+  font-weight: 600;
+  margin-top: 4px;
+}
+.cmd-line.is-highlighted {
+  color: var(--ink);
+  background: rgba(255, 209, 102, 0.14);
+  border-left-color: var(--gold);
+  box-shadow: 0 0 30px rgba(255, 209, 102, 0.2), inset 0 0 0 1px rgba(255, 209, 102, 0.2);
+}
+
+/* Demo-setup line: small body above a demo's two panes */
+.demo-setup {
+  position: absolute;
+  left: 80px; right: 80px;
+  top: 400px;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 36px;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  max-width: 1700px;
+}
+.demo-setup .gold { color: var(--gold); font-weight: 700; }
+
+/* ---------- Slide 11 — Long chats ---------- */
+.lc-body {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 46px;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  max-width: 1700px;
+  margin-bottom: 38px;
+}
+.lc-body .gold   { color: var(--gold); font-weight: 700; }
+.lc-accent {
+  border-left: 4px solid var(--gold);
+  padding: 14px 0 14px 28px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 58px;
+  line-height: 1.0;
+  letter-spacing: -0.025em;
+  color: var(--gold);
+  margin-bottom: 26px;
+}
+.lc-foot {
+  font-family: var(--font-mono);
+  font-size: 24px;
+  color: var(--ink-dim);
+  letter-spacing: 0.06em;
+}
+
+/* ---------- Slide 12 — Tying it back ---------- */
+.tie-stage {
+  display: grid;
+  grid-template-columns: 720px 1fr;
+  gap: 80px;
+  align-items: center;
+  height: 100%;
+}
+.tie-svg-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+.tie-svg-wrap svg {
+  width: 100%;
+  height: 100%;
+  max-width: 720px;
+  max-height: 100%;
+}
+.tie-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.tie-row {
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  align-items: center;
+  gap: 22px;
+  padding: 12px 0;
+  border-bottom: 1px dashed var(--ink-ghost);
+}
+.tie-row:last-child { border-bottom: none; }
+.tie-swatch {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--ink);
+}
+.tie-swatch.c-blue   { background: rgba(120, 200, 255, 0.35); border-color: var(--cyan); }
+.tie-swatch.c-violet { background: rgba(180, 140, 255, 0.35); border-color: var(--violet); }
+.tie-swatch.c-gold   { background: rgba(255, 209, 102, 0.45); border-color: var(--gold); box-shadow: 0 0 18px var(--gold-glow); }
+.tie-text-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 44px;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+.tie-text-sub {
+  font-family: var(--font-mono);
+  font-size: 24px;
+  color: var(--ink-dim);
+  margin-top: 6px;
+}
+.tie-close {
+  margin-top: 32px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 56px;
+  letter-spacing: -0.025em;
+  color: var(--gold);
+  line-height: 1.05;
+}
+
+/* ---------- Slide 13 — Homework + close ---------- */
+.hw-list {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  margin-bottom: 0;
+}
+.hw-item {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  align-items: start;
+  gap: 30px;
+  border: 1.5px solid var(--ink);
+  background: rgba(10, 37, 64, 0.6);
+  padding: 26px 36px;
+}
+.hw-item.is-spotlight {
+  border-color: var(--gold);
+  box-shadow: 0 0 30px var(--gold-glow), inset 0 0 20px rgba(255, 209, 102, 0.05);
+}
+.hw-num {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 72px;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--gold);
+}
+.hw-text {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 36px;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.hw-text .gold  { color: var(--gold); font-weight: 700; }
+.hw-text .quote {
+  display: inline-block;
+  border-left: 3px solid var(--gold);
+  padding-left: 18px;
+  margin-top: 10px;
+  font-family: var(--font-mono);
+  font-size: 28px;
+  color: var(--ink);
+  letter-spacing: -0.005em;
+}
+.hw-close {
+  position: absolute;
+  left: 80px; right: 80px;
+  bottom: 140px;
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 88px;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+}
+.hw-close .gold { color: var(--gold); }
+
+/* ---------- Help overlay ---------- */
+.help {
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 26, 48, 0.96);
+  z-index: 9998;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.deck--help .help { display: flex; }
+.help-card {
+  border: 1.5px solid var(--gold);
+  background: var(--bg);
+  padding: 60px 80px;
+  font-family: var(--font-mono);
+  font-size: 22px;
+  color: var(--ink);
+  letter-spacing: 0.05em;
+  line-height: 2;
+  box-shadow: 0 0 40px var(--gold-glow);
+}
+.help-card h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 36px;
+  letter-spacing: -0.02em;
+  color: var(--gold);
+  margin: 0 0 24px;
+}
+.help-card kbd {
+  background: var(--bg-deeper);
+  border: 1px solid var(--ink-ghost);
+  padding: 4px 10px;
+  font-family: var(--font-mono);
+  font-size: 18px;
+  color: var(--gold);
+  margin-right: 14px;
+  min-width: 40px;
+  display: inline-block;
+  text-align: center;
+}
+</style>
+</head>
+<body>
+
+<div class="deck">
+
+  <!-- Continuous holographic background -->
+  <div class="bg-stage"></div>
+
+  <div class="stage">
+
+    <!-- ╔══════════════════════════════════════════════════════════╗
+         ║ SLIDE 01 — Title                                         ║
+         ╚══════════════════════════════════════════════════════════╝ -->
+    <section class="slide" id="s01">
+      <span class="corner tl"></span><span class="corner tr"></span>
+      <span class="corner bl"></span><span class="corner br"></span>
+
+      <div class="meta-row meta-top">
+        <span>VBRC · 05.12.26</span>
+        <span>01 / 15</span>
+      </div>
+
+      <div class="fig-label">MONTH 3 · A 10-MINUTE BRIEFING</div>
+
+      <h1 class="headline">
+        Context<br/>
+        <span class="gold">Engineering.</span>
+      </h1>
+
+      <div class="subhead" style="top: 700px;">The universal upgrade — why your tool isn't the problem.</div>
+
+      <div class="hero-tag">
+        <span class="tag-dot"></span>
+        <span class="tag-text">Christopher · Vibe Code Club</span>
+      </div>
+
+      <!-- Hero mark: layered circles representing context shaping the model -->
+      <div class="hero-mark">
+        <svg viewBox="0 0 320 320">
+          <defs>
+            <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%"  stop-color="rgba(255,209,102,0.55)"/>
+              <stop offset="60%" stop-color="rgba(255,209,102,0.10)"/>
+              <stop offset="100%" stop-color="rgba(255,209,102,0)"/>
+            </radialGradient>
+          </defs>
+          <circle cx="160" cy="160" r="150" fill="url(#glow)"/>
+          <circle cx="160" cy="160" r="140" fill="none" stroke="rgba(232,241,255,0.18)" stroke-width="1" stroke-dasharray="4 6"/>
+          <circle cx="160" cy="160" r="105" fill="none" stroke="rgba(232,241,255,0.30)" stroke-width="1" stroke-dasharray="4 6"/>
+          <circle cx="160" cy="160" r="70"  fill="none" stroke="rgba(232,241,255,0.45)" stroke-width="1.2"/>
+          <circle cx="160" cy="160" r="38"  fill="#ffd166" stroke="#ffd166" stroke-width="2"/>
+          <circle cx="160" cy="160" r="38"  fill="none" stroke="#ffd166" stroke-width="2">
+            <animate attributeName="r" values="38;90;38" dur="3.6s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0.6;0;0.6" dur="3.6s" repeatCount="indefinite"/>
+          </circle>
+          <!-- four chevron context "feeds" pointing at the core -->
+          <g stroke="rgba(232,241,255,0.55)" stroke-width="1.4" fill="none">
+            <line x1="20"  y1="160" x2="100" y2="160"/>
+            <line x1="220" y1="160" x2="300" y2="160"/>
+            <line x1="160" y1="20"  x2="160" y2="100"/>
+            <line x1="160" y1="220" x2="160" y2="300"/>
+          </g>
+          <g fill="#ffd166">
+            <polygon points="100,156 110,160 100,164"/>
+            <polygon points="220,156 210,160 220,164"/>
+            <polygon points="156,100 160,110 164,100"/>
+            <polygon points="156,220 160,210 164,220"/>
+          </g>
+        </svg>
+      </div>
+
+      <div class="meta-row meta-bot">
+        <span>CHRISTOPHER</span>
+        <span>Vibe Code Club · Month 3</span>
+        <span>05.12.26</span>
+      </div>
+    </section>
+
+
+    <!-- ╔══════════════════════════════════════════════════════════╗
+         ║ SLIDE 02 — The arc so far                                ║
+         ╚══════════════════════════════════════════════════════════╝ -->
+    <section class="slide" id="s02">
+      <span class="corner tl"></span><span class="corner tr"></span>
+      <span class="corner bl"></span><span class="corner br"></span>
+
+      <div class="meta-row meta-top">
+        <span>VBRC · 05.12.26</span>
+        <span>02 / 15</span>
+      </div>
+
+      <div class="fig-label">WHERE WE'VE BEEN</div>
+
+      <h1 class="headline h-md">
+        Three months,<br/>
+        <span class="gold">one system.</span>
+      </h1>
+
+      <div class="content" style="top: 470px;">
+        <div class="arc-stack">
+
+          <div class="arc-row">
+            <div class="arc-num">Month 01</div>
+            <div class="arc-title">Audits</div>
+            <div class="arc-desc">A quality signal for what your AI produces.</div>
+          </div>
+
+          <div class="arc-row">
+            <div class="arc-num">Month 02</div>
+            <div class="arc-title">MCPs &amp; APIs</div>
+            <div class="arc-desc">Extending reach — plugging real tools into the model.</div>
+          </div>
+
+          <div class="arc-row is-current">
+            <div class="arc-num">Month 03 · today</div>
+            <div class="arc-title">Context</div>
+            <div class="arc-desc">The substrate that makes both of the others work.</div>
+          </div>
+
+          <div class="arc-quote">
+            “Everything else is built on <em>this</em>.”
+          </div>
+        </div>
+      </div>
+
+      <div class="meta-row meta-bot">
+        <span>CHRISTOPHER</span>
+        <span>Vibe Code Club · Month 3</span>
+        <span>02 / 15</span>
+      </div>
+    </section>
+
+
+    <!-- ╔══════════════════════════════════════════════════════════╗
+         ║ SLIDE 03 — Sound familiar (frustrations)                 ║
+         ╚══════════════════════════════════════════════════════════╝ -->
+    <section class="slide" id="s03">
+      <span class="corner tl"></span><span class="corner tr"></span>
+      <span class="corner bl"></span><span class="corner br"></span>
+
+      <div class="meta-row meta-top">
+        <span>VBRC · 05.12.26</span>
+        <span>03 / 15</span>
+      </div>
+
+      <div class="fig-label">SOUND FAMILIAR?</div>
+
+      <h1 class="headline h-lg">
+        Sound<br/>
+        <span class="gold">familiar?</span>
+      </h1>
+
+      <div class="content" style="top: 500px;">
+        <div class="quote-stack">
+          <div class="quote-line">
+            <span class="quote-mark">“</span>
+            <span class="quote-text">It keeps forgetting what we're building.</span>
+          </div>
+          <div class="quote-line">
+            <span class="quote-mark">“</span>
+            <span class="quote-text">It wrote code for the wrong framework.</span>
+          </div>
+          <div class="quote-line">
+            <span class="quote-mark">“</span>
+            <span class="quote-text">It looks generic.</span>
+          </div>
+          <div class="quote-line">
+            <span class="quote-mark">“</span>
+            <span class="quote-text">The UI on this project looks suspiciously familiar to another project I have.</span>
+          </div>
+
+          <div class="quote-punchline">
+            None of these are model problems.
+          </div>
+        </div>
+      </div>
+
+      <div class="meta-row meta-bot">
+        <span>CHRISTOPHER</span>
+        <span>Vibe Code Club · Month 3</span>
+        <span>03 / 15</span>
+      </div>
+    </section>
+
+
+    <!-- ╔══════════════════════════════════════════════════════════╗
+         ║ SLIDE 04 — Context engineering, defined                  ║
+         ╚══════════════════════════════════════════════════════════╝ -->
+    <section class="slide" id="s04">
+      <span class="corner tl"></span><span class="corner tr"></span>
+      <span class="corner bl"></span><span class="corner br"></span>
+
+      <div class="meta-row meta-top">
+        <span>VBRC · 05.12.26</span>
+        <span>04 / 15</span>
+      </div>
+
+      <div class="fig-label">DEFINITION</div>
+
+      <h1 class="headline h-md">
+        Context engineering,<br/>
+        <span class="gold">defined.</span>
+      </h1>
+
+      <div class="content" style="top: 460px;">
+        <div class="def-body">
+          Deliberately shaping <span class="gold">everything the model sees</span> before it generates a response.
+        </div>
+
+        <div class="def-split">
+          <div class="def-col">
+            <div class="def-label">Prompt engineering</div>
+            <div class="def-eq">what you type.</div>
+          </div>
+          <div class="def-col is-this">
+            <div class="def-label">Context engineering</div>
+            <div class="def-eq">the whole information environment.</div>
+          </div>
+        </div>
+
+        <div class="def-foot">Works the same in every tool.</div>
+      </div>
+
+      <div class="meta-row meta-bot">
+        <span>CHRISTOPHER</span>
+        <span>Vibe Code Club · Month 3</span>
+        <span>04 / 15</span>
+      </div>
+    </section>
+
+
+    <!-- ╔══════════════════════════════════════════════════════════╗
+         ║ SLIDE 05 — Counterintuitive truth                        ║
+         ╚══════════════════════════════════════════════════════════╝ -->
+    <section class="slide" id="s05">
+      <span class="corner tl"></span><span class="corner tr"></span>
+      <span class="corner bl"></span><span class="corner br"></span>
+
+      <div class="meta-row meta-top">
+        <span>VBRC · 05.12.26</span>
+        <span>05 / 15</span>
+      </div>
+
+      <div class="fig-label">THE COUNTERINTUITIVE TRUTH</div>
+
+      <h1 class="headline h-sm">
+        A better model<br/>
+        is the wrong upgrade.
+      </h1>
+
+      <div class="content" style="top: 480px;">
+        <div class="big-quote">
+          A <span class="gold">mediocre model</span> with great context<br/>
+          beats a great model with poor context.
+        </div>
+
+        <div class="diag-intro">Most “the AI is dumb” moments are actually:</div>
+        <div class="diag-list">
+          <div class="diag-item">Wrong stack assumed</div>
+          <div class="diag-item">Wrong audience addressed</div>
+          <div class="diag-item">Wrong definition of "done"</div>
+          <div class="diag-item">Wrong constraints applied</div>
+        </div>
+
+        <div class="diag-foot">→ None of these get fixed by switching tools.</div>
+      </div>
+
+      <div class="meta-row meta-bot">
+        <span>CHRISTOPHER</span>
+        <span>Vibe Code Club · Month 3</span>
+        <span>05 / 15</span>
+      </div>
+    </section>
+
+
+    <!-- ╔══════════════════════════════════════════════════════════╗
+         ║ SLIDE 06 — Four levers                                   ║
+         ╚══════════════════════════════════════════════════════════╝ -->
+    <section class="slide" id="s06">
+      <span class="corner tl"></span><span class="corner tr"></span>
+      <span class="corner bl"></span><span class="corner br"></span>
+
+      <div class="meta-row meta-top">
+        <span>VBRC · 05.12.26</span>
+        <span>06 / 15</span>
+      </div>
+
+      <div class="fig-label">WHAT YOU CONTROL</div>
+
+      <h1 class="headline h-md">
+        Four levers,<br/>
+        <span class="gold">all yours.</span>
+      </h1>
+
+      <div class="content" style="top: 480px;">
+        <div class="lever-grid">
+          <div class="lever-card">
+            <div class="lever-num">01</div>
+            <div class="lever-title">Selection</div>
+            <div class="lever-lead">What goes in.</div>
+            <ul class="lever-bullets">
+              <li>facts</li>
+              <li>examples</li>
+              <li>files</li>
+              <li>history</li>
+            </ul>
+          </div>
+          <div class="lever-card">
+            <div class="lever-num">02</div>
+            <div class="lever-title">Structure</div>
+            <div class="lever-lead">How it's organized.</div>
+            <ul class="lever-bullets">
+              <li>order</li>
+              <li>hierarchy</li>
+              <li>what comes first</li>
+            </ul>
+          </div>
+          <div class="lever-card">
+            <div class="lever-num">03</div>
+            <div class="lever-title">Specificity</div>
+            <div class="lever-lead">How concrete it is.</div>
+            <ul class="lever-bullets">
+              <li>names</li>
+              <li>numbers</li>
+              <li>examples — not adjectives</li>
+            </ul>
+          </div>
+          <div class="lever-card">
+            <div class="lever-num">04</div>
+            <div class="lever-title">Persistence</div>
+            <div class="lever-lead">What carries forward.</div>
+            <ul class="lever-bullets">
+              <li>saved instructions</li>
+              <li>rules</li>
+              <li>memory</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="meta-row meta-bot">
+        <span>CHRISTOPHER</span>
+        <span>Vibe Code Club · Month 3</span>
+        <span>06 / 15</span>
+      </div>
+    </section>
+
+
+    <!-- ╔══════════════════════════════════════════════════════════╗
+         ║ SLIDE 07 — Before/After #1: bare prompt vs. brief        ║
+         ╚══════════════════════════════════════════════════════════╝ -->
+    <section class="slide" id="s07">
+      <span class="corner tl"></span><span class="corner tr"></span>
+      <span class="corner bl"></span><span class="corner br"></span>
+
+      <div class="meta-row meta-top">
+        <span>VBRC · 05.12.26</span>
+        <span>07 / 15</span>
+      </div>
+
+      <div class="fig-label">MOVE 01 · FRONT-LOAD A BRIEF</div>
+
+      <h1 class="headline h-sm">
+        The bare prompt<br/>
+        vs. <span class="gold">the brief.</span>
+      </h1>
+
+      <div class="content" style="top: 400px; bottom: 200px;">
+        <div class="ba-split">
+
+          <!-- BEFORE -->
+          <div class="ba-pane">
+            <div class="ba-tag">Prompt</div>
+            <div class="ba-prompt">
+              &gt; Build me a landing page for my consulting business.
+            </div>
+            <div class="ba-response">
+              <ul>
+                <li>headline: "Innovation through excellence"</li>
+                <li>generic stock hero, vague services</li>
+                <li>no specific audience or CTA</li>
+              </ul>
+            </div>
+            <div class="ba-conclusion">who's this for?</div>
+          </div>
+
+          <!-- AFTER -->
+          <div class="ba-pane is-after">
+            <div class="ba-tag">Prompt + Brief</div>
+            <div class="ba-prompt">
+              &gt; Build me a landing page for my consulting business.
+              <span class="anno">
+                <span class="gold">Audience:</span> small nonprofit directors evaluating fiduciary advisors.<br/>
+                <span class="gold">Goal:</span> book a 20-minute intro call.<br/>
+                <span class="gold">Stack:</span> single HTML page, mobile-first.<br/>
+                <span class="gold">Tone:</span> trustworthy, plain-spoken, no jargon.
+              </span>
+            </div>
+            <div class="ba-response">
+              <ul>
+                <li>headline: "Built for nonprofit directors"</li>
+                <li>trust signals, plain language, no jargon</li>
+                <li>CTA: book a 20-minute intro call</li>
+              </ul>
+            </div>
+            <div class="ba-conclusion">this is for me.</div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="ba-foot">
+        Different context. <span class="gold">Same minute.</span>
+      </div>
+
+      <div class="meta-row meta-bot">
+        <span>CHRISTOPHER</span>
+        <span>Vibe Code Club · Month 3</span>
+        <span>07 / 15</span>
+      </div>
+    </section>
+
+
+    <!-- ╔══════════════════════════════════════════════════════════╗
+         ║ SLIDE 08 — Before/After #2: vague style vs. example      ║
+         ╚══════════════════════════════════════════════════════════╝ -->
+    <section class="slide" id="s08">
+      <span class="corner tl"></span><span class="corner tr"></span>
+      <span class="corner bl"></span><span class="corner br"></span>
+
+      <div class="meta-row meta-top">
+        <span>VBRC · 05.12.26</span>
+        <span>08 / 15</span>
+      </div>
+
+      <div class="fig-label">MOVE 02 · SHOW, DON'T TELL</div>
+
+      <h1 class="headline h-md">
+        Show,<br/>
+        <span class="gold">don't tell.</span>
+      </h1>
+
+      <div class="content" style="top: 460px; bottom: 220px;">
+        <div class="ba-split">
+
+          <!-- VAGUE -->
+          <div class="ba-pane">
+            <div class="ba-tag">Vague</div>
+            <div class="ba-vague">
+              “Make it<br/>sound smart.”
+            </div>
+          </div>
+
+          <!-- CONCRETE -->
+          <div class="ba-pane is-after">
+            <div class="ba-tag">Concrete example</div>
+            <div class="ba-example">
+              <div class="ba-example-intro">Match the tone of this paragraph:</div>
+              <div class="ba-example-text" data-typing-source="The thing about artificial intelligence, as nearly everyone has now discovered, is that it is extraordinarily good at producing answers that are technically responsive, broadly plausible, and almost entirely wrong, all at the same time, and with a kind of polite confidence that makes you feel rude for pointing it out. This is, in many ways, an enormous improvement over the previous arrangement, in which you had to ask a human."
+              >The thing about artificial intelligence, as nearly everyone has now discovered, is that it is extraordinarily good at producing answers that are technically responsive, broadly plausible, and almost entirely wrong, all at the same time, and with a kind of polite confidence that makes you feel rude for pointing it out. This is, in many ways, an enormous improvement over the previous arrangement, in which you had to ask a human.</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="ba-foot">
+        One example beats <span class="gold">three paragraphs</span> of description.
+      </div>
+
+      <div class="meta-row meta-bot">
+        <span>CHRISTOPHER</span>
+        <span>Vibe Code Club · Month 3</span>
+        <span>08 / 15</span>
+      </div>
+    </section>
+
+
+    <!-- ╔══════════════════════════════════════════════════════════╗
+         ║ SLIDE 09 — Move 3 demo: Constrain the format             ║
+         ╚══════════════════════════════════════════════════════════╝ -->
+    <section class="slide" id="s09a">
+      <span class="corner tl"></span><span class="corner tr"></span>
+      <span class="corner bl"></span><span class="corner br"></span>
+
+      <div class="meta-row meta-top">
+        <span>VBRC · 05.12.26</span>
+        <span>09 / 15</span>
+      </div>
+
+      <div class="fig-label">MOVE 03 · CONSTRAIN THE FORMAT</div>
+
+      <h1 class="headline h-sm">
+        Give it<br/>
+        <span class="gold">a shape.</span>
+      </h1>
+
+      <div class="content" style="top: 420px; bottom: 220px;">
+        <div class="ba-split">
+
+          <div class="ba-pane">
+            <div class="ba-tag">Open</div>
+            <div class="ba-prompt">
+              &gt; Give me feedback on this idea.
+            </div>
+            <div class="ba-response">
+              Sure! There's a lot to unpack here. Your concept has real potential, though there are several factors worth thinking about. The market timing is one consideration, as is the question of who's already doing something similar in this space…
+            </div>
+          </div>
+
+          <div class="ba-pane is-after">
+            <div class="ba-tag">Constrained</div>
+            <div class="ba-prompt">
+              &gt; Give me feedback in <span class="gold">3 bullets:</span><span class="anno"><span class="gold">·</span> strongest reason it'll work<br/><span class="gold">·</span> biggest risk<br/><span class="gold">·</span> one open question</span>
+            </div>
+            <div class="ba-response">
+              <ul>
+                <li><b>Reason:</b> nonprofits underserved by current tools.</li>
+                <li><b>Risk:</b> long, relationship-driven sales cycle.</li>
+                <li><b>Open:</b> who are your first 10 customers?</li>
+              </ul>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="ba-foot">
+        "Three bullets" beats <span class="gold">"give me a summary."</span>
+      </div>
+
+      <div class="meta-row meta-bot">
+        <span>CHRISTOPHER</span>
+        <span>Vibe Code Club · Month 3</span>
+        <span>09 / 15</span>
+      </div>
+    </section>
+
+
+    <!-- ╔══════════════════════════════════════════════════════════╗
+         ║ SLIDE 10 — Move 4 demo: Ask questions first              ║
+         ╚══════════════════════════════════════════════════════════╝ -->
+    <section class="slide" id="s09b">
+      <span class="corner tl"></span><span class="corner tr"></span>
+      <span class="corner bl"></span><span class="corner br"></span>
+
+      <div class="meta-row meta-top">
+        <span>VBRC · 05.12.26</span>
+        <span>10 / 15</span>
+      </div>
+
+      <div class="fig-label">MOVE 04 · ASK QUESTIONS FIRST</div>
+
+      <h1 class="headline h-sm">
+        Have it<br/>
+        <span class="gold">interview you.</span>
+      </h1>
+
+      <div class="content" style="top: 420px; bottom: 220px;">
+        <div class="ba-split">
+
+          <div class="ba-pane">
+            <div class="ba-tag">Direct ask</div>
+            <div class="ba-prompt">
+              &gt; Build me a landing page for my SaaS.
+            </div>
+            <div class="ba-response">
+              → generic page<br/>
+              → audience: ???<br/>
+              → offer: ???<br/>
+              → tone: ???
+            </div>
+          </div>
+
+          <div class="ba-pane is-after">
+            <div class="ba-tag">Interview first</div>
+            <div class="ba-prompt">
+              &gt; Before you start, what <span class="gold">5 questions</span> do you need answered to do this well?
+            </div>
+            <div class="ba-response">
+              <ul>
+                <li>Who's the target customer?</li>
+                <li>What problem are you solving?</li>
+                <li>What's the price point?</li>
+                <li>What's the one action you want?</li>
+                <li>What's the brand tone?</li>
+              </ul>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="ba-foot">
+        Surfaces what <span class="gold">you forgot to tell it.</span>
+      </div>
+
+      <div class="meta-row meta-bot">
+        <span>CHRISTOPHER</span>
+        <span>Vibe Code Club · Month 3</span>
+        <span>10 / 15</span>
+      </div>
+    </section>
+
+
+    <!-- ╔══════════════════════════════════════════════════════════╗
+         ║ SLIDE 11 — Move 5 demo: Prune aggressively               ║
+         ╚══════════════════════════════════════════════════════════╝ -->
+    <section class="slide" id="s09c">
+      <span class="corner tl"></span><span class="corner tr"></span>
+      <span class="corner bl"></span><span class="corner br"></span>
+
+      <div class="meta-row meta-top">
+        <span>VBRC · 05.12.26</span>
+        <span>11 / 15</span>
+      </div>
+
+      <div class="fig-label">MOVE 05 · PRUNE AGGRESSIVELY</div>
+
+      <h1 class="headline h-sm">
+        Don't drag<br/>
+        <span class="gold">the wreckage.</span>
+      </h1>
+
+      <div class="demo-setup">
+        It's not the model. It's the <span class="gold">broken conversation</span> behind you.
+      </div>
+
+      <div class="content" style="top: 500px; bottom: 220px;">
+        <div class="ba-split">
+
+          <div class="ba-pane">
+            <div class="ba-tag">Message 38 / 40</div>
+            <div class="ba-response chat-log">
+              <span class="chat-user">you:</span> no, not what I meant<br/>
+              <span class="chat-ai">ai:</span> apologies, let me try again...<br/>
+              <span class="chat-user">you:</span> still wrong<br/>
+              <span class="chat-ai">ai:</span> you're right, I see now...<br/>
+              <span class="chat-user">you:</span> actually, undo the last 20 messages<br/>
+              <span class="chat-ai">ai:</span> of course! reconstructing...
+            </div>
+          </div>
+
+          <div class="ba-pane is-after">
+            <div class="ba-tag">Fresh start</div>
+            <div class="ba-prompt">
+              &gt; Here's where I am: <span class="gold">[3-line summary]</span>.<br/>
+              Now: [the actual question, asked clearly].
+            </div>
+            <div class="ba-response">
+              <ul>
+                <li>Clear context. ✓</li>
+                <li>Clear ask. ✓</li>
+                <li>One good answer.</li>
+              </ul>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="ba-foot">
+        Don't rehabilitate. <span class="gold">Restart with a summary.</span>
+      </div>
+
+      <div class="meta-row meta-bot">
+        <span>CHRISTOPHER</span>
+        <span>Vibe Code Club · Month 3</span>
+        <span>11 / 15</span>
+      </div>
+    </section>
+
+
+    <!-- ╔══════════════════════════════════════════════════════════╗
+         ║ SLIDE 12 — Five moves summary                            ║
+         ╚══════════════════════════════════════════════════════════╝ -->
+    <section class="slide" id="s09">
+      <span class="corner tl"></span><span class="corner tr"></span>
+      <span class="corner bl"></span><span class="corner br"></span>
+
+      <div class="meta-row meta-top">
+        <span>VBRC · 05.12.26</span>
+        <span>12 / 15</span>
+      </div>
+
+      <div class="fig-label">FIVE MOVES, ANY TOOL</div>
+
+      <h1 class="headline h-sm">
+        Five moves.<br/>
+        <span class="gold">Any tool.</span>
+      </h1>
+
+      <div class="content" style="top: 400px; bottom: 150px;">
+        <div class="moves-list">
+          <div class="move-row">
+            <div class="move-num">1</div>
+            <div class="move-body">
+              <div class="move-title">Front-load a brief.</div>
+              <div class="move-desc">Who, what, constraints, success. Before the first request — not after the third bad answer.</div>
+            </div>
+          </div>
+          <div class="move-row">
+            <div class="move-num">2</div>
+            <div class="move-body">
+              <div class="move-title">Show, don't tell.</div>
+              <div class="move-desc">Paste an example of what you want — code, copy, tone, layout. Examples beat adjectives.</div>
+            </div>
+          </div>
+          <div class="move-row">
+            <div class="move-num">3</div>
+            <div class="move-body">
+              <div class="move-title">Constrain the format.</div>
+              <div class="move-desc">Length, structure, fields. "Three bullets" beats "give me a summary."</div>
+            </div>
+          </div>
+          <div class="move-row">
+            <div class="move-num">4</div>
+            <div class="move-body">
+              <div class="move-title">Have it ask you questions first.</div>
+              <div class="move-desc">Surfaces gaps you didn't know you had. "What do you need to know to do this well?"</div>
+            </div>
+          </div>
+          <div class="move-row">
+            <div class="move-num">5</div>
+            <div class="move-body">
+              <div class="move-title">Prune aggressively.</div>
+              <div class="move-desc">When a chat goes sideways, restart with a clean summary. Don't drag the wreckage with you.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="meta-row meta-bot">
+        <span>CHRISTOPHER</span>
+        <span>Vibe Code Club · Month 3</span>
+        <span>12 / 15</span>
+      </div>
+    </section>
+
+
+    <!-- ╔══════════════════════════════════════════════════════════╗
+         ║ SLIDE 10 — Externalize stable context                    ║
+         ╚══════════════════════════════════════════════════════════╝ -->
+    <section class="slide" id="s10">
+      <span class="corner tl"></span><span class="corner tr"></span>
+      <span class="corner bl"></span><span class="corner br"></span>
+
+      <div class="meta-row meta-top">
+        <span>VBRC · 05.12.26</span>
+        <span>13 / 15</span>
+      </div>
+
+      <div class="fig-label">TYPE ONCE · REUSE FOREVER</div>
+
+      <h1 class="headline h-sm">
+        Type once.<br/>
+        <span class="gold">Reuse forever.</span>
+      </h1>
+
+      <div class="content" style="top: 460px;">
+        <div class="ext-body">
+          Every tool has a place to store <span class="gold">standing context</span>. Most people never use it.
+        </div>
+
+        <div class="ext-grid">
+          <div class="ext-row">
+            <div class="ext-tool">ChatGPT</div>
+            <code class="ext-loc">Custom Instructions</code>
+          </div>
+          <div class="ext-row">
+            <div class="ext-tool">Claude</div>
+            <code class="ext-loc">Projects / Styles</code>
+          </div>
+          <div class="ext-row">
+            <div class="ext-tool">Cursor</div>
+            <code class="ext-loc">.cursorrules</code>
+          </div>
+          <div class="ext-row">
+            <div class="ext-tool">Claude Code</div>
+            <code class="ext-loc">CLAUDE.md</code>
+          </div>
+          <div class="ext-row">
+            <div class="ext-tool">Replit</div>
+            <code class="ext-loc">AI Instructions</code>
+          </div>
+          <div class="ext-row">
+            <div class="ext-tool">Base44</div>
+            <code class="ext-loc">Project Description</code>
+          </div>
+        </div>
+      </div>
+
+      <div class="meta-row meta-bot">
+        <span>CHRISTOPHER</span>
+        <span>Vibe Code Club · Month 3</span>
+        <span>13 / 15</span>
+      </div>
+    </section>
+
+
+
+    <!-- ╔══════════════════════════════════════════════════════════╗
+         ║ SLIDE 14 — Real CLAUDE.md showcase (scroll + highlight)  ║
+         ╚══════════════════════════════════════════════════════════╝ -->
+    <section class="slide" id="s13b">
+      <span class="corner tl"></span><span class="corner tr"></span>
+      <span class="corner bl"></span><span class="corner br"></span>
+
+      <div class="meta-row meta-top">
+        <span>VBRC · 05.12.26</span>
+        <span>14 / 15</span>
+      </div>
+
+      <div class="fig-label">A REAL CLAUDE.MD</div>
+
+      <h1 class="headline h-sm">
+        Here's <span class="gold">mine.</span>
+      </h1>
+
+      <div class="content" style="top: 320px; bottom: 200px;">
+        <div class="cmd-viewport">
+          <div class="cmd-chrome">
+            <i></i><i></i><i></i>
+            <span>~/partytab/CLAUDE.md · 151 lines</span>
+          </div>
+          <div class="cmd-body">
+            <div class="cmd-content"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ba-foot">
+        Written once. <span class="gold">Read on every request.</span>
+      </div>
+
+      <div class="meta-row meta-bot">
+        <span>CHRISTOPHER</span>
+        <span>Vibe Code Club · Month 3</span>
+        <span>14 / 15</span>
+      </div>
+    </section>
+
+
+    <!-- ╔══════════════════════════════════════════════════════════╗
+         ║ SLIDE — Homework + close                                 ║
+         ╚══════════════════════════════════════════════════════════╝ -->
+    <section class="slide" id="s13">
+      <span class="corner tl"></span><span class="corner tr"></span>
+      <span class="corner bl"></span><span class="corner br"></span>
+
+      <div class="meta-row meta-top">
+        <span>VBRC · 05.12.26</span>
+        <span>15 / 15</span>
+      </div>
+
+      <div class="fig-label">YOUR HOMEWORK</div>
+
+      <h1 class="headline h-md">
+        Your<br/>
+        <span class="gold">homework.</span>
+      </h1>
+
+      <div class="content" style="top: 440px; bottom: 280px;">
+        <div class="hw-list">
+          <div class="hw-item">
+            <div class="hw-num">01</div>
+            <div class="hw-text">
+              Open your project's <span class="gold">standing-context file</span> — whatever your tool calls it. Notice what's there — and what's missing.
+            </div>
+          </div>
+          <div class="hw-item is-spotlight">
+            <div class="hw-num">02</div>
+            <div class="hw-text">
+              Next time the AI disappoints you, ask:
+              <span class="quote">"What context was I missing?"</span>
+              <br/><span style="font-family: var(--font-mono); font-size: 28px; color: var(--ink-dim); letter-spacing: 0;">It's almost never the model.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hw-close">
+        <span class="gold">Questions?</span>
+      </div>
+
+      <div class="meta-row meta-bot">
+        <span>CHRISTOPHER</span>
+        <span>Vibe Code Club · Month 3 · 05.12.26</span>
+        <span>15 / 15</span>
+      </div>
+    </section>
+
+  </div><!-- /.stage -->
+
+  <!-- Help overlay (? key) -->
+  <div class="help">
+    <div class="help-card">
+      <h2>Keyboard shortcuts</h2>
+      <div><kbd>→</kbd> next slide</div>
+      <div><kbd>←</kbd> previous slide</div>
+      <div><kbd>Space</kbd> next slide</div>
+      <div><kbd>Home</kbd> first slide</div>
+      <div><kbd>End</kbd> last slide</div>
+      <div><kbd>1-9</kbd> jump to slide</div>
+      <div><kbd>B</kbd> black-out</div>
+      <div><kbd>P</kbd> projector mode (brighter)</div>
+      <div><kbd>T</kbd> elapsed timer</div>
+      <div><kbd>?</kbd> toggle this help</div>
+      <div><kbd>Esc</kbd> close help</div>
+    </div>
+  </div>
+
+</div><!-- /.deck -->
+
+<!-- CLAUDE.md source text (rendered into the slide 14 viewport via JS) -->
+<script type="text/markdown" id="cmd-source"># PartyTab — Claude Code Instructions
+
+## What Is This?
+
+PartyTab is a group expense-splitting web app. Users create tabs, invite friends, track expenses with even or custom splits, and settle up with minimal transfers. Pro subscribers get AI-powered receipt scanning, item-level claiming, and automated payment reminders.
+
+**Production URL:** https://partytab.app
+**Current version:** 1.0.1
+
+## Tech Stack
+
+| Layer | Technology | Version |
+|-------|-----------|---------|
+| Framework | Next.js (App Router) | 16.x |
+| UI | React | 19.x |
+| Language | TypeScript (strict) | 5.x |
+| Database | PostgreSQL (Supabase-hosted) | 16 |
+| ORM | Prisma | 6.x |
+| Auth | NextAuth v5 (beta) | 5.0.0-beta.30 |
+| Styling | Tailwind CSS | 4.x |
+| Payments | Stripe | 20.x |
+| Storage | Supabase (receipt images only) | — |
+| Email | Postmark | — |
+| AI | Anthropic Claude (receipt parsing) | claude-sonnet-4 |
+| Rate Limiting | Upstash Redis (optional, in-memory fallback) | — |
+| Testing | Vitest (unit), Playwright (E2E) | 3.x / 1.x |
+| Deployment | Vercel (auto-deploy from `main`) | — |
+
+## Commands
+
+```bash
+npm run dev              # Dev server (port 3000)
+npm run build            # Production build (runs prisma generate)
+npm run test             # Vitest unit tests (~111 cases across 13 files)
+npm run test:e2e         # Playwright E2E tests
+npm run lint             # ESLint
+npm run typecheck        # TypeScript type checking
+npm run db:migrate       # Run Prisma migrations (dev)
+npm run db:seed          # Seed demo data
+npm run db:reset         # Reset DB + seed
+```
+
+## Project Structure
+
+```
+app/
+  api/                   # ~50 route handlers (Next.js Route Handlers)
+  components/            # Shared React components (including split/ subdirectory)
+  hooks/                 # Custom hooks (usePushNotifications)
+  share/                 # Public shareable tab summary pages (no auth)
+  tabs/                  # Core app pages (tab dashboard, expenses, settlement)
+  settings/              # Account settings page (payment methods, profile, danger zone)
+  auth/ login/ signin/ register/ join/ claim/  # Auth flows
+  upgrade/ feedback/ demo/ how-it-works/       # App pages
+  unsubscribe/ marketing-assets/               # Email unsub + static social assets
+  blog/ use-cases/ compare/ privacy/ terms/    # SEO/marketing/legal
+
+lib/
+  api/                   # errors.ts, guards.ts, handler.ts, response.ts, audit-log.ts
+  auth/                  # config.ts, pin.ts, password.ts, entitlements.ts, merge.ts
+  billing/               # usage.ts (receipt quota tracking)
+  db/                    # prisma.ts (singleton client)
+  money/                 # cents.ts (parsing/formatting), allocation.ts (distribution)
+  payment/               # venmo.ts (buildVenmoWebLink — web URLs only, see Gotchas)
+  receipts/              # parser.ts (Claude AI parsing)
+  settlement/            # computeSettlement.ts (greedy algorithm)
+  validators/            # schemas.ts (Zod), splits.ts (split validation)
+
+tests/                   # Vitest unit tests
+e2e/                     # Playwright E2E tests
+prisma/                  # schema.prisma + migrations (7 migration files)
+```
+
+## Key Architecture
+
+- **API patterns:** **Prefer `withApiHandler`/`withSimpleApiHandler` for all new routes.** Wrapped handlers get automatic audit logging + per-user rate limiting + Content-Type validation.
+- **Money:** All USD cents (integers). Never floats. See `.claude/rules/database-and-money.md`.
+- **Auth:** Three modes coexist — Guest PIN (cookie), Email/Password (NextAuth), Google OAuth (NextAuth). Guest merging via `/auth/merge-confirm`.
+- **Pro features** gated by `canUseProFeatures(userId)`: reminders, 100/month receipt quota. Receipt scanning is available to all users — the per-tier cap is enforced by `checkReceiptLimit()` (free: 2/month, Pro: 100/month).
+- **Estimated expenses:** Expenses can be marked `isEstimate: true` for pre-trip planning. Visual cues (dashed borders, "~" prefix) distinguish estimates from confirmed expenses.
+- **Shareable cards:** Tabs can generate a `shareToken` for public summary pages at `/share/[token]` with OG image previews.
+- **Payment methods:** Users save Venmo/Zelle/PayPal/CashApp/Custom handles. Settlement page shows payee's methods with Venmo deep links. One method per type per user.
+
+## Code Style
+
+- **Formatting:** Prettier — double quotes, trailing commas, 100-char width
+- **TypeScript:** Strict mode. Path alias `@/*` maps to project root.
+- **Imports:** Use `@/lib/...`, `@/app/...` absolute imports
+- **Components:** Prefer `'use client'` only when needed (forms, interactivity)
+
+## Gotchas
+
+- **IMPORTANT:** All money is USD cents (integers). Never use floats. Use `parseCents()`/`formatCents()` from `@/lib/money/cents` — never parse or format manually.
+- **IMPORTANT:** Every `prisma.*.findMany()` MUST include `take: N`. Unbounded queries are a known regression class. Reviewers reject missing `take`.
+- `ReceiptItem.priceCents` is the **line total** (qty × unit price), NOT the unit price. The AI parser expands multi-qty items into individual rows.
+- Participant `id` ≠ User `id` — expense splits and settlements reference `participantId`, not `userId`.
+- `parseEmail()` throws `ZodError`, not `ApiError` — use `EMAIL_REGEX.test()` for optional email validation.
+- `withApiHandler` enforces per-user rate limits (60 req/min) and Content-Type. Manual try/catch routes must call `checkApiRateLimit()` and `logApiResponse()` themselves.
+- Rate limiting falls back to in-memory `Map`s when `UPSTASH_REDIS_REST_URL` is not configured. Failed-auth lockout: 5 attempts → 15 min IP block.
+- RLS is enabled with deny-all policies. Prisma connects with the service-role key and bypasses RLS. Don't expect Supabase PostgREST to return rows — use Prisma.
+- Supabase is used ONLY for file storage (receipts) — all data lives in Prisma/PostgreSQL.
+- Venmo: always use `buildVenmoWebLink(handle)` → plain `https://venmo.com/{username}`. Deep links (`venmo://`) and query-param recipients double-resolve on mobile (Feb 2026 bug).
+- `lib/env.ts` copies `DATABASE_URL_LOCAL` into `DATABASE_URL` at startup if the latter is unset.
+- Session parsing is in `lib/session/parse.ts` (extracted to avoid circular deps).
+- Guest cookie is `partytab_session` with HMAC-SHA256 — don't confuse with NextAuth session.
+
+## Environment Variables
+
+**Required:** `DATABASE_URL`, `SESSION_SECRET`, `APP_BASE_URL`, `AUTH_SECRET`
+
+**Optional (features degrade gracefully):** `GOOGLE_CLIENT_ID`/`SECRET`, `STRIPE_SECRET_KEY` + price IDs, `NEXT_PUBLIC_SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`, `ANTHROPIC_API_KEY`, `POSTMARK_SERVER_TOKEN`, `UPSTASH_REDIS_REST_URL`/`TOKEN`, `PUSH_VAPID_PUBLIC_KEY`/`PRIVATE_KEY`
+
+## Deployment
+
+- **Platform:** Vercel (auto-deploy from `main`)
+- **Cron:** `/api/reminders/run` daily at 2 PM UTC
+- **CI:** GitHub Actions — lint, typecheck, test (parallel) → E2E (sequential)
+
+### Changelog
+
+- **1.0.2** — CLAUDE.md sweep: refresh counts, raise Pro receipt cap to 100/month, document audit-log infra, surface `findMany` `take` rule.
+- **1.0.1** — Add ink-400 color token (#756e68) for WCAG AA contrast compliance. Set up changelog system.
+- **1.0.0** — Production baseline. Payment methods, estimated expenses, shareable cards, free receipt scanning, settlement acknowledgements.
+
+## Maintenance
+
+This file is checked by `scripts/check-claude-md.sh`. Run it after major changes to detect stale counts or missing entries.
+</script>
+
+<script>
+(() => {
+  const $  = (sel, root = document) => root.querySelector(sel);
+  const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+  const deck = $(".deck");
+  const slides = $$(".slide");
+  let current = 0;
+
+  /* ---------- Stage scaling: fit 1920×1080 into viewport ---------- */
+  const stage = $(".stage");
+  function fit() {
+    const sx = window.innerWidth  / 1920;
+    const sy = window.innerHeight / 1080;
+    const s  = Math.min(sx, sy);
+    stage.style.setProperty("--scale", Math.round(s * 100) / 100);
+  }
+  window.addEventListener("resize", fit);
+  fit();
+
+  /* ---------- Animation engine: typing + word-reveal ---------- */
+  let activeAnimations = [];
+
+  function clearAllAnimations() {
+    activeAnimations.forEach(a => { if (a.timer) clearTimeout(a.timer); });
+    activeAnimations = [];
+  }
+
+  function tokenizeHTML(html) {
+    const tokens = [];
+    let i = 0;
+    while (i < html.length) {
+      if (html[i] === "<") {
+        const end = html.indexOf(">", i);
+        if (end === -1) { tokens.push({ type: "text", value: html.slice(i) }); break; }
+        tokens.push({ type: "tag", value: html.slice(i, end + 1) });
+        i = end + 1;
+      } else if (html[i] === "&") {
+        const end = html.indexOf(";", i);
+        if (end !== -1 && end - i <= 8) {
+          tokens.push({ type: "entity", value: html.slice(i, end + 1) });
+          i = end + 1;
+        } else {
+          tokens.push({ type: "text", value: html[i] });
+          i++;
+        }
+      } else {
+        tokens.push({ type: "text", value: html[i] });
+        i++;
+      }
+    }
+    return tokens;
+  }
+
+  function typeHTML(element, html, opts = {}) {
+    const tokens = tokenizeHTML(html);
+    element.innerHTML = "";
+
+    const speed       = opts.speed || 22;
+    const startDelay  = opts.startDelay || 0;
+    const showCursor  = opts.cursor !== false;
+    const cursorHTML  = showCursor ? '<span class="typing-cursor">▍</span>' : "";
+
+    const state = {
+      timer: null, done: false, element, fullHTML: html, currentHTML: "",
+      tokens, idx: 0, type: "typingHTML"
+    };
+    activeAnimations.push(state);
+
+    const tick = () => {
+      if (state.done) return;
+      if (state.idx >= tokens.length) {
+        state.done = true;
+        element.innerHTML = state.fullHTML;
+        if (opts.onComplete) opts.onComplete();
+        return;
+      }
+      const tok = tokens[state.idx];
+      state.currentHTML += tok.value;
+      element.innerHTML = state.currentHTML + cursorHTML;
+      state.idx++;
+      let delay = 0;
+      if (tok.type === "text" || tok.type === "entity") {
+        delay = speed;
+        const ch = tok.value;
+        if (ch === ",") delay += 60;
+        else if (ch === "." || ch === "?" || ch === "!") delay += 180;
+      }
+      state.timer = setTimeout(tick, delay);
+    };
+    state.timer = setTimeout(tick, startDelay);
+    return state;
+  }
+
+  function typeBullets(ul, opts = {}) {
+    const lis = Array.from(ul.querySelectorAll("li"));
+    if (!lis.length) return;
+    // Cache original HTML the first time, so re-entries always restart cleanly
+    const savedHTMLs = lis.map(li => {
+      let orig = li.getAttribute("data-orig-html");
+      if (orig === null) {
+        orig = li.innerHTML;
+        li.setAttribute("data-orig-html", orig);
+      }
+      return orig;
+    });
+    lis.forEach(li => {
+      li.style.visibility = "hidden";  // reserve layout space
+      li.innerHTML = "";
+    });
+    lis.forEach((li, idx) => {
+      const t = setTimeout(() => {
+        li.style.visibility = "";
+        typeHTML(li, savedHTMLs[idx], { speed: opts.speed || 18, cursor: false });
+      }, (opts.startDelay || 500) + idx * (opts.stagger || 230));
+      activeAnimations.push({ timer: t, done: false, type: "scheduled" });
+    });
+  }
+
+  function typeContainer(element, opts = {}) {
+    let orig = element.getAttribute("data-orig-html");
+    if (orig === null) {
+      orig = element.innerHTML;
+      element.setAttribute("data-orig-html", orig);
+    }
+    element.innerHTML = "";
+    typeHTML(element, orig, opts);
+  }
+
+  function wordReveal(element, opts = {}) {
+    let orig = element.getAttribute("data-orig-text");
+    if (orig === null) {
+      orig = element.textContent;
+      element.setAttribute("data-orig-text", orig);
+    }
+    const text = orig;
+    const parts = text.split(/(\s+)/);
+    element.innerHTML = "";
+    const spans = [];
+    parts.forEach(part => {
+      if (/^\s+$/.test(part)) {
+        element.appendChild(document.createTextNode(part));
+      } else if (part.length > 0) {
+        const span = document.createElement("span");
+        span.textContent = part;
+        span.style.opacity = "0";
+        span.style.display = "inline-block";
+        span.style.transform = "translateY(8px)";
+        span.style.transition = "opacity 500ms ease-out, transform 500ms ease-out";
+        element.appendChild(span);
+        spans.push(span);
+      }
+    });
+    const state = { timer: null, done: false, spans, type: "wordReveal" };
+    activeAnimations.push(state);
+    const stagger = opts.stagger || 38;
+    const startDelay = opts.startDelay || 500;
+    let i = 0;
+    const reveal = () => {
+      if (state.done) return;
+      if (i >= spans.length) { state.done = true; return; }
+      spans[i].style.opacity = "1";
+      spans[i].style.transform = "translateY(0)";
+      i++;
+      state.timer = setTimeout(reveal, stagger);
+    };
+    state.timer = setTimeout(reveal, startDelay);
+  }
+
+  function skipAllAnimations() {
+    let any = false;
+    activeAnimations.forEach(a => {
+      if (a.done) return;
+      any = true;
+      if (a.timer) clearTimeout(a.timer);
+      if (a.type === "typingHTML") {
+        a.element.innerHTML = a.fullHTML;
+      } else if (a.type === "wordReveal") {
+        a.spans.forEach(s => {
+          s.style.opacity = "1";
+          s.style.transform = "translateY(0)";
+        });
+      } else if (a.type === "cmdScroll" && a.content) {
+        a.content.querySelectorAll(".cmd-line.is-highlighted").forEach(el =>
+          el.classList.remove("is-highlighted"));
+      }
+      a.done = true;
+    });
+    return any;
+  }
+
+  /* ---------- CLAUDE.md showcase: build + scroll-with-highlights ---------- */
+  // (line indices are 0-based in the markdown source after split('\n'))
+  const CMD_HIGHLIGHTS = [
+    { lineIdx: 4,   pause: 4500 }, // "PartyTab is a group expense-splitting web app..."
+    { lineIdx: 77,  pause: 4500 }, // "Auth: Three modes coexist..."
+    { lineIdx: 92,  pause: 5000 }, // "IMPORTANT: All money is USD cents..."
+    { lineIdx: 93,  pause: 5000 }, // "IMPORTANT: Every findMany() MUST include take: N..."
+    { lineIdx: 101, pause: 4500 }, // "Venmo: always use buildVenmoWebLink..."
+  ];
+
+  function buildCmdContent(content, source) {
+    if (content.children.length > 0) return;  // idempotent: only build once
+    const lines = source.split("\n");
+    lines.forEach((line) => {
+      const div = document.createElement("div");
+      div.className = "cmd-line";
+      if (line.startsWith("# "))        div.classList.add("cmd-h1");
+      else if (line.startsWith("## "))  div.classList.add("cmd-h2");
+      else if (line.startsWith("### ")) div.classList.add("cmd-h3");
+      if (line.length === 0)            div.classList.add("cmd-empty");
+      div.textContent = line;
+      content.appendChild(div);
+    });
+  }
+
+  function scrollCmd(viewport, content) {
+    // Clear any leftover highlights from a previous visit
+    content.querySelectorAll(".cmd-line.is-highlighted").forEach(el =>
+      el.classList.remove("is-highlighted"));
+    // Reset scroll to top instantly
+    content.style.transition = "none";
+    content.style.transform = "translateY(0px)";
+    void content.offsetHeight;  // force reflow
+    content.style.transition = "transform 1300ms cubic-bezier(0.22, 1, 0.36, 1)";
+
+    const body = viewport.querySelector(".cmd-body");
+    const bodyH = body.clientHeight;
+
+    const state = { timer: null, done: false, hIdx: 0, type: "cmdScroll", content };
+    activeAnimations.push(state);
+
+    const step = () => {
+      if (state.done) return;
+      if (state.hIdx >= CMD_HIGHLIGHTS.length) {
+        // Final glide: slow-scroll to bottom
+        const endY = Math.max(0, content.scrollHeight - bodyH + 40);
+        content.style.transform = `translateY(${-endY}px)`;
+        state.done = true;
+        return;
+      }
+      const h = CMD_HIGHLIGHTS[state.hIdx];
+      const line = content.children[h.lineIdx];
+      if (!line) { state.hIdx++; step(); return; }
+      // Park the line ~35% down from top of viewport
+      const targetY = Math.max(0, line.offsetTop - bodyH * 0.35);
+      content.style.transform = `translateY(${-targetY}px)`;
+      // After scroll settles, light up the line
+      state.timer = setTimeout(() => {
+        if (state.done) return;
+        line.classList.add("is-highlighted");
+        state.timer = setTimeout(() => {
+          if (state.done) return;
+          line.classList.remove("is-highlighted");
+          state.hIdx++;
+          step();
+        }, h.pause);
+      }, 1500);
+    };
+
+    state.timer = setTimeout(step, 1100);
+  }
+
+  /* ---------- Slide enter hooks ---------- */
+  const slideEnters = {};
+
+  function typeAllResponses(slide, opts = {}) {
+    slide.querySelectorAll(".ba-response").forEach((resp, paneIdx) => {
+      if (resp.classList.contains("chat-log")) return;  // skip static chat history
+      const ul = resp.querySelector("ul");
+      const delay = (opts.startDelay || 500) + paneIdx * (opts.paneStagger || 0);
+      if (ul) typeBullets(ul, { startDelay: delay, stagger: opts.stagger || 240 });
+      else typeContainer(resp, { startDelay: delay, speed: opts.speed || 18 });
+    });
+  }
+
+  // Slide 7 (idx 6) — Move 01 demo: type both panes' bullet responses
+  slideEnters[6] = (slide) => { typeAllResponses(slide); };
+
+  // Slide 8 (idx 7) — Move 02: word-by-word reveal on the concrete paragraph
+  slideEnters[7] = (slide) => {
+    const el = slide.querySelector(".ba-example-text");
+    if (el) wordReveal(el, { startDelay: 600, stagger: 38 });
+  };
+
+  // Slide 9 (idx 8) — Move 03: open=paragraph, constrained=bullets
+  slideEnters[8] = (slide) => { typeAllResponses(slide, { speed: 12 }); };
+
+  // Slide 10 (idx 9) — Move 04: direct=arrow list, interview=bullets
+  slideEnters[9] = (slide) => { typeAllResponses(slide); };
+
+  // Slide 11 (idx 10) — Move 05: chat-log skipped; fresh-start bullets type
+  slideEnters[10] = (slide) => { typeAllResponses(slide); };
+
+  // Slide 14 (idx 13) — Real CLAUDE.md: build content + scroll with highlights
+  slideEnters[13] = (slide) => {
+    const viewport = slide.querySelector(".cmd-viewport");
+    const content = viewport && viewport.querySelector(".cmd-content");
+    const src = document.getElementById("cmd-source");
+    if (!viewport || !content || !src) return;
+    buildCmdContent(content, src.textContent.replace(/^\n+/, "").replace(/\n+$/, ""));
+    scrollCmd(viewport, content);
+  };
+
+  /* ---------- Navigation ---------- */
+  function go(target) {
+    if (target < 0 || target >= slides.length || target === current) return;
+    clearAllAnimations();
+    const old = slides[current];
+    const neu = slides[target];
+    old.classList.remove("is-active");
+    old.classList.add("is-leaving");
+    setTimeout(() => old.classList.remove("is-leaving"), 400);
+    neu.classList.add("is-active");
+    current = target;
+    if (slideEnters[target]) slideEnters[target](neu);
+  }
+  function next() { go(current + 1); }
+  function prev() { go(current - 1); }
+
+  /* ---------- Keyboard ---------- */
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowRight" || e.key === "PageDown") {
+      skipAllAnimations();
+      next(); e.preventDefault(); return;
+    }
+    if (e.key === " ") {
+      if (skipAllAnimations()) { e.preventDefault(); return; }
+      next(); e.preventDefault(); return;
+    }
+    if (e.key === "ArrowLeft" || e.key === "PageUp") {
+      prev(); e.preventDefault(); return;
+    }
+    if (e.key === "Home") { go(0); e.preventDefault(); return; }
+    if (e.key === "End")  { go(slides.length - 1); e.preventDefault(); return; }
+    if (e.key === "b" || e.key === "B") {
+      deck.classList.toggle("deck--black"); e.preventDefault(); return;
+    }
+    if (e.key === "p" || e.key === "P") {
+      deck.classList.toggle("deck--projector"); e.preventDefault(); return;
+    }
+    if (e.key === "t" || e.key === "T") {
+      deck.classList.toggle("deck--timer"); e.preventDefault(); return;
+    }
+    if (e.key === "?" || e.key === "/") {
+      deck.classList.toggle("deck--help"); e.preventDefault(); return;
+    }
+    if (e.key === "Escape") {
+      deck.classList.remove("deck--help", "deck--black");
+      e.preventDefault(); return;
+    }
+    // Number keys 1-9 jump to slide
+    if (/^[1-9]$/.test(e.key)) {
+      go(parseInt(e.key, 10) - 1); e.preventDefault(); return;
+    }
+    // 0 jumps to slide 10
+    if (e.key === "0") { go(9); e.preventDefault(); return; }
+  });
+
+  /* ---------- Click anywhere to advance (except help card) ---------- */
+  deck.addEventListener("click", (e) => {
+    if (e.target.closest(".help-card, button, a, input")) return;
+    if (deck.classList.contains("deck--help")) {
+      deck.classList.remove("deck--help");
+      return;
+    }
+    if (skipAllAnimations()) return;
+    next();
+  });
+
+  /* ---------- Elapsed-time indicator (T key) ---------- */
+  const startTime = Date.now();
+  const timerEl = document.createElement("div");
+  timerEl.className = "timer";
+  document.body.appendChild(timerEl);
+  setInterval(() => {
+    const ms = Date.now() - startTime;
+    const m = Math.floor(ms / 60000);
+    const s = Math.floor((ms % 60000) / 1000);
+    timerEl.textContent = `${m}:${s.toString().padStart(2, "0")}`;
+  }, 500);
+
+  /* ---------- Activate first slide ---------- */
+  slides[0].classList.add("is-active");
+})();
+</script>
+
+</body>
+</html>

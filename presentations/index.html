@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Presentations | Christopher Kleinman</title>
+<meta name="description" content="Talks and decks by Christopher Kleinman — conference sessions and the Vibe Code Club series on building real software with AI.">
+<meta property="og:title" content="Presentations — Christopher Kleinman">
+<meta property="og:description" content="Conference talks and the Vibe Code Club series on building real software with AI.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://christopherkleinman.com/presentations">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="canonical" href="https://christopherkleinman.com/presentations">
+<script>
+  (function() {
+    var stored = localStorage.getItem('theme');
+    var preferred = stored ||
+      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', preferred);
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles/main.css">
+<style>
+  /* ---- Presentations page additions ---- */
+  .presentations-hero {
+    padding: calc(var(--nav-h) + var(--space-16)) 0 var(--space-12);
+    position: relative;
+    overflow: hidden;
+  }
+  .presentations-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 20% 0%, rgba(58, 101, 217, 0.08), transparent 60%),
+      radial-gradient(ellipse 50% 40% at 90% 30%, rgba(58, 101, 217, 0.05), transparent 70%);
+    pointer-events: none;
+  }
+  [data-theme="dark"] .presentations-hero::before {
+    background:
+      radial-gradient(ellipse 60% 50% at 20% 0%, rgba(79, 123, 247, 0.14), transparent 60%),
+      radial-gradient(ellipse 50% 40% at 90% 30%, rgba(79, 123, 247, 0.08), transparent 70%);
+  }
+  .presentations-hero .container { position: relative; z-index: 1; }
+  .presentations-hero__title {
+    font-size: clamp(2.25rem, 5vw, 3.5rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    margin: var(--space-3) 0 var(--space-5);
+  }
+  .presentations-hero__title .accent { color: var(--accent); }
+  .presentations-hero__sub {
+    font-size: 1.05rem;
+    color: var(--text-secondary);
+    max-width: 640px;
+    line-height: 1.6;
+  }
+
+  /* Section spacing tweaks */
+  .presentations-section { padding: var(--space-12) 0; }
+  .presentations-section + .presentations-section { padding-top: 0; }
+  .presentations-section .section-intro { margin-bottom: var(--space-8); }
+
+  /* Series badge — distinguishes VCC monthly cadence */
+  .series-stripe {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-bottom: var(--space-3);
+  }
+  .series-stripe::before {
+    content: '';
+    display: inline-block;
+    width: 24px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  /* Presentation card — extends .card with date + duration meta line */
+  .pres-card .pres-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--text-tertiary);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .pres-card .pres-meta .dot {
+    width: 3px; height: 3px; border-radius: 50%;
+    background: var(--border-active);
+    display: inline-block;
+  }
+
+  /* Featured (conference) card — larger, full-width */
+  .pres-featured {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--accent-warm);
+    border-radius: var(--radius-md);
+    padding: var(--space-8);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--space-6) var(--space-8);
+    align-items: start;
+    box-shadow: var(--shadow-sm);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  }
+  .pres-featured:hover {
+    border-color: var(--border-active);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+  }
+  .pres-featured__head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
+    flex-wrap: wrap;
+  }
+  .pres-featured__title {
+    font-size: clamp(1.5rem, 2.6vw, 1.85rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: var(--space-3);
+    line-height: 1.2;
+  }
+  .pres-featured__title .accent { color: var(--accent); }
+  .pres-featured__desc {
+    font-size: 0.975rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: var(--space-5);
+    max-width: 640px;
+  }
+  .pres-featured__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-4);
+  }
+  .pres-featured__hint {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--text-tertiary);
+    letter-spacing: 0.04em;
+  }
+  .pres-featured__aside {
+    align-self: stretch;
+    border-left: 1px solid var(--border);
+    padding-left: var(--space-8);
+    min-width: 220px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  .pres-featured__aside .label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-quaternary);
+  }
+  .pres-featured__aside .stat {
+    font-size: 1rem;
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+  .pres-featured__aside .stat strong {
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  @media (max-width: 860px) {
+    .pres-featured {
+      grid-template-columns: 1fr;
+      padding: var(--space-6);
+    }
+    .pres-featured__aside {
+      border-left: none;
+      border-top: 1px solid var(--border);
+      padding-left: 0;
+      padding-top: var(--space-5);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .presentations-hero { padding-top: calc(var(--nav-h) + var(--space-10)); }
+  }
+</style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav" role="navigation" aria-label="Main navigation">
+  <div class="nav-inner">
+    <a href="/" class="nav-brand" aria-label="Home">CK</a>
+    <ul class="nav-links">
+      <li><a href="/#about" class="nav-link">About</a></li>
+      <li><a href="/#projects" class="nav-link">Projects</a></li>
+      <li><a href="/presentations" class="nav-link active">Presentations</a></li>
+      <li><a href="/#contact" class="nav-link">Contact</a></li>
+    </ul>
+    <div class="nav-actions">
+      <button class="theme-toggle" aria-label="Toggle dark mode">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <button class="nav-hamburger" aria-label="Toggle menu" aria-expanded="false">
+        <svg class="icon-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        <svg class="icon-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile menu -->
+<div class="nav-mobile" id="mobile-menu">
+  <ul class="nav-mobile-links">
+    <li><a href="/#about" class="nav-mobile-link">About</a></li>
+    <li><a href="/#projects" class="nav-mobile-link">Projects</a></li>
+    <li><a href="/presentations" class="nav-mobile-link active">Presentations</a></li>
+    <li><a href="/#contact" class="nav-mobile-link">Contact</a></li>
+  </ul>
+</div>
+
+<!-- Hero -->
+<section class="presentations-hero">
+  <div class="container">
+    <div class="section-label reveal">Talks &amp; Decks</div>
+    <h1 class="presentations-hero__title reveal">
+      Presentations <span class="accent">&there4;</span>
+    </h1>
+    <p class="presentations-hero__sub reveal">
+      Conference sessions and the Vibe Code Club monthly series — practical, build-it-yourself walkthroughs of using AI to ship real internal business tools. Best on a laptop, sound on, drive with arrow keys.
+    </p>
+  </div>
+</section>
+
+<!-- Conferences -->
+<section class="presentations-section" id="conferences">
+  <div class="container">
+    <div class="section-label reveal">Conferences</div>
+    <div class="section-title reveal">Keynotes &amp; conference sessions</div>
+
+    <article class="pres-featured reveal" data-category="conference">
+      <div>
+        <div class="pres-featured__head">
+          <span class="category-tag tag-veteran">Conference</span>
+          <span class="status-badge status-live">New</span>
+          <span class="series-stripe">10th Annual VBRC · May 2026</span>
+        </div>
+        <h2 class="pres-featured__title">
+          Making Internal Business Tools <span class="accent">With AI</span>
+        </h2>
+        <p class="pres-featured__desc">
+          My session at the 10th Annual Veteran-Owned Business Conference. A 40-minute walk through five small internal tools — inquiry form, mini CRM, field schedule, invoice generator, CSV dashboard — built for a fictional landscaping company. Take the source for any of them and feed it to your AI of choice as a jumping-off point for your own.
+        </p>
+        <div class="pres-featured__actions">
+          <a href="/projects/vbrc-2026/" class="btn btn-primary" target="_blank" rel="noopener">
+            View the deck
+            <span aria-hidden="true">&nearr;</span>
+          </a>
+          <span class="pres-featured__hint">Best on a laptop · sound on · 40 min</span>
+        </div>
+      </div>
+      <aside class="pres-featured__aside">
+        <div>
+          <div class="label">Format</div>
+          <div class="stat">Live keynote</div>
+        </div>
+        <div>
+          <div class="label">Length</div>
+          <div class="stat"><strong>40</strong> min</div>
+        </div>
+        <div>
+          <div class="label">Includes</div>
+          <div class="stat"><strong>5</strong> tools · starter code</div>
+        </div>
+      </aside>
+    </article>
+  </div>
+</section>
+
+<!-- Vibe Code Club -->
+<section class="presentations-section section-alt" id="vibe-code-club">
+  <div class="container">
+    <div class="section-label reveal">Series</div>
+    <div class="section-title reveal">Vibe Code Club</div>
+    <p class="section-intro reveal">
+      A monthly meetup for veteran-owned business owners learning to build their own software with AI. Each session is a single self-contained deck — drive it with the arrow keys.
+    </p>
+
+    <div class="projects-grid">
+
+      <!-- Month 01 — Audits -->
+      <article class="card pres-card reveal" data-category="saas">
+        <div class="card-top">
+          <span class="category-tag tag-saas">Vibe Code Club</span>
+          <span class="status-badge status-live">Month 01</span>
+        </div>
+        <div class="pres-meta">
+          <span>Audits</span>
+          <span class="dot"></span>
+          <span>Mar 2026</span>
+        </div>
+        <h3 class="card-title">Catching what your AI missed</h3>
+        <p class="card-desc">Why your AI-built app still breaks in production, and how to use AuditBuffet to grade it across the dimensions humans care about — security, accessibility, performance, content — before customers do.</p>
+        <div class="tech-badges">
+          <span class="badge">Auditing</span>
+          <span class="badge">AuditBuffet</span>
+          <span class="badge">QA</span>
+        </div>
+        <div class="card-footer">
+          <a href="/projects/vcc-audits/" class="card-link" target="_blank" rel="noopener">View deck <span aria-hidden="true">&nearr;</span></a>
+        </div>
+      </article>
+
+      <!-- Month 02 — API / MCP -->
+      <article class="card pres-card reveal" data-category="saas">
+        <div class="card-top">
+          <span class="category-tag tag-saas">Vibe Code Club</span>
+          <span class="status-badge status-live">Month 02</span>
+        </div>
+        <div class="pres-meta">
+          <span>APIs &amp; MCP</span>
+          <span class="dot"></span>
+          <span>Apr 2026</span>
+        </div>
+        <h3 class="card-title">Make Claude actually do the work</h3>
+        <p class="card-desc">Move past chat-only AI. Wire Claude into your actual tools through the Claude CLI and MCP servers so it can read files, run commands, hit APIs, and finish tasks instead of describing them.</p>
+        <div class="tech-badges">
+          <span class="badge">Claude CLI</span>
+          <span class="badge">MCP</span>
+          <span class="badge">APIs</span>
+        </div>
+        <div class="card-footer">
+          <a href="/projects/vcc-api-mcp/" class="card-link" target="_blank" rel="noopener">View deck <span aria-hidden="true">&nearr;</span></a>
+        </div>
+      </article>
+
+      <!-- Month 03 — Context Engineering -->
+      <article class="card pres-card reveal" data-category="saas">
+        <div class="card-top">
+          <span class="category-tag tag-saas">Vibe Code Club</span>
+          <span class="status-badge status-live">Month 03</span>
+        </div>
+        <div class="pres-meta">
+          <span>Context Engineering</span>
+          <span class="dot"></span>
+          <span>May 12, 2026</span>
+        </div>
+        <h3 class="card-title">Context Engineering — the universal upgrade</h3>
+        <p class="card-desc">The single biggest lever for AI output quality isn't the model — it's the context. How to assemble the right files, rules, references, and examples so the AI you already have produces work you can actually ship.</p>
+        <div class="tech-badges">
+          <span class="badge">Prompting</span>
+          <span class="badge">Workflow</span>
+          <span class="badge">Claude</span>
+        </div>
+        <div class="card-footer">
+          <a href="/projects/vcc-context-engineering/" class="card-link" target="_blank" rel="noopener">View deck <span aria-hidden="true">&nearr;</span></a>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- Contact / Footer -->
+<footer class="footer" id="contact">
+  <div class="container">
+    <div class="footer-content reveal">
+      <h2 class="footer-cta">Want me to speak?</h2>
+      <p class="footer-sub">I'm happy to come talk to your team, cohort, or conference about building real software with AI.</p>
+      <div class="footer-links">
+        <a href="https://linkedin.com/in/christopherkleinman" target="_blank" rel="noopener" class="footer-link">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          LinkedIn
+        </a>
+      </div>
+      <div class="footer-bottom">
+        <span class="therefore" aria-hidden="true">&there4;</span>
+        <span>Christopher Kleinman</span>
+        <span class="footer-sep">/</span>
+        <span id="footer-year"></span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="/scripts/main.js"></script>
+</body>
+</html>

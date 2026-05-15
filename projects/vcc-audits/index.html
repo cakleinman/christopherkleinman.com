@@ -1,0 +1,2203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AuditBuffet — Vibe Code Club</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700;800&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    /* ============================================================
+       CSS CUSTOM PROPERTIES
+    ============================================================ */
+    :root {
+      --bg-main: #FAF9F6;
+      --bg-card: #F5F3EF;
+      --bg-dark: #0d1117;
+      --fg: #2D2D2D;
+      --fg-muted: #6B6B6B;
+      --primary: #7D6548;
+      --secondary: #EDEAE4;
+      --border: #E0DDD7;
+      --destructive: #E74C3C;
+
+      --grade-a: #27AE60;
+      --grade-b: #2ECC71;
+      --grade-c: #F39C12;
+      --grade-d: #E67E22;
+      --grade-f: #C0392B;
+
+      --grade-a-from: #1B7A43;
+      --grade-a-to: #34D87A;
+      --grade-b-from: #1FA855;
+      --grade-b-to: #5EEEA0;
+      --grade-c-from: #C07B0A;
+      --grade-c-to: #F7C948;
+      --grade-d-from: #B8600F;
+      --grade-d-to: #F0A050;
+      --grade-f-from: #8B1E15;
+      --grade-f-to: #E05545;
+
+      --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* ============================================================
+       RESET & BASE
+    ============================================================ */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-main);
+      color: var(--fg);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ============================================================
+       SLIDE LAYOUT
+    ============================================================ */
+    #slides {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .slide {
+      width: 100vw;
+      height: 100vh;
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+      background: var(--bg-main);
+    }
+
+    .slide.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .slide-content {
+      max-width: 1200px;
+      width: 90%;
+      padding: 60px;
+    }
+
+    .slide.bg-dark {
+      background: var(--bg-dark);
+      color: #e6e6e6;
+    }
+
+    .slide.bg-primary {
+      background: var(--primary);
+      color: var(--bg-main);
+    }
+
+    /* ============================================================
+       TEXT UTILITIES
+    ============================================================ */
+    .text-huge {
+      font-size: 96px;
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -3px;
+    }
+
+    .text-big {
+      font-size: 64px;
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -2px;
+    }
+
+    .text-medium {
+      font-size: 48px;
+      font-weight: 700;
+      line-height: 1.2;
+      letter-spacing: -1px;
+    }
+
+    .text-body {
+      font-size: 28px;
+      font-weight: 400;
+      line-height: 1.5;
+    }
+
+    .text-small {
+      font-size: 22px;
+      line-height: 1.4;
+    }
+
+    .text-code {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .text-primary {
+      color: var(--primary);
+    }
+
+    .text-muted {
+      color: var(--fg-muted);
+    }
+
+    .text-brand {
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    .text-green {
+      color: var(--grade-a);
+    }
+
+    .text-red {
+      color: var(--grade-f);
+    }
+
+    .text-center {
+      text-align: center;
+    }
+
+    .text-left {
+      text-align: left;
+    }
+
+    /* ============================================================
+       LAYOUT UTILITIES
+    ============================================================ */
+    .flex-center {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .flex-col {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .flex-row {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+    }
+
+    .flex-wrap {
+      flex-wrap: wrap;
+    }
+
+    .gap-1 { gap: 8px; }
+    .gap-2 { gap: 16px; }
+    .gap-3 { gap: 24px; }
+    .gap-4 { gap: 32px; }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 2rem;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 2rem;
+    }
+
+    .mt-1 { margin-top: 16px; }
+    .mt-2 { margin-top: 24px; }
+    .mt-3 { margin-top: 32px; }
+    .mt-4 { margin-top: 48px; }
+
+    .mb-1 { margin-bottom: 16px; }
+    .mb-2 { margin-bottom: 24px; }
+    .mb-3 { margin-bottom: 32px; }
+    .mb-4 { margin-bottom: 48px; }
+
+    .w-full { width: 100%; }
+    .mx-auto { margin: 0 auto; }
+
+    /* ============================================================
+       FRAGMENT ANIMATION SYSTEM
+    ============================================================ */
+    .fragment {
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(30px);
+      transition: opacity 0.6s var(--spring),
+                  visibility 0.6s var(--spring),
+                  transform 0.6s var(--spring);
+      transition-delay: calc(var(--stagger, 0) * 100ms);
+    }
+
+    .fragment.visible {
+      opacity: 1;
+      visibility: visible;
+      transform: none;
+    }
+
+    /* Pop-in variant */
+    .fragment.pop-in {
+      transform: scale(0.3);
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .fragment.pop-in.visible {
+      transform: scale(1);
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Fade-up variant */
+    .fragment.fade-up {
+      transform: translateY(50px);
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .fragment.fade-up.visible {
+      transform: none;
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Slide-left variant */
+    .fragment.slide-left {
+      transform: translateX(-80px);
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .fragment.slide-left.visible {
+      transform: none;
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Slide-right variant */
+    .fragment.slide-right {
+      transform: translateX(80px);
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .fragment.slide-right.visible {
+      transform: none;
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Scale-bounce variant */
+    .fragment.scale-bounce {
+      transform: scale(0);
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .fragment.scale-bounce.visible {
+      transform: scale(1);
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* ============================================================
+       MOCK TERMINAL
+    ============================================================ */
+    .mock-terminal {
+      background: var(--bg-dark);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+      max-width: 900px;
+      width: 100%;
+    }
+
+    .terminal-header {
+      height: 40px;
+      background: #161b22;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      gap: 8px;
+    }
+
+    .terminal-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .terminal-dot.red    { background: #ff5f57; }
+    .terminal-dot.yellow { background: #febc2e; }
+    .terminal-dot.green  { background: #28c840; }
+
+    .terminal-title {
+      flex: 1;
+      text-align: center;
+      font-size: 13px;
+      color: #8b949e;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .terminal-body {
+      padding: 24px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 15px;
+      line-height: 1.7;
+      color: #e6edf3;
+      min-height: 200px;
+      position: relative;
+    }
+
+    .terminal-prompt  { color: #58a6ff; }
+    .terminal-comment { color: #8b949e; }
+    .terminal-string  { color: #a5d6ff; }
+    .terminal-number  { color: #79c0ff; }
+    .terminal-key     { color: #ff7b72; }
+    .terminal-bool    { color: #7ee787; }
+
+    .terminal-cursor {
+      display: inline-block;
+      width: 8px;
+      height: 18px;
+      background: #58a6ff;
+      animation: blink 1s step-end infinite;
+      vertical-align: middle;
+      margin-left: 1px;
+    }
+
+    /* ============================================================
+       MOCK CARD
+    ============================================================ */
+    .mock-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .mock-card.highlight {
+      border-color: var(--primary);
+      box-shadow: 0 4px 20px rgba(125, 101, 72, 0.15);
+    }
+
+    /* ============================================================
+       GRADE CIRCLES
+    ============================================================ */
+    .grade-circle {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      font-weight: 900;
+      border: 6px solid;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .grade-circle.grade-a {
+      border-color: var(--grade-a);
+      color: var(--grade-a);
+      box-shadow: 0 0 30px rgba(39, 174, 96, 0.3);
+    }
+
+    .grade-circle.grade-b {
+      border-color: var(--grade-b);
+      color: var(--grade-b);
+      box-shadow: 0 0 30px rgba(46, 204, 113, 0.3);
+    }
+
+    .grade-circle.grade-c {
+      border-color: var(--grade-c);
+      color: var(--grade-c);
+      box-shadow: 0 0 30px rgba(243, 156, 18, 0.3);
+    }
+
+    .grade-circle.grade-d {
+      border-color: var(--grade-d);
+      color: var(--grade-d);
+      box-shadow: 0 0 30px rgba(230, 126, 34, 0.3);
+    }
+
+    .grade-circle.grade-f {
+      border-color: var(--grade-f);
+      color: var(--grade-f);
+      box-shadow: 0 0 30px rgba(192, 57, 43, 0.3);
+    }
+
+    .grade-circle.small {
+      width: 80px;
+      height: 80px;
+      font-size: 32px;
+      border-width: 4px;
+    }
+
+    .grade-circle.large {
+      width: 160px;
+      height: 160px;
+      font-size: 64px;
+      border-width: 8px;
+    }
+
+    /* ============================================================
+       SEVERITY BADGES
+    ============================================================ */
+    .severity-badge {
+      display: inline-flex;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .severity-badge.critical {
+      background: rgba(192, 57, 43, 0.15);
+      color: var(--grade-f);
+    }
+
+    .severity-badge.high {
+      background: rgba(230, 126, 34, 0.15);
+      color: var(--grade-d);
+    }
+
+    .severity-badge.medium {
+      background: rgba(243, 156, 18, 0.15);
+      color: var(--grade-c);
+    }
+
+    .severity-badge.low {
+      background: rgba(46, 204, 113, 0.15);
+      color: var(--grade-b);
+    }
+
+    .severity-badge.info {
+      background: rgba(107, 107, 107, 0.15);
+      color: var(--fg-muted);
+    }
+
+    /* ============================================================
+       CHECK ROWS
+    ============================================================ */
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 20px;
+    }
+
+    .check-row:last-child {
+      border-bottom: none;
+    }
+
+    .check-icon {
+      font-weight: 700;
+      font-size: 20px;
+      flex-shrink: 0;
+      width: 24px;
+      text-align: center;
+    }
+
+    .check-icon.pass { color: var(--grade-a); }
+    .check-icon.pass::before { content: "\2713"; }
+    .check-icon.fail { color: var(--grade-f); }
+    .check-icon.fail::before { content: "\2717"; }
+
+    /* ============================================================
+       BAR CHART
+    ============================================================ */
+    .bar-chart {
+      display: flex;
+      align-items: flex-end;
+      gap: 16px;
+      height: 300px;
+      padding-top: 20px;
+    }
+
+    .bar-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      height: 100%;
+    }
+
+    .bar {
+      width: 100%;
+      border-radius: 8px 8px 0 0;
+      transition: height 1s var(--spring);
+      height: 0;
+      align-self: flex-end;
+    }
+
+    .bar.animate {
+      height: var(--bar-height);
+    }
+
+    .bar-label {
+      font-size: 14px;
+      margin-top: 8px;
+      text-align: center;
+      color: var(--fg-muted);
+    }
+
+    .bar-value {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    /* ============================================================
+       PROGRESS BAR (content component)
+    ============================================================ */
+    .progress-bar-track {
+      width: 100%;
+      height: 8px;
+      background: var(--secondary);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 1s var(--spring);
+    }
+
+    /* ============================================================
+       STACK BADGE
+    ============================================================ */
+    .stack-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 14px;
+      background: var(--secondary);
+      color: var(--fg);
+      font-weight: 500;
+      gap: 4px;
+    }
+
+    /* ============================================================
+       PRICE TAG
+    ============================================================ */
+    .price-tag {
+      font-size: 96px;
+      font-weight: 900;
+      color: var(--primary);
+    }
+
+    .price-tag .period {
+      font-size: 32px;
+      font-weight: 400;
+      color: var(--fg-muted);
+    }
+
+    /* ============================================================
+       LOGO
+    ============================================================ */
+    .logo-inline {
+      display: inline-block;
+    }
+
+    .logo-inline svg {
+      height: 60px;
+      width: auto;
+    }
+
+    /* ============================================================
+       TOOL LOGO
+    ============================================================ */
+    .tool-logo {
+      width: 80px;
+      height: 80px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+
+    /* ============================================================
+       KPI CARD
+    ============================================================ */
+    .kpi-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .kpi-value {
+      font-size: 48px;
+      font-weight: 900;
+    }
+
+    .kpi-label {
+      font-size: 16px;
+      color: var(--fg-muted);
+      margin-top: 4px;
+    }
+
+    /* ============================================================
+       COMPARE COLUMNS
+    ============================================================ */
+    .compare-col {
+      flex: 1;
+      padding: 32px;
+      border-radius: 12px;
+    }
+
+    .compare-col.bad {
+      background: rgba(192, 57, 43, 0.08);
+      border: 1px solid rgba(192, 57, 43, 0.2);
+    }
+
+    .compare-col.good {
+      background: rgba(39, 174, 96, 0.08);
+      border: 1px solid rgba(39, 174, 96, 0.2);
+    }
+
+    /* ============================================================
+       CYCLE DIAGRAM
+    ============================================================ */
+    .cycle-diagram {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .cycle-node {
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+    }
+
+    .cycle-arrow {
+      font-size: 24px;
+      color: var(--primary);
+    }
+
+    /* ============================================================
+       SCORE CIRCLE (Lighthouse-style)
+    ============================================================ */
+    .score-circle {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 5px solid;
+      flex-shrink: 0;
+    }
+
+    .score-circle .score-value {
+      font-size: 28px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .score-circle .score-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 2px;
+    }
+
+    /* ============================================================
+       SLIDE PROGRESS BAR (fixed, bottom of screen)
+    ============================================================ */
+    #progress-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      height: 4px;
+      background: var(--primary);
+      transition: width 0.3s ease;
+      z-index: 100;
+      width: 0%;
+    }
+
+    /* ============================================================
+       SLIDE COUNTER
+    ============================================================ */
+    #slide-counter {
+      position: fixed;
+      bottom: 16px;
+      right: 24px;
+      font-size: 16px;
+      color: var(--fg-muted);
+      z-index: 100;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ============================================================
+       KEYFRAMES
+    ============================================================ */
+    /* Warning shake entrance — replaces fade-up for "tends to miss" items */
+    @keyframes warningShake {
+      0% { transform: translateX(-12px); opacity: 0; }
+      15% { opacity: 1; }
+      20% { transform: translateX(8px); opacity: 1; }
+      40% { transform: translateX(-5px); opacity: 1; }
+      60% { transform: translateX(3px); opacity: 1; }
+      80% { transform: translateX(-1px); opacity: 1; }
+      100% { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes warningFlash {
+      0% { background: rgba(231, 76, 60, 0.3); border-radius: 6px; }
+      100% { background: transparent; }
+    }
+    .fragment.shake-in {
+      transform: translateX(-12px);
+      opacity: 0;
+      visibility: hidden;
+    }
+    .fragment.shake-in.visible {
+      opacity: 1;
+      transform: translateX(0);
+      visibility: visible;
+      transition: none !important;
+      animation: warningShake 0.6s ease-out, warningFlash 1s ease-out;
+    }
+
+    /* Impact zoom — "1" flies in big and slams into place */
+    @keyframes impactZoom {
+      0% { transform: scale(15); opacity: 1; }
+      60% { transform: scale(1); }
+      72% { transform: scale(0.92); }
+      84% { transform: scale(1.04); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    @keyframes screenShake {
+      0% { transform: translate(0, 0) rotate(0); }
+      12% { transform: translate(-8px, 5px) rotate(-0.5deg); }
+      24% { transform: translate(7px, -4px) rotate(0.4deg); }
+      36% { transform: translate(-5px, 3px) rotate(-0.3deg); }
+      48% { transform: translate(4px, -2px) rotate(0.2deg); }
+      60% { transform: translate(-2px, 1px) rotate(-0.1deg); }
+      100% { transform: translate(0, 0) rotate(0); }
+    }
+    .fragment.impact-zoom {
+      opacity: 0;
+      transform: scale(15);
+      visibility: hidden;
+    }
+    .fragment.impact-zoom.visible {
+      opacity: 1;
+      transform: scale(1);
+      visibility: visible;
+      transition: none !important;
+      animation: impactZoom 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .slide.shaking {
+      animation: screenShake 0.6s ease-out;
+    }
+
+    /* Live score counter */
+    .score-counter {
+      font-size: 64px;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+      transition: color 0.3s ease;
+    }
+    .grade-letter-live {
+      font-size: 48px;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+      transition: color 0.3s ease;
+    }
+
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50%       { transform: scale(1.05); }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-10px); }
+    }
+
+    @keyframes countup {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    @keyframes gradePop {
+      0%   { transform: scale(0);   opacity: 0; }
+      60%  { transform: scale(1.2);             }
+      100% { transform: scale(1);   opacity: 1; }
+    }
+
+    @keyframes slideInFromRight {
+      from { transform: translateX(100px); opacity: 0; }
+      to   { transform: none;              opacity: 1; }
+    }
+
+    @keyframes fadeInUp {
+      from { transform: translateY(40px); opacity: 0; }
+      to   { transform: none;             opacity: 1; }
+    }
+
+    @keyframes typewriter-blink {
+      50% { border-color: transparent; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="progress-bar"></div>
+  <div id="slide-counter"></div>
+
+  <div id="slides">
+
+
+<!-- ============================================================
+     ACT 1: WHY AUDITS MATTER
+     ============================================================ -->
+
+<!-- Slide 1: Title -->
+<section class="slide bg-dark">
+  <div class="slide-content flex-col flex-center text-center" style="min-height: 100vh; justify-content: center; gap: 48px;">
+    <div>
+      <p class="text-small" style="margin: 0 0 16px 0; color: #58a6ff; font-weight: 600; text-transform: uppercase; letter-spacing: 0.15em;">Vibe Code Club <em style="font-weight: 400; text-transform: none; letter-spacing: 0;">for Entrepreneurs</em></p>
+      <p class="text-huge" style="margin: 0; line-height: 1.05;">Auditing Your<br>AI-Built Projects</p>
+    </div>
+    <div class="fragment fade-up" style="--stagger: 0;">
+      <div style="width: 60px; height: 2px; background: #58a6ff; margin: 0 auto 16px auto; border-radius: 1px;"></div>
+      <p class="text-small" style="margin: 0; color: #8b949e;">Christopher Kleinman</p>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 2: AI tools build fast -->
+<section class="slide">
+  <div class="slide-content flex-col flex-center text-center" style="min-height: 100vh; justify-content: center; gap: 48px;">
+    <p class="text-big" style="margin: 0;">AI tools build fast.<br>That&rsquo;s the point.</p>
+
+    <div class="flex-row flex-wrap flex-center gap-3" style="justify-content: center;">
+      <div class="tool-logo fragment pop-in" style="--stagger: 0; background: #D97706; color: #fff;">Claude Code</div>
+      <div class="tool-logo fragment pop-in" style="--stagger: 1; background: #111; color: #fff;">Cursor</div>
+      <div class="tool-logo fragment pop-in" style="--stagger: 2; background: #7C3AED; color: #fff;">Bolt</div>
+      <div class="tool-logo fragment pop-in" style="--stagger: 3; background: #EC4899; color: #fff;">Lovable</div>
+      <div class="tool-logo fragment pop-in" style="--stagger: 4; background: #111; color: #fff;">v0</div>
+      <div class="tool-logo fragment pop-in" style="--stagger: 5; background: #0EA5E9; color: #fff;">Windsurf</div>
+    </div>
+
+    <p class="text-body text-muted fragment fade-up" style="--stagger: 6; margin: 0; max-width: 700px;">
+      These are amazing. You&rsquo;re building real things.<br>But building fast creates a specific kind of risk.
+    </p>
+  </div>
+</section>
+
+<!-- Slide 3: What AI tools are great at / What they miss -->
+<section class="slide">
+  <div class="slide-content flex-col" style="min-height: 100vh; justify-content: center; gap: 32px; padding: 60px 0;">
+    <p class="text-big text-center" style="margin: 0;">What AI Tools Optimize For</p>
+
+    <div class="grid-2 gap-4">
+      <div class="compare-col good" style="display: flex; flex-direction: column; gap: 16px; padding: 28px 32px;">
+        <p class="text-body" style="margin: 0 0 4px 0; font-weight: 700;">Great at</p>
+        <div class="fragment fade-up" style="--stagger: 0;"><span class="text-small"><strong>UI components &amp; layouts</strong></span></div>
+        <div class="fragment fade-up" style="--stagger: 2;"><span class="text-small"><strong>Routing &amp; navigation</strong></span></div>
+        <div class="fragment fade-up" style="--stagger: 4;"><span class="text-small"><strong>Database basics</strong> <span style="font-size: 17px; color: var(--fg-muted);">(create, read, update, delete)</span></span></div>
+        <div class="fragment fade-up" style="--stagger: 6;"><span class="text-small"><strong>Getting to &ldquo;it works!&rdquo;</strong></span></div>
+      </div>
+
+      <div class="compare-col bad" style="display: flex; flex-direction: column; gap: 16px; padding: 28px 32px;">
+        <p class="text-body" style="margin: 0 0 4px 0; font-weight: 700;">Tends to miss</p>
+        <div class="fragment shake-in" style="--stagger: 12;"><span class="text-small"><strong>Security headers</strong> <span style="font-size: 17px; color: var(--fg-muted);">(rules that protect your site from attacks)</span></span></div>
+        <div class="fragment shake-in" style="--stagger: 14;"><span class="text-small"><strong>Rate limiting</strong> <span style="font-size: 17px; color: var(--fg-muted);">(capping how often someone can hit your server)</span></span></div>
+        <div class="fragment shake-in" style="--stagger: 16;"><span class="text-small"><strong>Accessibility</strong> <span style="font-size: 17px; color: var(--fg-muted);">(making your app usable for people with disabilities)</span></span></div>
+        <div class="fragment shake-in" style="--stagger: 18;"><span class="text-small"><strong>Secret keys</strong> <span style="font-size: 17px; color: var(--fg-muted);">leaking into your public code</span></span></div>
+      </div>
+    </div>
+
+    <p class="text-body text-muted text-center fragment fade-up" style="--stagger: 21; margin: 0;">
+      They&rsquo;re built to answer <strong>&ldquo;does it work?&rdquo;</strong> not <strong>&ldquo;is it safe to ship?&rdquo;</strong>
+    </p>
+  </div>
+</section>
+
+<!-- Slide 4: Real consequences -->
+<section class="slide">
+  <div class="slide-content flex-col flex-center" style="min-height: 100vh; justify-content: center; gap: 40px;">
+    <p class="text-big text-center" style="margin: 0;">Real Consequences<br>for Entrepreneurs</p>
+
+    <p class="text-body text-muted text-center fragment fade-up" style="--stagger: 0; margin: 0; max-width: 700px;">
+      A hobby project with missing security headers is probably fine.<br>A SaaS with paying customers? That&rsquo;s a different story.
+    </p>
+
+    <div class="grid-3 gap-3">
+      <div class="kpi-card fragment pop-in" style="--stagger: 1;" data-kpi="money" data-kpi-target="488">
+        <div class="kpi-value text-red" data-kpi-display>$0</div>
+        <div class="kpi-label">Avg. data breach cost<br><span style="font-size: 11px; opacity: 0.6;">IBM Cost of a Data Breach Report, 2024</span></div>
+      </div>
+      <div class="kpi-card fragment pop-in" style="--stagger: 2;" data-kpi="number" data-kpi-target="4000">
+        <div class="kpi-value" style="color: var(--grade-d);" data-kpi-display>0</div>
+        <div class="kpi-label">Accessibility lawsuits (ADA) in 2025</div>
+      </div>
+      <div class="kpi-card fragment impact-zoom" style="--stagger: 12;" id="impact-card">
+        <div class="kpi-value" style="color: var(--grade-c);">1</div>
+        <div class="kpi-label">Incident to lose trust</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 5: The good news -->
+<section class="slide bg-dark">
+  <div class="slide-content flex-col flex-center text-center" style="min-height: 100vh; justify-content: center; gap: 32px;">
+    <p class="text-huge" style="margin: 0; line-height: 1.1;">The good news:</p>
+    <p class="text-huge text-green fragment pop-in" style="--stagger: 0; margin: 0; line-height: 1.1;">Audits are easy.</p>
+    <p class="text-medium fragment fade-up" style="--stagger: 1; margin: 0; color: #e6e6e6; max-width: 700px;">
+      Your AI tool can do most of the work.
+    </p>
+  </div>
+</section>
+
+
+<!-- ============================================================
+     ACT 2: HOW TO AUDIT (THE SPECTRUM)
+     ============================================================ -->
+
+<!-- Slide 6: Start right now for free -->
+<section class="slide">
+  <div class="slide-content flex-col flex-center" style="min-height: 100vh; justify-content: center; gap: 36px;">
+    <p class="text-big text-center" style="margin: 0;">You can start right now, for free.</p>
+
+    <div class="mock-terminal fragment fade-up" style="--stagger: 0;">
+      <div class="terminal-header">
+        <div class="terminal-dot red"></div>
+        <div class="terminal-dot yellow"></div>
+        <div class="terminal-dot green"></div>
+        <div class="terminal-title">your-ai-tool</div>
+      </div>
+      <div class="terminal-body" style="min-height: 200px;">
+        <div id="typer-output" style="color: #e6edf3; white-space: pre-wrap;"></div>
+        <span id="typer-cursor" class="terminal-cursor"></span>
+      </div>
+    </div>
+    <script>
+    (function() {
+      // Custom typewriter with backspace support for slide 6
+      var actions = [
+        // Each action: {type:'char', ch:'x'} or {type:'pause', ms:N} or {type:'backspace', count:N}
+      ];
+      var text1 = "Hey Claude, I'm worried that someone nefarious might hack my app. Could you review it for security ";
+      var typo1 = "vulner";
+      var typo1b = "abiilties";
+      var typo2 = "vulner";
+      var typo2b = "ablities";
+      var typo3 = "vuln";
+      var finalWord = "problems";
+      var text2 = ", missing headers, and exposed secrets?";
+
+      // Type main text
+      for (var i = 0; i < text1.length; i++) actions.push({type:'char', ch: text1[i]});
+      // Type first misspelling: "vulnerabiilties"
+      for (var i = 0; i < typo1.length; i++) actions.push({type:'char', ch: typo1[i]});
+      for (var i = 0; i < typo1b.length; i++) actions.push({type:'char', ch: typo1b[i], slow: true});
+      actions.push({type:'pause', ms: 600});
+      // Backspace the whole word
+      for (var i = 0; i < (typo1.length + typo1b.length); i++) actions.push({type:'backspace'});
+      actions.push({type:'pause', ms: 300});
+      // Type second misspelling: "vulnerablities"
+      for (var i = 0; i < typo2.length; i++) actions.push({type:'char', ch: typo2[i]});
+      for (var i = 0; i < typo2b.length; i++) actions.push({type:'char', ch: typo2b[i], slow: true});
+      actions.push({type:'pause', ms: 500});
+      // Backspace again
+      for (var i = 0; i < (typo2.length + typo2b.length); i++) actions.push({type:'backspace'});
+      actions.push({type:'pause', ms: 300});
+      // Type third attempt: "vuln"
+      for (var i = 0; i < typo3.length; i++) actions.push({type:'char', ch: typo3[i]});
+      actions.push({type:'pause', ms: 400});
+      // Backspace
+      for (var i = 0; i < typo3.length; i++) actions.push({type:'backspace'});
+      actions.push({type:'pause', ms: 500});
+      // Give up, type "problems"
+      for (var i = 0; i < finalWord.length; i++) actions.push({type:'char', ch: finalWord[i]});
+      // Finish the sentence
+      for (var i = 0; i < text2.length; i++) actions.push({type:'char', ch: text2[i]});
+
+      var output = null;
+      var cursor = null;
+      var actionIdx = 0;
+      var currentText = '';
+      var started = false;
+
+      function runAction() {
+        if (actionIdx >= actions.length) return;
+        var a = actions[actionIdx];
+        actionIdx++;
+        var delay = 35;
+        if (a.type === 'char') {
+          currentText += a.ch;
+          output.textContent = currentText;
+          if (a.slow) delay = 90;
+        } else if (a.type === 'backspace') {
+          currentText = currentText.slice(0, -1);
+          output.textContent = currentText;
+          delay = 40;
+        } else if (a.type === 'pause') {
+          delay = a.ms;
+        }
+        setTimeout(runAction, delay);
+      }
+
+      // Hook into the slide system: start typing when this slide becomes active
+      var checkInterval = setInterval(function() {
+        if (window.presentation && !started) {
+          output = document.getElementById('typer-output');
+          cursor = document.getElementById('typer-cursor');
+          if (!output) return;
+
+          // Watch for slide activation
+          var observer = new MutationObserver(function() {
+            var slide = output.closest('.slide');
+            if (slide && slide.classList.contains('active') && !started) {
+              started = true;
+              setTimeout(runAction, 800);
+            }
+            // Reset if slide becomes inactive
+            if (slide && !slide.classList.contains('active') && started) {
+              started = false;
+              actionIdx = 0;
+              currentText = '';
+              output.textContent = '';
+            }
+          });
+          var slide = output.closest('.slide');
+          if (slide) {
+            observer.observe(slide, {attributes: true, attributeFilter: ['class']});
+            // Check if already active
+            if (slide.classList.contains('active')) {
+              started = true;
+              setTimeout(runAction, 800);
+            }
+          }
+          clearInterval(checkInterval);
+        }
+      }, 100);
+    })();
+    </script>
+
+    <p class="text-body text-muted text-center fragment fade-up" style="--stagger: 1; margin: 0;">
+      The simplest audit is just asking. This catches the obvious stuff.<br><strong>Do this today.</strong>
+    </p>
+  </div>
+</section>
+
+<!-- Slide 7: Better prompts = better audits -->
+<section class="slide">
+  <div class="slide-content flex-col" style="min-height: 100vh; justify-content: center; gap: 32px; padding: 60px 0;">
+    <p class="text-big text-center" style="margin: 0;">Better prompts = better audits</p>
+
+    <div class="flex-col gap-2" style="max-width: 800px; margin: 0 auto; width: 100%;">
+      <div class="mock-card fragment fade-up" style="--stagger: 0; padding: 16px 24px; border-left: 4px solid var(--grade-a); font-family: 'JetBrains Mono', monospace; font-size: 18px;">
+        &ldquo;Check all API routes for rate limiting&rdquo; <span style="color: var(--fg-muted); font-family: Inter, sans-serif; font-size: 14px;">(abuse prevention)</span>
+      </div>
+      <div class="mock-card fragment fade-up" style="--stagger: 1; padding: 16px 24px; border-left: 4px solid var(--grade-c); font-family: 'JetBrains Mono', monospace; font-size: 18px;">
+        &ldquo;Find any hardcoded keys or secrets in client-side code&rdquo;
+      </div>
+      <div class="mock-card fragment fade-up" style="--stagger: 2; padding: 16px 24px; border-left: 4px solid var(--primary); font-family: 'JetBrains Mono', monospace; font-size: 18px;">
+        &ldquo;Verify HTTPS enforcement and security headers&rdquo;
+      </div>
+    </div>
+
+    <p class="text-body text-muted text-center fragment fade-up" style="--stagger: 3; margin: 0;">
+      More specific = more useful. Tell it exactly what to look for.
+    </p>
+  </div>
+</section>
+
+<!-- Slide 8: The limitation of ad-hoc prompts -->
+<section class="slide">
+  <div class="slide-content flex-col flex-center text-center" style="min-height: 100vh; justify-content: center; gap: 40px;">
+    <p class="text-big" style="margin: 0;">But ad-hoc prompts have limits.</p>
+
+    <div class="grid-2 gap-3" style="max-width: 800px; width: 100%;">
+      <div class="mock-card fragment pop-in" style="--stagger: 0; padding: 18px 24px; text-align: left;">
+        <span class="text-red" style="font-weight: 800; font-size: 20px;">&times;</span>
+        <span class="text-small" style="margin-left: 8px;">Inconsistent: different every time</span>
+      </div>
+      <div class="mock-card fragment pop-in" style="--stagger: 1; padding: 18px 24px; text-align: left;">
+        <span class="text-red" style="font-weight: 800; font-size: 20px;">&times;</span>
+        <span class="text-small" style="margin-left: 8px;">Not tracked. No history.</span>
+      </div>
+      <div class="mock-card fragment pop-in" style="--stagger: 2; padding: 18px 24px; text-align: left;">
+        <span class="text-red" style="font-weight: 800; font-size: 20px;">&times;</span>
+        <span class="text-small" style="margin-left: 8px;">Not benchmarked. Is 85 good?</span>
+      </div>
+      <div class="mock-card fragment pop-in" style="--stagger: 3; padding: 18px 24px; text-align: left;">
+        <span class="text-red" style="font-weight: 800; font-size: 20px;">&times;</span>
+        <span class="text-small" style="margin-left: 8px;">Limited by what you know to ask</span>
+      </div>
+    </div>
+
+    <p class="text-body text-primary fragment fade-up" style="--stagger: 4; margin: 0; font-weight: 600;">
+      You can&rsquo;t audit for things you haven&rsquo;t thought of.
+    </p>
+  </div>
+</section>
+
+<!-- Slide 9: Formalized tools you should know -->
+<section class="slide">
+  <div class="slide-content flex-col" style="min-height: 100vh; justify-content: center; gap: 32px; padding: 60px 0;">
+    <p class="text-big text-center" style="margin: 0;">Free Tools You Should Know</p>
+
+    <div class="grid-2 gap-3">
+      <div class="mock-card fragment fade-up" style="--stagger: 0; padding: 20px 24px; display: flex; gap: 16px; align-items: flex-start;">
+        <span style="font-size: 26px; line-height: 1; color: var(--grade-c); font-weight: 800;">LH</span>
+        <div>
+          <p class="text-body" style="margin: 0; font-weight: 600;">Lighthouse</p>
+          <p class="text-small text-muted" style="margin: 2px 0 0 0;">Performance &amp; SEO. Built into Chrome DevTools.</p>
+        </div>
+      </div>
+      <div class="mock-card fragment fade-up" style="--stagger: 1; padding: 20px 24px; display: flex; gap: 16px; align-items: flex-start;">
+        <span style="font-size: 26px; line-height: 1; color: #7C3AED; font-weight: 800;">axe</span>
+        <div>
+          <p class="text-body" style="margin: 0; font-weight: 600;">axe DevTools</p>
+          <p class="text-small text-muted" style="margin: 2px 0 0 0;">Accessibility. Free browser extension.</p>
+        </div>
+      </div>
+      <div class="mock-card fragment fade-up" style="--stagger: 2; padding: 20px 24px; display: flex; gap: 16px; align-items: flex-start;">
+        <span style="font-size: 26px; line-height: 1; color: #2980B9; font-weight: 800;">ES</span>
+        <div>
+          <p class="text-body" style="margin: 0; font-weight: 600;">ESLint</p>
+          <p class="text-small text-muted" style="margin: 2px 0 0 0;">Code quality. Probably already in your project.</p>
+        </div>
+      </div>
+      <div class="mock-card fragment fade-up" style="--stagger: 3; padding: 20px 24px; display: flex; gap: 16px; align-items: flex-start;">
+        <span style="font-size: 26px; line-height: 1; color: var(--grade-f); font-weight: 800;">MO</span>
+        <div>
+          <p class="text-body" style="margin: 0; font-weight: 600;">Mozilla Observatory</p>
+          <p class="text-small text-muted" style="margin: 2px 0 0 0;">Security headers. Free website scan.</p>
+        </div>
+      </div>
+    </div>
+
+    <p class="text-body text-muted text-center fragment fade-up" style="--stagger: 4; margin: 0;">
+      Free, standardized, and repeatable. <strong>Use them.</strong>
+    </p>
+  </div>
+</section>
+
+<!-- Slide 10: What formalized tools give you -->
+<section class="slide">
+  <div class="slide-content flex-col flex-center text-center" style="min-height: 100vh; justify-content: center; gap: 40px;">
+    <p class="text-big" style="margin: 0;">What Formalized Tools Give You</p>
+
+    <div class="flex-row gap-4 fragment fade-up" style="--stagger: 0; justify-content: center;">
+      <div class="score-circle" style="border-color: var(--grade-a); color: var(--grade-a);">
+        <span class="score-value">96</span>
+        <span class="score-label">Perf</span>
+      </div>
+      <div class="score-circle" style="border-color: var(--grade-b); color: var(--grade-b);">
+        <span class="score-value">82</span>
+        <span class="score-label">Access.</span>
+      </div>
+      <div class="score-circle" style="border-color: var(--grade-a); color: var(--grade-a);">
+        <span class="score-value">100</span>
+        <span class="score-label">Best Prac</span>
+      </div>
+      <div class="score-circle" style="border-color: var(--grade-a); color: var(--grade-a);">
+        <span class="score-value">91</span>
+        <span class="score-label">SEO</span>
+      </div>
+    </div>
+
+    <div class="grid-2 gap-3" style="max-width: 700px; width: 100%;">
+      <div class="fragment fade-up" style="--stagger: 1;"><span class="text-small"><strong style="color: var(--grade-a);">&check;</strong> Consistent checks</span></div>
+      <div class="fragment fade-up" style="--stagger: 2;"><span class="text-small"><strong style="color: var(--grade-a);">&check;</strong> Scores you can track</span></div>
+      <div class="fragment fade-up" style="--stagger: 3;"><span class="text-small"><strong style="color: var(--grade-a);">&check;</strong> Industry standards</span></div>
+      <div class="fragment fade-up" style="--stagger: 4;"><span class="text-small"><strong style="color: var(--grade-a);">&check;</strong> Tells you how to fix it</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 11: The gap -->
+<section class="slide bg-dark">
+  <div class="slide-content flex-col flex-center text-center" style="min-height: 100vh; justify-content: center; gap: 32px;">
+    <p class="text-huge" style="margin: 0; line-height: 1.1;">The Gap</p>
+
+    <div class="flex-col gap-2 fragment fade-up" style="--stagger: 0; max-width: 700px;">
+      <p class="text-body" style="margin: 0; color: #999;">Lighthouse doesn&rsquo;t check your <strong style="color: #e6e6e6;">API security</strong>.</p>
+      <p class="text-body" style="margin: 0; color: #999;">axe doesn&rsquo;t check your <strong style="color: #e6e6e6;">payment flow</strong>.</p>
+      <p class="text-body" style="margin: 0; color: #999;">ESLint doesn&rsquo;t know about <strong style="color: #e6e6e6;">EU privacy law</strong>.</p>
+    </div>
+
+    <p class="text-medium fragment pop-in" style="--stagger: 1; margin: 0; color: var(--grade-c);">
+      For AI-built projects, you need something<br>that covers the full surface area.
+    </p>
+  </div>
+</section>
+
+
+<!-- ============================================================
+     ACT 3: AUDITBUFFET - ONE SOLUTION
+     ============================================================ -->
+
+<!-- Slide 12: This is what I built -->
+<section class="slide">
+  <div class="slide-content flex-col flex-center text-center" style="min-height: 100vh; justify-content: center; gap: 32px;">
+    <p class="text-body text-muted fragment fade-up" style="--stagger: 0; margin: 0;">
+      I ran into this exact problem building my own projects. So I built&hellip;
+    </p>
+
+    <div class="fragment scale-bounce" style="--stagger: 1;">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="46 118 108 68" style="height: 100px;">
+        <g stroke="#2D2D2D" stroke-width="3" fill="#FDFDFD" stroke-linejoin="round">
+          <polygon points="50,170 150,170 138,182 62,182"/>
+          <polygon points="50,158 150,158 138,170 62,170"/>
+          <polygon points="50,146 150,146 138,158 62,158"/>
+          <polygon points="50,134 150,134 138,146 62,146"/>
+          <polygon points="50,122 150,122 138,134 62,134"/>
+        </g>
+      </svg>
+    </div>
+
+    <p class="text-huge fragment pop-in" style="--stagger: 2; margin: 0; line-height: 1; font-family: 'Fraunces', serif; color: #2D2D2D;">AuditBuffet</p>
+
+    <p class="text-body text-muted fragment fade-up" style="--stagger: 3; margin: 0; max-width: 700px;">
+      97 audit prompts across security, accessibility, SEO, performance, privacy, compliance, and more.
+    </p>
+  </div>
+</section>
+
+<!-- Slide 13: The feedback loop -->
+<section class="slide bg-dark">
+  <div class="slide-content flex-col flex-center" style="min-height: 100vh; justify-content: center; gap: 48px;">
+
+    <p class="text-big text-center" style="margin: 0; line-height: 1.2;">The audits get better<br>every time someone runs one.</p>
+
+    <div class="flex-row gap-3 fragment fade-up" style="--stagger: 0; justify-content: center; align-items: center;">
+      <div style="text-align: center; padding: 16px 24px;">
+        <p style="font-size: 36px; font-weight: 800; color: #e6e6e6; margin: 0;">You run an audit</p>
+      </div>
+      <span style="font-size: 32px; color: #58a6ff;">&rarr;</span>
+      <div style="text-align: center; padding: 16px 24px;">
+        <p style="font-size: 36px; font-weight: 800; color: #e6e6e6; margin: 0;">We see what fails</p>
+      </div>
+      <span style="font-size: 32px; color: #58a6ff;">&rarr;</span>
+      <div style="text-align: center; padding: 16px 24px;">
+        <p style="font-size: 36px; font-weight: 800; color: #e6e6e6; margin: 0;">We improve the checks</p>
+      </div>
+    </div>
+
+    <p class="text-body fragment fade-up" style="--stagger: 1; margin: 0; color: #999; text-align: center;">
+      A DIY prompt learns from a sample size of one.
+    </p>
+
+  </div>
+</section>
+
+<!-- Slide 14: How it works -->
+<section class="slide">
+  <div class="slide-content flex-col flex-center" style="min-height: 100vh; justify-content: center; gap: 40px;">
+    <p class="text-big text-center" style="margin: 0;">How It Works</p>
+
+    <div class="grid-3 gap-3" style="max-width: 900px; width: 100%;">
+      <div class="mock-card fragment pop-in" style="--stagger: 0; text-align: center; padding: 28px 20px;">
+        <div style="font-size: 48px; margin-bottom: 12px;">1</div>
+        <p class="text-body" style="margin: 0 0 8px 0; font-weight: 700;">Copy the prompt</p>
+        <p class="text-small text-muted" style="margin: 0;">From AuditBuffet.com</p>
+      </div>
+      <div class="mock-card fragment pop-in" style="--stagger: 1; text-align: center; padding: 28px 20px;">
+        <div style="font-size: 48px; margin-bottom: 12px;">2</div>
+        <p class="text-body" style="margin: 0 0 8px 0; font-weight: 700;">Paste into your AI tool</p>
+        <p class="text-small text-muted" style="margin: 0;">Claude, Cursor, Bolt, anything</p>
+      </div>
+      <div class="mock-card fragment pop-in" style="--stagger: 2; text-align: center; padding: 28px 20px;">
+        <div style="font-size: 48px; margin-bottom: 12px;">3</div>
+        <p class="text-body" style="margin: 0 0 8px 0; font-weight: 700;">It runs the audit</p>
+        <p class="text-small text-muted" style="margin: 0;">The AI does the work</p>
+      </div>
+    </div>
+
+    <p class="text-body text-muted text-center fragment fade-up" style="--stagger: 3; margin: 0;">
+      Works in Claude Code, Cursor, Bolt, Lovable. Whatever you use.
+    </p>
+  </div>
+</section>
+
+<!-- Slide 15: What you get back -->
+<section class="slide">
+  <div class="slide-content flex-col" style="min-height: 100vh; justify-content: center; gap: 28px; padding: 60px 0;">
+    <p class="text-big text-center" style="margin: 0;">What You Get Back</p>
+
+    <div class="flex-row gap-4" style="align-items: flex-start;">
+      <!-- Check results -->
+      <div class="flex-col gap-1" style="flex: 1;">
+        <div class="mock-card fragment fade-up" style="--stagger: 0; padding: 14px 20px; display: flex; align-items: center; gap: 12px;">
+          <span class="check-icon pass"></span>
+          <span class="text-small" style="flex: 1;">HTTPS enforced</span>
+          <span class="severity-badge critical">CRITICAL</span>
+        </div>
+        <div class="mock-card fragment fade-up" style="--stagger: 1; padding: 14px 20px; display: flex; align-items: center; gap: 12px;">
+          <span class="check-icon fail"></span>
+          <span class="text-small" style="flex: 1;">No security headers configured</span>
+          <span class="severity-badge critical">CRITICAL</span>
+        </div>
+        <div class="mock-card fragment fade-up" style="--stagger: 2; padding: 14px 20px; display: flex; align-items: center; gap: 12px;">
+          <span class="check-icon fail"></span>
+          <span class="text-small" style="flex: 1;">API key exposed in client bundle</span>
+          <span class="severity-badge high">HIGH</span>
+        </div>
+        <div class="mock-card fragment fade-up" style="--stagger: 3; padding: 14px 20px; display: flex; align-items: center; gap: 12px;">
+          <span class="check-icon fail"></span>
+          <span class="text-small" style="flex: 1;">No rate limiting on API</span>
+          <span class="severity-badge critical">CRITICAL</span>
+        </div>
+        <div class="mock-card fragment fade-up" style="--stagger: 4; padding: 14px 20px; display: flex; align-items: center; gap: 12px;">
+          <span class="check-icon fail"></span>
+          <span class="text-small" style="flex: 1;">No error boundaries</span>
+          <span class="severity-badge medium">MEDIUM</span>
+        </div>
+      </div>
+
+      <!-- Grade -->
+      <div class="flex-col flex-center gap-2 fragment pop-in" style="--stagger: 5; min-width: 180px;">
+        <div class="grade-circle large grade-f">F</div>
+        <div style="text-align: center; margin-top: 8px;">
+          <p class="text-body" style="margin: 0; font-weight: 700;">Score: 38</p>
+          <p class="text-small text-muted" style="margin: 0;">Security Headers</p>
+        </div>
+      </div>
+    </div>
+
+    <p class="text-body text-primary text-center fragment fade-up" style="--stagger: 6; margin: 0; font-weight: 600;">
+      Every failed check tells you exactly what&rsquo;s wrong and how to fix it.
+    </p>
+  </div>
+</section>
+
+<!-- Slide 16: The audit-fix-re-audit loop -->
+<section class="slide">
+  <div class="slide-content flex-col flex-center" style="min-height: 100vh; justify-content: center; gap: 40px;">
+    <p class="text-big text-center" style="margin: 0;">The Real Workflow</p>
+
+    <div class="cycle-diagram fragment fade-up" style="--stagger: 0; font-size: 22px;">
+      <div class="cycle-node" style="background: rgba(39,174,96,0.1); border-color: var(--grade-a);">Run Audit</div>
+      <span class="cycle-arrow">&rarr;</span>
+      <div class="cycle-node" style="background: rgba(243,156,18,0.1); border-color: var(--grade-c);">Fix Issues</div>
+      <span class="cycle-arrow">&rarr;</span>
+      <div class="cycle-node" style="background: rgba(39,174,96,0.1); border-color: var(--grade-a);">Run Again</div>
+      <span class="cycle-arrow">&rarr;</span>
+      <div class="cycle-node" style="background: rgba(46,204,113,0.1); border-color: var(--grade-b);">Score Goes Up</div>
+    </div>
+
+    <!-- Live score counter + bar chart -->
+    <div class="fragment fade-up" style="--stagger: 1; width: 100%; max-width: 700px;">
+      <div style="display: flex; align-items: center; gap: 40px;">
+
+        <!-- Live score display -->
+        <div style="text-align: center; min-width: 160px;" id="live-score-panel">
+          <div class="score-counter" id="live-score-number" style="color: var(--grade-f);">0</div>
+          <div class="grade-letter-live" id="live-score-grade" style="color: var(--grade-f);">F</div>
+        </div>
+
+        <!-- Bar chart -->
+        <div style="flex: 1;">
+          <div class="bar-chart" style="height: 220px;" id="live-bar-chart">
+            <div class="bar-wrapper">
+              <div class="bar-value" id="bar-val-0" style="color: var(--grade-f);">42</div>
+              <div class="bar" id="bar-0" style="--bar-height: 42%; background: linear-gradient(to top, var(--grade-f-from), var(--grade-f-to));"></div>
+              <div class="bar-label">Run 1</div>
+            </div>
+            <div class="bar-wrapper">
+              <div class="bar-value" id="bar-val-1" style="color: var(--grade-c);">67</div>
+              <div class="bar" id="bar-1" style="--bar-height: 67%; background: linear-gradient(to top, var(--grade-c-from), var(--grade-c-to));"></div>
+              <div class="bar-label">Run 2</div>
+            </div>
+            <div class="bar-wrapper">
+              <div class="bar-value" id="bar-val-2" style="color: var(--grade-b);">81</div>
+              <div class="bar" id="bar-2" style="--bar-height: 81%; background: linear-gradient(to top, var(--grade-b-from), var(--grade-b-to));"></div>
+              <div class="bar-label">Run 3</div>
+            </div>
+            <div class="bar-wrapper">
+              <div class="bar-value" id="bar-val-3" style="color: var(--grade-a);">100</div>
+              <div class="bar" id="bar-3" style="--bar-height: 100%; background: linear-gradient(to top, var(--grade-a-from), var(--grade-a-to));"></div>
+              <div class="bar-label">Run 4</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <p class="text-body text-muted text-center fragment fade-up" style="--stagger: 2; margin: 0;">
+      Your AI tool already has the context. Just say <strong>&ldquo;fix these.&rdquo;</strong>
+    </p>
+  </div>
+</section>
+
+<!-- Slide 17: 5 free audits -->
+<section class="slide">
+  <div class="slide-content flex-col flex-center text-center" style="min-height: 100vh; justify-content: center; gap: 40px;">
+    <p class="text-big" style="margin: 0;">5 Free Audits. No Account Needed.</p>
+
+    <div class="flex-row flex-wrap gap-3" style="justify-content: center;">
+      <div class="mock-card fragment pop-in" style="--stagger: 0; padding: 20px 18px; min-width: 170px; text-align: center;">
+        <p class="text-small" style="margin: 0 0 8px 0; font-weight: 700;">Security Headers</p>
+        <span class="stack-badge" style="background: #27AE60; color: #fff; font-weight: 700;">FREE</span>
+      </div>
+      <div class="mock-card fragment pop-in" style="--stagger: 1; padding: 20px 18px; min-width: 170px; text-align: center;">
+        <p class="text-small" style="margin: 0 0 8px 0; font-weight: 700;">SEO Fundamentals</p>
+        <span class="stack-badge" style="background: #27AE60; color: #fff; font-weight: 700;">FREE</span>
+      </div>
+      <div class="mock-card fragment pop-in" style="--stagger: 2; padding: 20px 18px; min-width: 170px; text-align: center;">
+        <p class="text-small" style="margin: 0 0 8px 0; font-weight: 700;">Accessibility</p>
+        <span class="stack-badge" style="background: #27AE60; color: #fff; font-weight: 700;">FREE</span>
+      </div>
+      <div class="mock-card fragment pop-in" style="--stagger: 3; padding: 20px 18px; min-width: 170px; text-align: center;">
+        <p class="text-small" style="margin: 0 0 8px 0; font-weight: 700;">Performance</p>
+        <span class="stack-badge" style="background: #27AE60; color: #fff; font-weight: 700;">FREE</span>
+      </div>
+      <div class="mock-card fragment pop-in" style="--stagger: 4; padding: 20px 18px; min-width: 170px; text-align: center;">
+        <p class="text-small" style="margin: 0 0 8px 0; font-weight: 700;">Mobile</p>
+        <span class="stack-badge" style="background: #27AE60; color: #fff; font-weight: 700;">FREE</span>
+      </div>
+    </div>
+
+    <p class="text-body text-muted fragment fade-up" style="--stagger: 5; margin: 0;">
+      Copy, paste, run. Try one tonight on your own project.
+    </p>
+  </div>
+</section>
+
+<!-- Slide 18: What you'll learn -->
+<section class="slide">
+  <div class="slide-content flex-col flex-center" style="min-height: 100vh; justify-content: center; gap: 36px;">
+    <p class="text-big text-center" style="margin: 0;">What You&rsquo;ll Learn About Your Project</p>
+
+    <p class="text-body text-muted text-center fragment fade-up" style="--stagger: 0; margin: 0; max-width: 700px;">
+      Running even one audit will teach you things you didn&rsquo;t know.
+    </p>
+
+    <div class="flex-col gap-2" style="max-width: 750px; width: 100%;">
+      <div class="mock-card highlight fragment fade-up" style="--stagger: 1; border-color: #C0392B; background: #FFF5F5; padding: 18px 24px; text-align: left;">
+        <span class="text-small text-red" style="font-weight: 700;">&ldquo;Your app sends passwords over HTTP&rdquo;</span>
+      </div>
+      <div class="mock-card highlight fragment fade-up" style="--stagger: 2; border-color: var(--grade-d); background: #FFF8F0; padding: 18px 24px; text-align: left;">
+        <span class="text-small" style="font-weight: 700; color: var(--grade-d);">&ldquo;Your images have no alt text. That&rsquo;s an accessibility lawsuit risk.&rdquo;</span>
+      </div>
+      <div class="mock-card highlight fragment fade-up" style="--stagger: 3; border-color: #C0392B; background: #FFF5F5; padding: 18px 24px; text-align: left;">
+        <span class="text-small text-red" style="font-weight: 700;">&ldquo;Your API has no rate limiting. Anyone can flood your server for free.&rdquo;</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================
+     ACT 4: TAKEAWAYS
+     ============================================================ -->
+
+<!-- Slide 19: Three things to do tonight -->
+<section class="slide">
+  <div class="slide-content flex-col flex-center" style="min-height: 100vh; justify-content: center; gap: 36px;">
+    <p class="text-big text-center" style="margin: 0;">Three Things to Do Tonight</p>
+
+    <div class="flex-col gap-3" style="max-width: 800px; width: 100%;">
+      <div class="mock-card fragment fade-up" style="--stagger: 0; padding: 24px 28px; display: flex; gap: 20px; align-items: flex-start; border-left: 4px solid var(--grade-a);">
+        <span style="font-size: 32px; font-weight: 900; color: var(--grade-a); line-height: 1;">1</span>
+        <div>
+          <p class="text-body" style="margin: 0; font-weight: 700;">Ask your AI tool</p>
+          <p class="text-small text-muted" style="margin: 4px 0 0 0;">&ldquo;Audit my app for security issues.&rdquo; Free. Instant. Better than nothing.</p>
+        </div>
+      </div>
+      <div class="mock-card fragment fade-up" style="--stagger: 1; padding: 24px 28px; display: flex; gap: 20px; align-items: flex-start; border-left: 4px solid var(--grade-c);">
+        <span style="font-size: 32px; font-weight: 900; color: var(--grade-c); line-height: 1;">2</span>
+        <div>
+          <p class="text-body" style="margin: 0; font-weight: 700;">Run Lighthouse in Chrome DevTools</p>
+          <p class="text-small text-muted" style="margin: 4px 0 0 0;">Free. 30 seconds. Right-click &rarr; Inspect &rarr; Lighthouse tab.</p>
+        </div>
+      </div>
+      <div class="mock-card fragment fade-up" style="--stagger: 2; padding: 24px 28px; display: flex; gap: 20px; align-items: flex-start; border-left: 4px solid var(--primary);">
+        <span style="font-size: 32px; font-weight: 900; color: var(--primary); line-height: 1;">3</span>
+        <div>
+          <p class="text-body" style="margin: 0; font-weight: 700;">Try a free AuditBuffet audit</p>
+          <p class="text-small text-muted" style="margin: 4px 0 0 0;">Copy, paste, done. 5 free audits at AuditBuffet.com</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 20: Auditing is a habit -->
+<section class="slide bg-dark">
+  <div class="slide-content flex-col flex-center text-center" style="min-height: 100vh; justify-content: center; gap: 32px;">
+    <p class="text-huge" style="margin: 0; line-height: 1.1;">Auditing is a habit,<br>not an event.</p>
+
+    <p class="text-medium fragment fade-up" style="--stagger: 0; margin: 0; color: #999;">
+      Run them after every big change. It takes minutes.
+    </p>
+
+    <p class="text-big fragment pop-in" style="--stagger: 1; margin: 0; color: var(--grade-c);">
+      The cost of <em>not</em> auditing?
+    </p>
+    <p class="text-medium fragment fade-up" style="--stagger: 2; margin: 0; color: #e6e6e6;">
+      Ask your users.
+    </p>
+  </div>
+</section>
+
+<!-- Slide 21: Thank you -->
+<section class="slide bg-dark">
+  <div style="
+    width: 90%;
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+    padding: 80px 60px;
+  ">
+
+    <!-- Main statement: two lines -->
+    <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 0.25rem;">
+
+      <div class="fragment fade-up" style="--stagger: 0;">
+        <span style="
+          font-size: 24px;
+          font-weight: 500;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          line-height: 1;
+          color: rgba(255,255,255,0.35);
+          display: block;
+        ">Run your first audit at</span>
+      </div>
+
+      <div class="fragment scale-bounce" style="--stagger: 1; margin-top: 1rem;">
+        <span style="
+          font-family: 'Fraunces', serif;
+          font-size: 112px;
+          font-weight: 900;
+          letter-spacing: -0.04em;
+          line-height: 1;
+          color: #ffffff;
+          display: block;
+        ">AuditBuffet.com</span>
+      </div>
+
+      <div class="fragment fade-up" style="--stagger: 2; margin-top: 1.5rem;">
+        <span style="
+          font-size: 22px;
+          font-weight: 500;
+          color: rgba(255,255,255,0.4);
+          letter-spacing: 0.02em;
+        ">5 free audits &nbsp;&middot;&nbsp; No account needed</span>
+      </div>
+    </div>
+
+    <!-- Footer row: icon + name on left, Questions on right -->
+    <div class="fragment fade-up" style="
+      --stagger: 3;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    ">
+      <div style="display: flex; align-items: center; gap: 1rem;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="46 118 108 68" style="height: 32px; opacity: 0.35;">
+          <g stroke="#ffffff" stroke-width="3" fill="none" stroke-linejoin="round">
+            <polygon points="50,170 150,170 138,182 62,182"/>
+            <polygon points="50,158 150,158 138,170 62,170"/>
+            <polygon points="50,146 150,146 138,158 62,158"/>
+            <polygon points="50,134 150,134 138,146 62,146"/>
+            <polygon points="50,122 150,122 138,134 62,134"/>
+          </g>
+        </svg>
+        <span style="
+          font-family: 'Fraunces', serif;
+          font-size: 15px;
+          color: rgba(255,255,255,0.3);
+        ">Christopher Kleinman</span>
+      </div>
+      <span style="
+        font-size: 28px;
+        font-weight: 700;
+        color: rgba(255,255,255,0.65);
+        letter-spacing: -0.01em;
+      ">Questions?</span>
+    </div>
+
+  </div>
+</section>
+
+
+  </div><!-- /#slides -->
+
+  <script>
+    (function () {
+      'use strict';
+
+      /* ============================================================
+         STATE
+      ============================================================ */
+      var state = {
+        currentSlide: 0,
+        slides: [],
+        fragments: new Map(),
+        currentFragment: new Map()
+      };
+
+      /* ============================================================
+         INIT
+      ============================================================ */
+      function init() {
+        state.slides = Array.from(document.querySelectorAll('.slide'));
+
+        state.slides.forEach(function (slide, i) {
+          var frags = Array.from(slide.querySelectorAll('.fragment'));
+          state.fragments.set(i, frags);
+          state.currentFragment.set(i, -1);
+        });
+
+        if (state.slides.length > 0) {
+          goToSlide(0);
+        }
+
+        updateProgressBar();
+        updateSlideCounter();
+
+        document.addEventListener('keydown', handleKeydown);
+
+        document.addEventListener('click', function (e) {
+          if (e.target.tagName !== 'A' && e.target.tagName !== 'BUTTON') {
+            next();
+          }
+        });
+      }
+
+      /* ============================================================
+         KEYBOARD HANDLER
+      ============================================================ */
+      function handleKeydown(e) {
+        switch (e.key) {
+          case 'ArrowRight':
+          case ' ':
+          case 'Enter':
+            e.preventDefault();
+            next();
+            break;
+          case 'ArrowLeft':
+          case 'Backspace':
+            e.preventDefault();
+            prev();
+            break;
+          case 'f':
+            toggleFullscreen();
+            break;
+          case 'Home':
+            e.preventDefault();
+            goToSlide(0);
+            break;
+          case 'End':
+            e.preventDefault();
+            goToSlide(state.slides.length - 1);
+            break;
+        }
+      }
+
+      /* ============================================================
+         NAVIGATION
+      ============================================================ */
+      function next() {
+        if (state.currentSlide < state.slides.length - 1) {
+          goToSlide(state.currentSlide + 1);
+        }
+      }
+
+      function prev() {
+        if (state.currentSlide > 0) {
+          goToSlide(state.currentSlide - 1);
+        }
+      }
+
+      var autoRevealTimers = [];
+
+      function goToSlide(index) {
+        autoRevealTimers.forEach(function (t) { clearTimeout(t); });
+        autoRevealTimers = [];
+
+        if (state.slides[state.currentSlide]) {
+          state.slides[state.currentSlide].classList.remove('active');
+        }
+
+        state.currentSlide = index;
+        var slide = state.slides[index];
+        slide.classList.add('active');
+
+        var frags = state.fragments.get(index) || [];
+        state.currentFragment.set(index, -1);
+        frags.forEach(function (f) { f.classList.remove('visible'); });
+
+        var BASE_DELAY = 400;
+        var STAGGER_MS = 350;
+        frags.forEach(function (frag, i) {
+          var stagger = parseInt(getComputedStyle(frag).getPropertyValue('--stagger')) || i;
+          var delay = BASE_DELAY + stagger * STAGGER_MS;
+          var timer = setTimeout(function () {
+            frag.classList.add('visible');
+            state.currentFragment.set(index, i);
+            onFragmentReveal(index, i, frag);
+          }, delay);
+          autoRevealTimers.push(timer);
+        });
+
+        onSlideEnter(index, slide);
+
+        updateProgressBar();
+        updateSlideCounter();
+      }
+
+      /* ============================================================
+         HUD
+      ============================================================ */
+      function updateProgressBar() {
+        var bar = document.getElementById('progress-bar');
+        var pct = ((state.currentSlide + 1) / state.slides.length) * 100;
+        bar.style.width = pct + '%';
+      }
+
+      function updateSlideCounter() {
+        var counter = document.getElementById('slide-counter');
+        counter.textContent = (state.currentSlide + 1) + ' / ' + state.slides.length;
+      }
+
+      /* ============================================================
+         FULLSCREEN
+      ============================================================ */
+      function toggleFullscreen() {
+        var el = document.documentElement;
+        var isFs = document.fullscreenElement || document.webkitFullscreenElement;
+        if (!isFs) {
+          if (el.requestFullscreen) {
+            el.requestFullscreen().catch(function () {});
+          } else if (el.webkitRequestFullscreen) {
+            el.webkitRequestFullscreen();
+          }
+        } else {
+          if (document.exitFullscreen) {
+            document.exitFullscreen().catch(function () {});
+          } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+          }
+        }
+      }
+
+      /* ============================================================
+         ANIMATION UTILITIES
+      ============================================================ */
+      function typewrite(element, lines, speed) {
+        speed = speed !== undefined ? speed : 30;
+        while (element.firstChild) {
+          element.removeChild(element.firstChild);
+        }
+        var lineIdx = 0;
+        var charIdx = 0;
+        var cursor = document.createElement('span');
+        cursor.className = 'terminal-cursor';
+        cursor.textContent = '\u00A0';
+
+        function typeChar() {
+          if (lineIdx >= lines.length) {
+            if (cursor.parentNode) cursor.parentNode.removeChild(cursor);
+            return;
+          }
+          var line = lines[lineIdx];
+          if (charIdx === 0) {
+            var lineEl = document.createElement('div');
+            if (line.className) lineEl.className = line.className;
+            lineEl.dataset.lineIdx = String(lineIdx);
+            element.appendChild(lineEl);
+          }
+          var currentLineEl = element.querySelector('[data-line-idx="' + lineIdx + '"]');
+          if (charIdx < line.text.length) {
+            currentLineEl.textContent = line.text.substring(0, charIdx + 1);
+            currentLineEl.appendChild(cursor);
+            charIdx++;
+            setTimeout(typeChar, line.fast ? Math.round(speed / 3) : speed);
+          } else {
+            if (cursor.parentNode) cursor.parentNode.removeChild(cursor);
+            charIdx = 0;
+            lineIdx++;
+            setTimeout(typeChar, line.pause !== undefined ? line.pause : 200);
+          }
+        }
+        typeChar();
+      }
+
+      function countUp(element, target, duration) {
+        duration = duration !== undefined ? duration : 1500;
+        var startTime = performance.now();
+        function update(currentTime) {
+          var elapsed  = currentTime - startTime;
+          var progress = Math.min(elapsed / duration, 1);
+          var eased = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+          element.textContent = String(Math.round(target * eased));
+          if (progress < 1) requestAnimationFrame(update);
+        }
+        requestAnimationFrame(update);
+      }
+
+      function animateBars(container) {
+        var bars = container.querySelectorAll('.bar');
+        bars.forEach(function (bar, i) {
+          setTimeout(function () {
+            bar.classList.add('animate');
+          }, i * 100);
+        });
+      }
+
+      function animateProgress(element, targetWidth) {
+        setTimeout(function () {
+          element.style.width = targetWidth;
+        }, 300);
+      }
+
+      /* ============================================================
+         SLIDE HOOKS
+      ============================================================ */
+      var slideHooks = {};
+
+      function registerSlideHook(slideIndex, fn) {
+        slideHooks[slideIndex] = fn;
+      }
+
+      function onSlideEnter(index, slide) {
+        var autoAnimates = slide.querySelectorAll('[data-animate]');
+        autoAnimates.forEach(function (el, i) {
+          setTimeout(function () {
+            el.classList.add('animate');
+          }, i * 150);
+        });
+
+        if (slideHooks[index]) {
+          slideHooks[index](slide);
+        }
+
+        var barCharts = slide.querySelectorAll('.bar-chart');
+        barCharts.forEach(function (chart) {
+          if (!chart.classList.contains('fragment')) {
+            animateBars(chart);
+          }
+        });
+
+        var countEls = slide.querySelectorAll('[data-count-to]');
+        countEls.forEach(function (el) {
+          var target   = parseInt(el.dataset.countTo, 10);
+          var duration = parseInt(el.dataset.countDuration, 10) || 1500;
+          countUp(el, target, duration);
+        });
+
+        var typewriterEl = slide.querySelector('[data-typewriter]');
+        if (typewriterEl) {
+          if (!typewriterEl._twLines) {
+            var lineEls = slide.querySelectorAll('[data-tw-line]');
+            if (lineEls.length > 0) {
+              typewriterEl._twLines = Array.from(lineEls).map(function (el) {
+                return {
+                  text:      el.textContent,
+                  className: el.dataset.twClass  || '',
+                  fast:      el.hasAttribute('data-tw-fast'),
+                  pause:     parseInt(el.dataset.twPause, 10) || 200
+                };
+              });
+              lineEls.forEach(function (el) { el.style.display = 'none'; });
+            }
+          }
+          if (typewriterEl._twLines) {
+            typewrite(typewriterEl, typewriterEl._twLines);
+          }
+        }
+      }
+
+      function onFragmentReveal(slideIndex, fragIndex, element) {
+        var countTarget = element.querySelector('[data-count-target]');
+        if (countTarget && element.dataset.countTo) {
+          countUp(countTarget, parseInt(element.dataset.countTo, 10));
+        }
+
+        var barChart = element.querySelector('.bar-chart');
+        if (barChart) {
+          animateBars(barChart);
+        }
+
+        var fills = element.querySelectorAll('.progress-bar-fill[data-target-width]');
+        fills.forEach(function (fill) {
+          animateProgress(fill, fill.dataset.targetWidth);
+        });
+      }
+
+      /* ============================================================
+         PUBLIC API
+      ============================================================ */
+      window.presentation = {
+        registerSlideHook: registerSlideHook,
+        typewrite:         typewrite,
+        countUp:           countUp,
+        animateBars:       animateBars,
+        animateProgress:   animateProgress,
+        goToSlide:         goToSlide,
+        next:              next,
+        prev:              prev,
+        state:             state
+      };
+
+      /* ============================================================
+         BOOT
+      ============================================================ */
+      /* ============================================================
+         ANIMATION B: Screen shake on "1" impact
+      ============================================================ */
+      function setupImpactShake() {
+        var card = document.getElementById('impact-card');
+        if (!card) return;
+        var observer = new MutationObserver(function (mutations) {
+          var classChanged = mutations.some(function (m) {
+            return m.attributeName === 'class';
+          });
+          if (!classChanged) return;
+          if (card.classList.contains('visible')) {
+            var slide = card.closest('.slide');
+            // Trigger shake when the "1" lands (~480ms into 800ms animation)
+            setTimeout(function () {
+              slide.classList.add('shaking');
+              setTimeout(function () {
+                slide.classList.remove('shaking');
+              }, 600);
+            }, 480);
+          }
+        });
+        observer.observe(card, { attributes: true, attributeFilter: ['class'] });
+      }
+
+      /* ============================================================
+         ANIMATION C: KPI count-up on Slide 4
+      ============================================================ */
+      function setupKpiCounters() {
+        document.querySelectorAll('[data-kpi]').forEach(function (el) {
+          var running = false;
+          var observer = new MutationObserver(function (mutations) {
+            var classChanged = mutations.some(function (m) {
+              return m.attributeName === 'class';
+            });
+            if (!classChanged) return;
+
+            if (el.classList.contains('visible') && !running) {
+              running = true;
+              var display = el.querySelector('[data-kpi-display]');
+              var target = parseInt(el.dataset.kpiTarget, 10);
+              var type = el.dataset.kpi;
+              var duration = 2000;
+              var startTime = performance.now();
+
+              function tick(now) {
+                var elapsed = now - startTime;
+                var progress = Math.min(elapsed / duration, 1);
+                var eased = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+                var current = Math.round(target * eased);
+
+                if (type === 'money') {
+                  var dollars = (current / 100).toFixed(2);
+                  display.textContent = '$' + dollars + 'M';
+                } else if (type === 'number') {
+                  display.textContent = current.toLocaleString() + '+';
+                }
+
+                if (progress < 1) requestAnimationFrame(tick);
+              }
+              requestAnimationFrame(tick);
+            }
+            if (!el.classList.contains('visible')) {
+              running = false;
+              var display2 = el.querySelector('[data-kpi-display]');
+              var type2 = el.dataset.kpi;
+              if (type2 === 'money') display2.textContent = '$0';
+              else display2.textContent = '0';
+            }
+          });
+          observer.observe(el, { attributes: true, attributeFilter: ['class'] });
+        });
+      }
+
+      /* ============================================================
+         ANIMATION D: Live score counter on Slide 16
+      ============================================================ */
+      function setupLiveScoreCounter() {
+        var RUNS = [
+          { score: 42,  grade: 'F', color: 'var(--grade-f)' },
+          { score: 67,  grade: 'C', color: 'var(--grade-c)' },
+          { score: 81,  grade: 'B', color: 'var(--grade-b)' },
+          { score: 100, grade: 'A', color: 'var(--grade-a)' }
+        ];
+
+        var scoreEl = document.getElementById('live-score-number');
+        var gradeEl = document.getElementById('live-score-grade');
+        var chart = document.getElementById('live-bar-chart');
+        if (!scoreEl || !gradeEl || !chart) return;
+
+        var bars = [];
+        for (var i = 0; i < 4; i++) {
+          bars.push({
+            bar: document.getElementById('bar-' + i),
+            val: document.getElementById('bar-val-' + i)
+          });
+        }
+
+        // Hide bars initially, animate them in sequence
+        bars.forEach(function (b) {
+          b.bar.style.height = '0%';
+          b.bar.style.transition = 'height 1s ease-out';
+          b.val.style.opacity = '0';
+          b.val.style.transition = 'opacity 0.3s';
+        });
+
+        // Watch for the fragment containing the chart to become visible
+        var panel = document.getElementById('live-score-panel');
+        if (!panel) return;
+        var container = panel.closest('.fragment');
+        if (!container) return;
+
+        var started = false;
+        var observer = new MutationObserver(function (mutations) {
+          mutations.forEach(function (m) {
+            if (m.target === container && container.classList.contains('visible') && !started) {
+              started = true;
+              runScoreSequence();
+            }
+            if (m.target === container && !container.classList.contains('visible')) {
+              started = false;
+              resetScoreSequence();
+            }
+          });
+        });
+        observer.observe(container, { attributes: true });
+
+        function getGradeInfo(score) {
+          if (score >= 90) return { grade: 'A', color: 'var(--grade-a)' };
+          if (score >= 75) return { grade: 'B', color: 'var(--grade-b)' };
+          if (score >= 60) return { grade: 'C', color: 'var(--grade-c)' };
+          if (score >= 40) return { grade: 'D', color: 'var(--grade-d)' };
+          return { grade: 'F', color: 'var(--grade-f)' };
+        }
+
+        function animateScoreTo(from, to, duration, onDone) {
+          var startTime = performance.now();
+          function tick(now) {
+            var elapsed = now - startTime;
+            var progress = Math.min(elapsed / duration, 1);
+            var eased = progress === 1 ? 1 : 1 - Math.pow(2, -8 * progress);
+            var current = Math.round(from + (to - from) * eased);
+            var info = getGradeInfo(current);
+            scoreEl.textContent = current;
+            scoreEl.style.color = info.color;
+            gradeEl.textContent = info.grade;
+            gradeEl.style.color = info.color;
+            if (progress < 1) {
+              requestAnimationFrame(tick);
+            } else if (onDone) {
+              onDone();
+            }
+          }
+          requestAnimationFrame(tick);
+        }
+
+        function runScoreSequence() {
+          var delay = 0;
+          var prevScore = 0;
+          RUNS.forEach(function (run, idx) {
+            setTimeout(function () {
+              // Show bar
+              bars[idx].bar.style.height = run.score + '%';
+              bars[idx].val.style.opacity = '1';
+              // Animate score counter
+              animateScoreTo(prevScore, run.score, 1200);
+              prevScore = run.score;
+            }, delay);
+            delay += 1600;
+          });
+        }
+
+        function resetScoreSequence() {
+          scoreEl.textContent = '0';
+          scoreEl.style.color = 'var(--grade-f)';
+          gradeEl.textContent = 'F';
+          gradeEl.style.color = 'var(--grade-f)';
+          bars.forEach(function (b) {
+            b.bar.style.height = '0%';
+            b.val.style.opacity = '0';
+          });
+        }
+      }
+
+      /* ============================================================
+         BOOT
+      ============================================================ */
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function () {
+          init();
+          setupImpactShake();
+          setupKpiCounters();
+          setupLiveScoreCounter();
+        });
+      } else {
+        init();
+        setupImpactShake();
+        setupKpiCounters();
+        setupLiveScoreCounter();
+      }
+
+    })();
+  </script>
+
+</body>
+</html>
