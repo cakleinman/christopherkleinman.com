@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Presentations | Christopher Kleinman</title>
-<meta name="description" content="Talks and decks by Christopher Kleinman — conference sessions and the Vibe Code Club series on building real software with AI.">
-<meta property="og:title" content="Presentations — Christopher Kleinman">
+<meta name="description" content="Talks and decks by Christopher Kleinman: conference sessions and the Vibe Code Club series on building real software with AI.">
+<meta property="og:title" content="Presentations | Christopher Kleinman">
 <meta property="og:description" content="Conference talks and the Vibe Code Club series on building real software with AI.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://christopherkleinman.com/presentations">
@@ -65,28 +65,7 @@
   .presentations-section + .presentations-section { padding-top: 0; }
   .presentations-section .section-intro { margin-bottom: var(--space-8); }
 
-  /* Series badge — distinguishes VCC monthly cadence */
-  .series-stripe {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    font-family: var(--font-mono);
-    font-size: 0.7rem;
-    font-weight: 500;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text-tertiary);
-    margin-bottom: var(--space-3);
-  }
-  .series-stripe::before {
-    content: '';
-    display: inline-block;
-    width: 24px;
-    height: 1px;
-    background: var(--accent);
-  }
-
-  /* Presentation card — extends .card with date + duration meta line */
+  /* Date/topic meta line on VCC presentation cards */
   .pres-card .pres-meta {
     display: flex;
     flex-wrap: wrap;
@@ -102,98 +81,6 @@
     width: 3px; height: 3px; border-radius: 50%;
     background: var(--border-active);
     display: inline-block;
-  }
-
-  /* Featured (conference) card — larger, full-width */
-  .pres-featured {
-    background: var(--bg-surface);
-    border: 1px solid var(--border);
-    border-top: 3px solid var(--accent-warm);
-    border-radius: var(--radius-md);
-    padding: var(--space-8);
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: var(--space-6) var(--space-8);
-    align-items: start;
-    box-shadow: var(--shadow-sm);
-    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
-  }
-  .pres-featured:hover {
-    border-color: var(--border-active);
-    box-shadow: var(--shadow-lg);
-    transform: translateY(-2px);
-  }
-  .pres-featured__head {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    margin-bottom: var(--space-3);
-    flex-wrap: wrap;
-  }
-  .pres-featured__title {
-    font-size: clamp(1.5rem, 2.6vw, 1.85rem);
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    margin-bottom: var(--space-3);
-    line-height: 1.2;
-  }
-  .pres-featured__title .accent { color: var(--accent); }
-  .pres-featured__desc {
-    font-size: 0.975rem;
-    color: var(--text-secondary);
-    line-height: 1.6;
-    margin-bottom: var(--space-5);
-    max-width: 640px;
-  }
-  .pres-featured__actions {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-4);
-  }
-  .pres-featured__hint {
-    font-family: var(--font-mono);
-    font-size: 0.7rem;
-    color: var(--text-tertiary);
-    letter-spacing: 0.04em;
-  }
-  .pres-featured__aside {
-    align-self: stretch;
-    border-left: 1px solid var(--border);
-    padding-left: var(--space-8);
-    min-width: 220px;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
-  }
-  .pres-featured__aside .label {
-    font-family: var(--font-mono);
-    font-size: 0.7rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text-quaternary);
-  }
-  .pres-featured__aside .stat {
-    font-size: 1rem;
-    color: var(--text-primary);
-    font-weight: 500;
-  }
-  .pres-featured__aside .stat strong {
-    color: var(--accent);
-    font-weight: 700;
-  }
-
-  @media (max-width: 860px) {
-    .pres-featured {
-      grid-template-columns: 1fr;
-      padding: var(--space-6);
-    }
-    .pres-featured__aside {
-      border-left: none;
-      border-top: 1px solid var(--border);
-      padding-left: 0;
-      padding-top: var(--space-5);
-    }
   }
 
   @media (max-width: 768px) {
@@ -244,7 +131,7 @@
       Presentations <span class="accent">&there4;</span>
     </h1>
     <p class="presentations-hero__sub reveal">
-      Conference sessions and the Vibe Code Club monthly series — practical, build-it-yourself walkthroughs of using AI to ship real internal business tools. Best on a laptop, sound on, drive with arrow keys.
+      Conference sessions and the Vibe Code Club monthly series: practical, build-it-yourself walkthroughs of using AI to ship real internal business tools. Best on a laptop, sound on, drive with arrow keys.
     </p>
   </div>
 </section>
@@ -253,44 +140,94 @@
 <section class="presentations-section" id="conferences">
   <div class="container">
     <div class="section-label reveal">Conferences</div>
-    <div class="section-title reveal">Keynotes &amp; conference sessions</div>
+    <div class="section-title reveal">Recent talks</div>
 
-    <article class="pres-featured reveal" data-category="conference">
-      <div>
-        <div class="pres-featured__head">
-          <span class="category-tag tag-veteran">Conference</span>
-          <span class="status-badge status-live">New</span>
-          <span class="series-stripe">10th Annual VBRC · May 2026</span>
-        </div>
-        <h2 class="pres-featured__title">
-          Making Internal Business Tools <span class="accent">With AI</span>
-        </h2>
-        <p class="pres-featured__desc">
-          My session at the 10th Annual Veteran-Owned Business Conference. A 40-minute walk through five small internal tools — inquiry form, mini CRM, field schedule, invoice generator, CSV dashboard — built for a fictional landscaping company. Take the source for any of them and feed it to your AI of choice as a jumping-off point for your own.
-        </p>
-        <div class="pres-featured__actions">
-          <a href="/projects/vbrc-2026/" class="btn btn-primary" target="_blank" rel="noopener">
-            View the deck
-            <span aria-hidden="true">&nearr;</span>
-          </a>
-          <span class="pres-featured__hint">Best on a laptop · sound on · 40 min</span>
-        </div>
-      </div>
-      <aside class="pres-featured__aside">
-        <div>
-          <div class="label">Format</div>
-          <div class="stat">Live keynote</div>
-        </div>
-        <div>
-          <div class="label">Length</div>
-          <div class="stat"><strong>40</strong> min</div>
-        </div>
-        <div>
-          <div class="label">Includes</div>
-          <div class="stat"><strong>5</strong> tools · starter code</div>
-        </div>
-      </aside>
-    </article>
+    <div class="talk-promo__head reveal">
+      <span class="category-tag tag-veteran">Talk · May 2026</span>
+      <span class="talk-promo__eyebrow">10th Annual Veteran-Owned Business Conference</span>
+    </div>
+
+    <h2 class="talk-promo__title reveal">
+      Making Internal Business Tools <span class="accent">With AI</span>
+    </h2>
+    <p class="talk-promo__sub reveal">
+      My session at the 10th Annual VBRC. A 40-minute walk through five small internal tools (inquiry form, mini CRM, field schedule, invoice generator, CSV dashboard) built for a fictional landscaping company. Watch the deck, then take the source for any of them and feed it to your AI of choice (Claude, Cursor, Copilot, Gemini, ChatGPT) as a jumping-off point for your own.
+    </p>
+
+    <div class="talk-promo__cta-row reveal">
+      <a href="/projects/vbrc-2026/" class="btn btn-primary" target="_blank" rel="noopener">
+        View the deck
+        <span aria-hidden="true">&nearr;</span>
+      </a>
+      <span class="talk-promo__hint">Best on a laptop · sound on · 40 min</span>
+    </div>
+
+    <div class="talk-promo__downloads-label reveal">
+      <span class="label">Starter code</span>
+      <span class="desc">5 self-contained HTML files · drop into your AI as a starting point</span>
+    </div>
+
+    <div class="talk-promo__downloads reveal">
+      <a class="talk-dl" href="/projects/vbrc-2026/starter-code/inquiry-starter.html" download="rivera-inquiry-starter.html">
+        <span class="talk-dl__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
+        </span>
+        <span class="talk-dl__body">
+          <span class="talk-dl__name">Inquiry Form</span>
+        </span>
+        <span class="talk-dl__arrow" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </span>
+      </a>
+
+      <a class="talk-dl" href="/projects/vbrc-2026/starter-code/crm-starter.html" download="rivera-crm-starter.html">
+        <span class="talk-dl__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </span>
+        <span class="talk-dl__body">
+          <span class="talk-dl__name">Mini CRM</span>
+        </span>
+        <span class="talk-dl__arrow" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </span>
+      </a>
+
+      <a class="talk-dl" href="/projects/vbrc-2026/starter-code/schedule-starter.html" download="rivera-schedule-starter.html">
+        <span class="talk-dl__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </span>
+        <span class="talk-dl__body">
+          <span class="talk-dl__name">Field Schedule</span>
+        </span>
+        <span class="talk-dl__arrow" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </span>
+      </a>
+
+      <a class="talk-dl" href="/projects/vbrc-2026/starter-code/invoice-starter.html" download="rivera-invoice-starter.html">
+        <span class="talk-dl__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+        </span>
+        <span class="talk-dl__body">
+          <span class="talk-dl__name">Invoice Generator</span>
+        </span>
+        <span class="talk-dl__arrow" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </span>
+      </a>
+
+      <a class="talk-dl" href="/projects/vbrc-2026/starter-code/dashboard-starter.html" download="rivera-dashboard-starter.html">
+        <span class="talk-dl__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        </span>
+        <span class="talk-dl__body">
+          <span class="talk-dl__name">CSV Dashboard</span>
+        </span>
+        <span class="talk-dl__arrow" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </span>
+      </a>
+    </div>
   </div>
 </section>
 
@@ -300,7 +237,7 @@
     <div class="section-label reveal">Series</div>
     <div class="section-title reveal">Vibe Code Club</div>
     <p class="section-intro reveal">
-      A monthly meetup for veteran-owned business owners learning to build their own software with AI. Each session is a single self-contained deck — drive it with the arrow keys.
+      A monthly meetup for veteran-owned business owners learning to build their own software with AI. Each session is a single self-contained deck. Drive it with the arrow keys.
     </p>
 
     <div class="projects-grid">
@@ -317,7 +254,7 @@
           <span>Mar 2026</span>
         </div>
         <h3 class="card-title">Catching what your AI missed</h3>
-        <p class="card-desc">Why your AI-built app still breaks in production, and how to use AuditBuffet to grade it across the dimensions humans care about — security, accessibility, performance, content — before customers do.</p>
+        <p class="card-desc">Why your AI-built app still breaks in production, and how to use AuditBuffet to grade it across the dimensions humans care about (security, accessibility, performance, content) before customers do.</p>
         <div class="tech-badges">
           <span class="badge">Auditing</span>
           <span class="badge">AuditBuffet</span>
@@ -362,8 +299,8 @@
           <span class="dot"></span>
           <span>May 12, 2026</span>
         </div>
-        <h3 class="card-title">Context Engineering — the universal upgrade</h3>
-        <p class="card-desc">The single biggest lever for AI output quality isn't the model — it's the context. How to assemble the right files, rules, references, and examples so the AI you already have produces work you can actually ship.</p>
+        <h3 class="card-title">Context Engineering: the universal upgrade</h3>
+        <p class="card-desc">The single biggest lever for AI output quality isn't the model. It's the context. How to assemble the right files, rules, references, and examples so the AI you already have produces work you can actually ship.</p>
         <div class="tech-badges">
           <span class="badge">Prompting</span>
           <span class="badge">Workflow</span>
